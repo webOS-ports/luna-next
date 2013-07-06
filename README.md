@@ -19,7 +19,7 @@ Install the following packages
 sudo apt-get install qtbase5-private-dev libwayland-dev libxkbcommon-dev \
 libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libxcomposite-dev \
 libxrender-dev libudev-dev qt5-default pkg-config pkg-kde-tools \
-libfontconfig1-dev libfreetype6-dev libglib2.0-dev
+libfontconfig1-dev libfreetype6-dev libglib2.0-dev libqt5v8-5-dev
 ```
 
 Get qtwayland
