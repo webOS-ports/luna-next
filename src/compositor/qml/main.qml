@@ -49,6 +49,7 @@ Item {
 
     onHasFullscreenWindowChanged: console.log("has fullscreen window: " + hasFullscreenWindow);
 
+    // background
     Image {
         id: background
         Behavior on opacity {
@@ -79,6 +80,119 @@ Item {
             root.focus = true
         }
         z: 10
+    }
+
+    // top area
+    Item {
+        id: statusBar
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: 30
+
+        Rectangle {
+            anchors.fill: parent
+            color: "grey"
+        }
+    }
+
+    // cardview
+    Item {
+        id: cardViewDisplay
+
+        property alias listCardsModel: listCardsModel
+
+        anchors.top: statusBar.bottom
+        anchors.bottom: quickLauncher.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+
+        ListModel {
+            id: listCardsModel
+        }
+
+        ListView {
+            id: listCardsView
+            anchors.fill: parent
+            anchors.margins: 50
+            orientation: ListView.Horizontal
+            spacing: 30
+
+            preferredHighlightBegin: 100
+            preferredHighlightEnd: width - 100
+            highlightRangeMode: ListView.StrictlyEnforceRange
+
+            model: listCardsModel
+            delegate: Item {
+                id: cardContainer
+
+                height: listCardsView.height
+                width: height
+
+                DummyWindow {
+                    anchors.fill: parent
+                }
+
+                Text {
+                    anchors.top: parent.top
+                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    height: 20
+                    text: appName
+                }
+            }
+
+        }
+    }
+
+    // bottom area
+    Item {
+        id: quickLauncher
+
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: 100
+
+        // background of quick laucnh
+        Rectangle {
+            anchors.fill: parent
+            opacity: 0.8
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "grey" }
+                GradientStop { position: 1.0; color: "white" }
+            }
+        }
+
+        // list of icons
+        ListModel {
+            id: launcherListModel
+
+            ListElement {
+                icon: "list-add.png"
+            }
+        }
+
+        ListView {
+            id: launcherListView
+
+            anchors.fill: parent
+            orientation: ListView.Horizontal
+
+            model: launcherListModel
+            delegate: Image {
+                id: launcherIcon
+                fillMode: Image.PreserveAspectFit
+                height: parent.height
+                source: icon
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: cardViewDisplay.listCardsModel.append({"appName": "myApp"})
+                }
+            }
+        }
     }
 
     function windowAdded(window) {
@@ -125,4 +239,5 @@ Item {
 
     onHeightChanged: CompositorLogic.relayout();
     onWidthChanged: CompositorLogic.relayout();
+
 }
