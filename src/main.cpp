@@ -63,7 +63,7 @@ public:
         , m_fullscreenSurface(0)
     {
         enableSubSurfaceExtension();
-        setSource(QUrl("qml/main.qml"));
+        setSource(QUrl("qrc:///qml/main.qml"));
         setResizeMode(QQuickView::SizeRootObjectToView);
         setColor(Qt::black);
         winId();

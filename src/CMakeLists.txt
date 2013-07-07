@@ -8,7 +8,9 @@ include_directories(
 set(SOURCES
     main.cpp)
 
-add_executable(luna-next ${SOURCES})
+qt5_add_resources(RESOURCES compositor/compositor.qrc)
+
+add_executable(luna-next ${SOURCES} ${RESOURCES})
 qt5_use_modules(luna-next Quick Compositor Gui)
 
 # install(TARGETS luna-next DESTINATION ${CMAKE_INSTALL_BINDIR})
