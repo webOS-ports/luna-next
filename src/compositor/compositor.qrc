@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/compositor.js</file>
+        <file>qml/ContrastEffect.qml</file>
+        <file>qml/main.qml</file>
+        <file>qml/WindowChrome.qml</file>
+        <file>qml/WindowContainer.qml</file>
+        <file>qml/background.jpg</file>
+        <file>qml/closebutton.png</file>
+    </qresource>
+</RCC>
