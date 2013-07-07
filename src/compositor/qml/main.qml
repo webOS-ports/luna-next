@@ -39,13 +39,30 @@
 ****************************************************************************/
 
 import QtQuick 2.0
-import "compositor.js" as CompositorLogic
+import "CardView" as CardView
+import "StatusBar" as StatusBar
+import "LaunchBar" as LaunchBar
+import "Compositor" as Compositor
+import "Compositor/compositor.js" as CompositorLogic
 
 Item {
     id: root
 
+    property real screenwidth: 1280
+    property real screenheight: 800
+    property real screenSizeInInch: 14   // corresponds to my desktop
+
+    property real screenDotPerMM: (Math.sqrt(screenwidth*screenwidth + screenheight*screenheight) / (screenSizeInInch*25.4))
+
     property variant selectedWindow: null
     property bool hasFullscreenWindow: typeof compositor != "undefined" && compositor.fullscreenSurface !== null
+
+    width: screenwidth
+    height: screenheight
+
+    Component.onCompleted: {
+        //console.log("screenDotPerMM: " + screenDotPerMM);
+    }
 
     onHasFullscreenWindowChanged: console.log("has fullscreen window: " + hasFullscreenWindow);
 
@@ -59,6 +76,8 @@ Item {
         fillMode: Image.Tile
         source: "background.jpg"
         smooth: true
+
+        z: -1; // the background item should always be behind other components
     }
 
     MouseArea {
@@ -82,121 +101,56 @@ Item {
         z: 10
     }
 
-    // top area
-    Item {
-        id: statusBar
+    // gesture area
+    GestureArea {
+        id: gestureAreaDisplay
 
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        height: 30
+        anchors.bottom: root.bottom
+        anchors.left: root.left
+        anchors.right: root.right
+        height: computeFromLength(4);
 
-        Rectangle {
-            anchors.fill: parent
-            color: "grey"
-        }
+        z: 2 // the gesture area is in front of everything, always.
     }
 
     // cardview
-    Item {
+    CardView.CardView {
         id: cardViewDisplay
 
-        property alias listCardsModel: listCardsModel
+        anchors.top: root.top
+        anchors.bottom: gestureAreaDisplay.top
+        anchors.left: root.left
+        anchors.right: root.right
 
-        anchors.top: statusBar.bottom
-        anchors.bottom: quickLauncher.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-
-        ListModel {
-            id: listCardsModel
-        }
-
-        ListView {
-            id: listCardsView
-            anchors.fill: parent
-            anchors.margins: 50
-            orientation: ListView.Horizontal
-            spacing: 30
-
-            preferredHighlightBegin: 100
-            preferredHighlightEnd: width - 100
-            highlightRangeMode: ListView.StrictlyEnforceRange
-
-            model: listCardsModel
-            delegate: Item {
-                id: cardContainer
-
-                height: listCardsView.height
-                width: height
-
-                DummyWindow {
-                    anchors.fill: parent
-                }
-
-                Text {
-                    anchors.top: parent.top
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    height: 20
-                    text: appName
-                }
-            }
-
-        }
+        z: 0
     }
 
-    // bottom area
-    Item {
-        id: quickLauncher
+    // top area: status bar
+    StatusBar.StatusBar {
+        id: statusBarDisplay
 
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        height: 100
+        anchors.top: root.top
+        anchors.left: root.left
+        anchors.right: root.right
+        height: computeFromLength(8);
 
-        // background of quick laucnh
-        Rectangle {
-            anchors.fill: parent
-            opacity: 0.8
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: "grey" }
-                GradientStop { position: 1.0; color: "white" }
-            }
-        }
+        z: 1
+    }
 
-        // list of icons
-        ListModel {
-            id: launcherListModel
+    // bottom area: launcher bar
+    LaunchBar.LaunchBar {
+        id: launchBarDisplay
 
-            ListElement {
-                icon: "list-add.png"
-            }
-        }
+        anchors.bottom: gestureAreaDisplay.top
+        anchors.left: root.left
+        anchors.right: root.right
+        height: computeFromLength(20);
 
-        ListView {
-            id: launcherListView
-
-            anchors.fill: parent
-            orientation: ListView.Horizontal
-
-            model: launcherListModel
-            delegate: Image {
-                id: launcherIcon
-                fillMode: Image.PreserveAspectFit
-                height: parent.height
-                source: icon
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: cardViewDisplay.listCardsModel.append({"appName": "myApp"})
-                }
-            }
-        }
+        z: 1
     }
 
     function windowAdded(window) {
-        var windowContainerComponent = Qt.createComponent("WindowContainer.qml");
+        var windowContainerComponent = Qt.createComponent("Compositor/WindowContainer.qml");
         var windowContainer = windowContainerComponent.createObject(root);
 
         window.parent = windowContainer;
@@ -205,7 +159,7 @@ Item {
         windowContainer.targetHeight = window.height;
         windowContainer.child = window;
 
-        var windowChromeComponent = Qt.createComponent("WindowChrome.qml");
+        var windowChromeComponent = Qt.createComponent("Compositor/WindowChrome.qml");
         var windowChrome = windowChromeComponent.createObject(window);
 
         CompositorLogic.addWindow(windowContainer);
@@ -226,7 +180,7 @@ Item {
     function windowDestroyed(window) {
         var windowContainer = window.parent;
         if (windowContainer.runDestroyAnimation)
-            windowContainer.runDestroyAnimation();
+            windowContainer.runDestroyAnimation(); 25.4;
     }
 
     function removeWindow(window) {
@@ -237,7 +191,14 @@ Item {
         compositor.destroyWindow(window);
     }
 
+    function computeFromLength(lengthInMillimeter) {
+        return (lengthInMillimeter * root.screenDotPerMM);
+    }
+
+    function startApp(appName) {
+        cardViewDisplay.listCardsModel.append({"appName": appName});
+    }
+
     onHeightChanged: CompositorLogic.relayout();
     onWidthChanged: CompositorLogic.relayout();
-
 }
