@@ -52,6 +52,11 @@
 #include <QQuickItem>
 #include <QQuickView>
 
+#include <QFileInfo>
+
+#include <unistd.h>
+#include <stdio.h>
+
 class QmlCompositor : public QQuickView, public QWaylandCompositor
 {
     Q_OBJECT
@@ -63,7 +68,7 @@ public:
         , m_fullscreenSurface(0)
     {
         enableSubSurfaceExtension();
-        setSource(QUrl("qml/main.qml"));
+        setSource(QUrl("qrc:///qml/main.qml"));
         setResizeMode(QQuickView::SizeRootObjectToView);
         setColor(Qt::black);
         winId();
@@ -152,9 +157,81 @@ private:
     QWaylandSurface *m_fullscreenSurface;
 };
 
+static int convertPermission(const QFileInfo &fileInfo)
+{
+    int p = 0;
+
+    if (fileInfo.permission(QFile::ReadUser))
+        p += 400;
+    if (fileInfo.permission(QFile::WriteUser))
+        p += 200;
+    if (fileInfo.permission(QFile::ExeUser))
+        p += 100;
+    if (fileInfo.permission(QFile::ReadGroup))
+        p += 40;
+    if (fileInfo.permission(QFile::WriteGroup))
+        p += 20;
+    if (fileInfo.permission(QFile::ExeGroup))
+        p += 10;
+    if (fileInfo.permission(QFile::ReadOther))
+        p += 4;
+    if (fileInfo.permission(QFile::WriteOther))
+        p += 2;
+    if (fileInfo.permission(QFile::ExeOther))
+        p += 1;
+
+    return p;
+}
+
+static void verifyXdgRuntimeDir()
+{
+    QByteArray dirName = qgetenv("XDG_RUNTIME_DIR");
+
+    if (dirName.isEmpty()) {
+        QString msg = QObject::tr(
+                    "The XDG_RUNTIME_DIR environment variable is not set.\n"
+                    "Refer to your distribution on how to get it, or read\n"
+                    "http://www.freedesktop.org/wiki/Specifications/basedir-spec\n"
+                    "on how to implement it.\n");
+        qFatal(msg.toUtf8());
+    }
+
+    QFileInfo fileInfo(dirName);
+
+    if (!fileInfo.exists()) {
+        QString msg = QObject::tr(
+                    "The XDG_RUNTIME_DIR environment variable is set to "
+                    "\"%1\", which doesn't exist.\n").arg(dirName.constData());
+        qFatal(msg.toUtf8());
+    }
+
+    if (convertPermission(fileInfo) != 700 || fileInfo.ownerId() != getuid()) {
+        QString msg = QObject::tr(
+                    "XDG_RUNTIME_DIR is set to \"%1\" and is not configured correctly.\n"
+                    "Unix access mode must be 0700, but is 0%2.\n"
+                    "It must also be owned by the current user (UID %3), "
+                    "but is owned by UID %4 (\"%5\").\n")
+                .arg(dirName.constData())
+                .arg(convertPermission(fileInfo))
+                .arg(getuid())
+                .arg(fileInfo.ownerId())
+                .arg(fileInfo.owner());
+        qFatal(msg.toUtf8());
+    }
+}
+
 int main(int argc, char *argv[])
 {
+    if (!qgetenv("DISPLAY").isEmpty())
+        setenv("QT_QPA_PLATFORM", "xcb", 0);
+    else {
+        setenv("QT_QPA_PLATFORM", "eglfs", 0);
+        setenv("QT_QPA_GENERIC_PLUGINS", "evdevtouch", 0);
+    }
+
     QGuiApplication app(argc, argv);
+
+    verifyXdgRuntimeDir();
 
     QmlCompositor compositor;
     compositor.setTitle(QLatin1String("QML Compositor"));
