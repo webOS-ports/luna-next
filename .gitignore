@@ -1,4 +1,2 @@
-Makefile
-luna-next
-*.o
-*.moc
+build/
+*.user
