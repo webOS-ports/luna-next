@@ -39,16 +39,34 @@
 ****************************************************************************/
 
 import QtQuick 2.0
-import "compositor.js" as CompositorLogic
+import "CardView" as CardView
+import "StatusBar" as StatusBar
+import "LaunchBar" as LaunchBar
+import "Compositor" as Compositor
+import "Compositor/compositor.js" as CompositorLogic
 
 Item {
     id: root
 
+    property real screenwidth: 1280
+    property real screenheight: 800
+    property real screenSizeInInch: 14   // corresponds to my desktop
+
+    property real screenDotPerMM: (Math.sqrt(screenwidth*screenwidth + screenheight*screenheight) / (screenSizeInInch*25.4))
+
     property variant selectedWindow: null
     property bool hasFullscreenWindow: typeof compositor != "undefined" && compositor.fullscreenSurface !== null
 
+    width: screenwidth
+    height: screenheight
+
+    Component.onCompleted: {
+        //console.log("screenDotPerMM: " + screenDotPerMM);
+    }
+
     onHasFullscreenWindowChanged: console.log("has fullscreen window: " + hasFullscreenWindow);
 
+    // background
     Image {
         id: background
         Behavior on opacity {
@@ -58,6 +76,8 @@ Item {
         fillMode: Image.Tile
         source: "background.jpg"
         smooth: true
+
+        z: -1; // the background item should always be behind other components
     }
 
     MouseArea {
@@ -81,8 +101,56 @@ Item {
         z: 10
     }
 
+    // gesture area
+    GestureArea {
+        id: gestureAreaDisplay
+
+        anchors.bottom: root.bottom
+        anchors.left: root.left
+        anchors.right: root.right
+        height: computeFromLength(4);
+
+        z: 2 // the gesture area is in front of everything, always.
+    }
+
+    // cardview
+    CardView.CardView {
+        id: cardViewDisplay
+
+        anchors.top: root.top
+        anchors.bottom: gestureAreaDisplay.top
+        anchors.left: root.left
+        anchors.right: root.right
+
+        z: 0
+    }
+
+    // top area: status bar
+    StatusBar.StatusBar {
+        id: statusBarDisplay
+
+        anchors.top: root.top
+        anchors.left: root.left
+        anchors.right: root.right
+        height: computeFromLength(8);
+
+        z: 1
+    }
+
+    // bottom area: launcher bar
+    LaunchBar.LaunchBar {
+        id: launchBarDisplay
+
+        anchors.bottom: gestureAreaDisplay.top
+        anchors.left: root.left
+        anchors.right: root.right
+        height: computeFromLength(20);
+
+        z: 1
+    }
+
     function windowAdded(window) {
-        var windowContainerComponent = Qt.createComponent("WindowContainer.qml");
+        var windowContainerComponent = Qt.createComponent("Compositor/WindowContainer.qml");
         var windowContainer = windowContainerComponent.createObject(root);
 
         window.parent = windowContainer;
@@ -91,7 +159,7 @@ Item {
         windowContainer.targetHeight = window.height;
         windowContainer.child = window;
 
-        var windowChromeComponent = Qt.createComponent("WindowChrome.qml");
+        var windowChromeComponent = Qt.createComponent("Compositor/WindowChrome.qml");
         var windowChrome = windowChromeComponent.createObject(window);
 
         CompositorLogic.addWindow(windowContainer);
@@ -112,7 +180,7 @@ Item {
     function windowDestroyed(window) {
         var windowContainer = window.parent;
         if (windowContainer.runDestroyAnimation)
-            windowContainer.runDestroyAnimation();
+            windowContainer.runDestroyAnimation(); 25.4;
     }
 
     function removeWindow(window) {
@@ -121,6 +189,14 @@ Item {
         windowContainer.chrome.destroy();
         windowContainer.destroy();
         compositor.destroyWindow(window);
+    }
+
+    function computeFromLength(lengthInMillimeter) {
+        return (lengthInMillimeter * root.screenDotPerMM);
+    }
+
+    function startApp(appName) {
+        cardViewDisplay.listCardsModel.append({"appName": appName});
     }
 
     onHeightChanged: CompositorLogic.relayout();
