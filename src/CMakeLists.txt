@@ -13,4 +13,4 @@ qt5_add_resources(RESOURCES compositor/compositor.qrc)
 add_executable(luna-next ${SOURCES} ${RESOURCES})
 qt5_use_modules(luna-next Quick Compositor Gui)
 
-# install(TARGETS luna-next DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS luna-next DESTINATION bin)
