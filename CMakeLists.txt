@@ -32,6 +32,11 @@ if(NOT Qt5Compositor_FOUND)
     message(FATAL_ERROR "Qt5Compositor module is required!")
 endif()
 
+find_package(Qt5WebKit REQUIRED)
+if(NOT Qt5WebKit_FOUND)
+    message(FATAL_ERROR "Qt5WebKit module is required!")
+endif()
+
 find_package(PkgConfig "0.22" REQUIRED)
 
 pkg_check_modules(EGL egl REQUIRED)
@@ -41,3 +46,4 @@ pkg_check_modules(WAYLAND_CLIENT wayland-client REQUIRED)
 pkg_check_modules(WAYLAND_SERVER wayland-server REQUIRED)
 
 add_subdirectory(src)
+add_subdirectory(tests)
