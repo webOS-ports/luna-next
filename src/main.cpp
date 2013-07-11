@@ -18,6 +18,8 @@
 
 #include <QGuiApplication>
 #include <QFileInfo>
+#include <QRect>
+#include <QScreen>
 
 #include <unistd.h>
 #include <stdio.h>
@@ -103,7 +105,7 @@ int main(int argc, char *argv[])
 
     LunaCompositor compositor;
     compositor.setTitle(QLatin1String("LunaNext"));
-    compositor.setGeometry(0, 0, 1024, 768);
+    compositor.setGeometry(QRect(QPoint(0, 0), QGuiApplication::primaryScreen()->size()));
     compositor.show();
 
     compositor.rootContext()->setContextProperty("compositor", &compositor);
