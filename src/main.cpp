@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     verifyXdgRuntimeDir();
 
     LunaCompositor compositor;
-    compositor.setTitle(QLatin1String("QML Compositor"));
+    compositor.setTitle(QLatin1String("LunaNext"));
     compositor.setGeometry(0, 0, 1024, 768);
     compositor.show();
 
