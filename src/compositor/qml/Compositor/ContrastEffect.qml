@@ -47,7 +47,8 @@ ShaderEffect {
 
     onSourceChanged: {
         if (source != null) {
-            source.setPaintEnabled(false);
+            if( source.setPaintEnabled )
+                source.setPaintEnabled(false);
         }
     }
 
