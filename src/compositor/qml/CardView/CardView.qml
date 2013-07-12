@@ -28,5 +28,32 @@ Item {
         model: listCardsModel
         delegate: CardWindowDelegate {}
     }
+
+    function addWindow(window) {
+        listCardsModel.append({"window": window})
+    }
+
+    function removeWindow(window) {
+        for (i = 0; i < listCardsModel.count; ++i) {
+            if (listCardsModel.get(i) === window) {
+                listCardsModel.remove(i);
+                break;
+            }
+        }
+    }
+
+    function setCurrentWindowMaximizedState(bMaximized) {
+        var currentModelItem = listCardsModel.get(listCardsView.currentIndex);
+        var currentWindow = currentModelItem.window;
+        var currentWindowContainer = currentWindow.parent;
+        if( currentWindowContainer ) {
+            if( !bMaximized ) {
+                currentWindowContainer.state = "normal";
+            }
+            else {
+                currentWindowContainer.state = "maximized";
+            }
+        }
+    }
 }
 

@@ -20,26 +20,37 @@ Item {
         width: parent.width
         scale:  (listCardsView.currentIndex === index) ? 1.0: 0.9
 
-        // Of course this should be reworked to point to the real compositor window
-        Compositor.DummyWindow {
+        WindowContainer {
             id: cardDelegateContent
 
-            anchors.fill: parent
+            child: window
+            maximizedWindowParent: maximizedWindowContainer
+            normalParent: cardDelegateWindow
 
-            Behavior on scale {
-                NumberAnimation { duration: 100 }
+            x: 0; y: 0; width: parent.width; height: parent.height
+
+            Component.onCompleted: {
+                window.parent = cardDelegateContent;
+                window.anchors.fill = cardDelegateContent;
+                window.anchors.margins = 20;
             }
         }
 
         Text {
-            anchors.top: cardDelegateContent.top
+            anchors.top: cardDelegateWindow.top
             anchors.horizontalCenter: cardDelegateWindow.horizontalCenter
 
             height: 20
-            text: index + " : " + appName
+            text: index
+
+            z: 1
         }
 
         Behavior on y {
+            NumberAnimation { duration: 100 }
+        }
+
+        Behavior on scale {
             NumberAnimation { duration: 100 }
         }
 
@@ -50,7 +61,12 @@ Item {
             drag.minimumY: -cardDelegateContent.height;
             drag.maximumY: listCardsView.height;
             drag.filterChildren: true
-            enabled: (listCardsView.currentIndex === index)
+            enabled: (listCardsView.currentIndex === index) && (cardDelegateContent.state === "normal")
+
+            onClicked: {
+                // maximize window
+                cardViewDisplay.setCurrentWindowMaximizedState(true);
+            }
 
             onReleased: {
                 if( cardDelegateWindow.y > -cardDelegateContent.height/2 && cardDelegateWindow.y < listCardsView.height-cardDelegateContent.height/2 ) {
