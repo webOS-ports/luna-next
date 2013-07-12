@@ -54,17 +54,8 @@ Item {
 
     property real screenDotPerMM: (Math.sqrt(screenwidth*screenwidth + screenheight*screenheight) / (screenSizeInInch*25.4))
 
-    property variant selectedWindow: null
-    property bool hasFullscreenWindow: typeof compositor != "undefined" && compositor.fullscreenSurface !== null
-
     width: screenwidth
     height: screenheight
-
-    Component.onCompleted: {
-        //console.log("screenDotPerMM: " + screenDotPerMM);
-    }
-
-    onHasFullscreenWindowChanged: console.log("has fullscreen window: " + hasFullscreenWindow);
 
     // background
     Image {
@@ -73,32 +64,13 @@ Item {
             NumberAnimation { easing.type: Easing.InCubic; duration: 400; }
         }
         anchors.fill: parent
-        fillMode: Image.Tile
+        fillMode: Image.PreserveAspectCrop
         source: "background.jpg"
         smooth: true
+        sourceSize.width: root.width
+        sourceSize.height: root.height
 
         z: -1; // the background item should always be behind other components
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        onClicked: {
-            root.selectedWindow = null
-            root.focus = true
-        }
-    }
-
-    MouseArea {
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        width: 2
-        height: 2
-        hoverEnabled: true
-        onEntered: {
-            root.selectedWindow = null
-            root.focus = true
-        }
-        z: 10
     }
 
     // gesture area
@@ -110,7 +82,7 @@ Item {
         anchors.right: root.right
         height: computeFromLength(4);
 
-        z: 2 // the gesture area is in front of everything, always.
+        z: 3 // the gesture area is in front of everything, always.
     }
 
     // cardview
@@ -123,6 +95,24 @@ Item {
         anchors.right: root.right
 
         z: 0
+
+        Behavior on opacity {
+            NumberAnimation { duration: 100 }
+        }
+    }
+
+    // maximized window container
+    Item {
+        id: maximizedWindowContainer
+
+        opacity: 0
+
+        anchors.top: statusBarDisplay.bottom
+        anchors.bottom: gestureAreaDisplay.top
+        anchors.left: root.left
+        anchors.right: root.right
+
+        z: 2
     }
 
     // top area: status bar
@@ -150,6 +140,7 @@ Item {
     }
 
     function windowAdded(window) {
+        /*
         var windowContainerComponent = Qt.createComponent("Compositor/WindowContainer.qml");
         var windowContainer = windowContainerComponent.createObject(root);
 
@@ -159,36 +150,45 @@ Item {
         windowContainer.targetHeight = window.height;
         windowContainer.child = window;
 
-        var windowChromeComponent = Qt.createComponent("Compositor/WindowChrome.qml");
-        var windowChrome = windowChromeComponent.createObject(window);
-
         CompositorLogic.addWindow(windowContainer);
-
-        windowContainer.opacity = 1
-        windowContainer.animationsEnabled = true;
-        windowContainer.chrome = windowChrome;
+        */
+        cardViewDisplay.addWindow(window);
     }
 
     function windowResized(window) {
         var windowContainer = window.parent;
         windowContainer.width = window.width;
         windowContainer.height = window.height;
+    }
 
-        CompositorLogic.relayout();
+    function setFullScreenWindow(window) {
+        // first, get the coordinates of the window mapped in the root
+        var coordsInRoot = root.mapFromItem(window, 0, 0, window.width, window.height);
+        // now move the fullscreen window container to match that
+        maximizedWindowContainer.x = coordsInRoot.x;
+        maximizedWindowContainer.y = coordsInRoot.y;
+        maximizedWindowContainer.width = coordsInRoot.width;
+        maximizedWindowContainer.height = coordsInRoot.height;
+        // set the child information
+        maximizedWindowContainer.child = window;
+
+        // switch the state to fullscreen
+        maximizedWindowContainer.state = "fullscreen";
+        // hide the card view
+        cardViewDisplay.opacity = 0;
     }
 
     function windowDestroyed(window) {
         var windowContainer = window.parent;
-        if (windowContainer.runDestroyAnimation)
-            windowContainer.runDestroyAnimation(); 25.4;
     }
 
     function removeWindow(window) {
+        /*
         var windowContainer = window.parent;
         CompositorLogic.removeWindow(windowContainer);
-        windowContainer.chrome.destroy();
         windowContainer.destroy();
-        compositor.destroyWindow(window);
+        */
+        cardViewDisplay.removeWindow(window);
     }
 
     function computeFromLength(lengthInMillimeter) {
@@ -196,9 +196,9 @@ Item {
     }
 
     function startApp(appName) {
-        cardViewDisplay.listCardsModel.append({"appName": appName});
+        // Simulate the creation of a new window
+        var windowComponent = Qt.createComponent("Compositor/DummyWindow.qml");
+        var window = windowComponent.createObject(root);
+        windowAdded(window);
     }
-
-    onHeightChanged: CompositorLogic.relayout();
-    onWidthChanged: CompositorLogic.relayout();
 }

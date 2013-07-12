@@ -11,39 +11,71 @@ Item {
     width: listCardsView.cardWindowWidth
 
     // Swipe a card up of down the screen to close the window:
-    // use a Flickable area containing the card window
-    Flickable {
-        id: cardDelegateVerticalSwipe
+    // use a movable area containing the card window
+    Item {
+        id: cardDelegateWindow
 
-        anchors.fill: cardDelegateContainer
-        flickableDirection: Flickable.VerticalFlick
-        interactive: (listCardsView.currentIndex === index)
+        y: parent.height/2 - cardDelegateContent.height/2
+        height: parent.width
+        width: parent.width
+        scale:  (listCardsView.currentIndex === index) ? 1.0: 0.9
 
-        Item {
-            anchors.verticalCenter: parent.verticalCenter
-            height: parent.width
-            width: parent.width
+        WindowContainer {
+            id: cardDelegateContent
 
-            // Of course this should be reworked to point to the real compositor window
-            Compositor.DummyWindow {
-                id: cardDelegateWindow
+            child: window
+            maximizedWindowParent: maximizedWindowContainer
+            normalParent: cardDelegateWindow
 
-                anchors.fill: parent
-                scale:  (listCardsView.currentIndex === index) ? 1.0: 0.9
+            x: 0; y: 0; width: parent.width; height: parent.height
 
-                Behavior on scale {
-                    NumberAnimation { duration: 100 }
-                }
+            Component.onCompleted: {
+                window.parent = cardDelegateContent;
+                window.anchors.fill = cardDelegateContent;
+                window.anchors.margins = 20;
+            }
+        }
+
+        Text {
+            anchors.top: cardDelegateWindow.top
+            anchors.horizontalCenter: cardDelegateWindow.horizontalCenter
+
+            height: 20
+            text: index
+
+            z: 1
+        }
+
+        Behavior on y {
+            NumberAnimation { duration: 100 }
+        }
+
+        Behavior on scale {
+            NumberAnimation { duration: 100 }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            drag.target: cardDelegateWindow
+            drag.axis: Drag.YAxis
+            drag.minimumY: -cardDelegateContent.height;
+            drag.maximumY: listCardsView.height;
+            drag.filterChildren: true
+            enabled: (listCardsView.currentIndex === index) && (cardDelegateContent.state === "normal")
+
+            onClicked: {
+                // maximize window
+                cardViewDisplay.setCurrentWindowMaximizedState(true);
             }
 
-            Text {
-                anchors.top: cardDelegateWindow.top
-                anchors.horizontalCenter: cardDelegateWindow.horizontalCenter
-
-                height: 20
-                text: index + " : " + appName
+            onReleased: {
+                if( cardDelegateWindow.y > -cardDelegateContent.height/2 && cardDelegateWindow.y < listCardsView.height-cardDelegateContent.height/2 ) {
+                    cardDelegateWindow.y = cardDelegateContainer.height/2 - cardDelegateContent.height/2;
+                }
+                else {
+                    listCardsModel.remove(index)
+                }
             }
         }
     }
-
 }

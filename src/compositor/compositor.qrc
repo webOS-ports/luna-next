@@ -12,6 +12,7 @@
         <file>qml/Compositor/DummyWindow.qml</file>
         <file>qml/CardView/CardWindowDelegate.qml</file>
         <file>qml/CardView/CardView.qml</file>
+        <file>qml/CardView/WindowContainer.qml</file>
         <file>qml/StatusBar/StatusBar.qml</file>
         <file>qml/main.qml</file>
     </qresource>
