@@ -1,6 +1,9 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.0
 
+// this should be a plugin import
+import "compositor.js" as CompositorLogic
+
 Item {
     id: dummyWindow
     property alias scale: windowRectangle.scale
@@ -15,16 +18,27 @@ Item {
         }
 
         Column {
-            CheckBox {
-                text: qsTr("Breakfast")
+            Button {
+                text: "Current mode: " + (dummyWindow.parent?dummyWindow.parent.state:"undefined")
+
+                onClicked: {
+                    var currentState = CompositorLogic.getAppWindowState(dummyWindow);
+                    // switch to the next state
+                    currentState = (currentState+1) % 3;
+                    CompositorLogic.setAppWindowState(dummyWindow, currentState);
+                }
             }
-            CheckBox {
-                text: qsTr("Lunch")
-            }
-            CheckBox {
-                text: qsTr("Dinner")
+            Button {
+                text: "Add notification"
+
+                onClicked: {
+                    var newNotif = {
+                        "icon": "../GestureArea/glow.png",
+                        "content": "this is a new notification from DummyWindow"
+                    };
+                    CompositorLogic.addNotification(newNotif);
+                }
             }
         }
-
     }
 }
