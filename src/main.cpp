@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 
 #include <systemd/sd-daemon.h>
+#include <Settings.h>
 
 #include "compositor.h"
 
@@ -39,6 +40,9 @@ int main(int argc, char *argv[])
         setenv("EGL_PLATFORM", "fbdev", 0);
         setenv("QT_QPA_PLATFORM", "eglfs", 0);
     }
+
+    // preload all settings for later use
+    Settings *settings = Settings::LunaSettings();
 
     QGuiApplication app(argc, argv);
 

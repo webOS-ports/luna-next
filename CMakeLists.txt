@@ -46,6 +46,8 @@ pkg_check_modules(WAYLAND_CLIENT wayland-client REQUIRED)
 pkg_check_modules(WAYLAND_SERVER wayland-server REQUIRED)
 
 pkg_check_modules(SYSTEMD_DAEMON libsystemd-daemon REQUIRED)
+pkg_check_modules(GLIB2 glib-2.0 REQUIRED)
+pkg_check_modules(LUNA_SYSMGR_COMMON LunaSysMgrCommon REQUIRED)
 
 add_subdirectory(src)
 add_subdirectory(tests)
