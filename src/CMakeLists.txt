@@ -8,7 +8,8 @@ include_directories(
 
 set(SOURCES
     main.cpp
-    compositor/lunacompositor.cpp)
+    compositor/compositor.cpp
+    compositor/compositorwindow.cpp)
 
 qt5_add_resources(RESOURCES compositor/compositor.qrc)
 

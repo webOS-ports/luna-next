@@ -24,7 +24,7 @@
 #include <unistd.h>
 #include <stdio.h>
 
-#include "lunacompositor.h"
+#include "compositor.h"
 
 static int convertPermission(const QFileInfo &fileInfo)
 {
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 
     verifyXdgRuntimeDir();
 
-    LunaCompositor compositor;
+    luna::Compositor compositor;
     compositor.setTitle(QLatin1String("LunaNext"));
     compositor.setGeometry(QRect(QPoint(0, 0), QGuiApplication::primaryScreen()->size()));
     compositor.show();
