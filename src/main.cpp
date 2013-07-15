@@ -96,7 +96,6 @@ int main(int argc, char *argv[])
     else {
         setenv("EGL_PLATFORM", "fbdev", 0);
         setenv("QT_QPA_PLATFORM", "eglfs", 0);
-        setenv("QT_QPA_GENERIC_PLUGINS", "evdevtouch", 0);
     }
 
     QGuiApplication app(argc, argv);
