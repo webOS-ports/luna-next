@@ -179,7 +179,6 @@ Item {
     }
 
     function windowDestroyed(window) {
-        var windowContainer = window.parent;
     }
 
     function removeWindow(window) {
