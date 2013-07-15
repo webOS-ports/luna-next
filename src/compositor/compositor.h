@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#ifndef LUNACOMPOSITOR_H_
-#define LUNACOMPOSITOR_H_
+#ifndef LUNA_COMPOSITOR_H_
+#define LUNA_COMPOSITOR_H_
 
 #include "qwaylandcompositor.h"
 #include "qwaylandsurface.h"
@@ -26,21 +26,27 @@
 #include <QQuickItem>
 #include <QQuickView>
 
-class LunaCompositor : public QQuickView, public QWaylandCompositor
+#include "compositorwindow.h"
+
+namespace luna
+{
+
+class Compositor : public QQuickView, public QWaylandCompositor
 {
     Q_OBJECT
     Q_PROPERTY(QWaylandSurface* fullscreenSurface READ fullscreenSurface WRITE setFullscreenSurface NOTIFY fullscreenSurfaceChanged)
 
 public:
-    LunaCompositor();
+    Compositor();
 
-    QWaylandSurface *fullscreenSurface() const { return m_fullscreenSurface; }
+    QWaylandSurface *fullscreenSurface() const { return mFullscreenSurface; }
 
 signals:
     void windowAdded(QVariant window);
     void windowDestroyed(QVariant window);
     void windowResized(QVariant window);
     void fullscreenSurfaceChanged();
+    void windowsChanged();
 
 public slots:
     void destroyWindow(QVariant window);
@@ -58,7 +64,11 @@ protected:
     void surfaceCreated(QWaylandSurface *surface);
 
 private:
-    QWaylandSurface *m_fullscreenSurface;
+    QWaylandSurface *mFullscreenSurface;
+    unsigned int mNextWindowId;
+    QHash<unsigned int, CompositorWindow*> mWindows;
 };
+
+} // namespace luna
 
 #endif

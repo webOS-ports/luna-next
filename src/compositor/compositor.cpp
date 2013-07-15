@@ -15,11 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#include "lunacompositor.h"
+#include "compositor.h"
 
-LunaCompositor::LunaCompositor()
+namespace luna
+{
+
+Compositor::Compositor()
     : QWaylandCompositor(this),
-      m_fullscreenSurface(0)
+      mFullscreenSurface(0),
+      mNextWindowId(1)
 {
     enableSubSurfaceExtension();
     setSource(QUrl("qrc:///qml/main.qml"));
@@ -30,12 +34,12 @@ LunaCompositor::LunaCompositor()
     connect(this, SIGNAL(frameSwapped()), this, SLOT(frameSwappedSlot()));
 }
 
-void LunaCompositor::destroyWindow(QVariant window)
+void Compositor::destroyWindow(QVariant window)
 {
     qvariant_cast<QObject *>(window)->deleteLater();
 }
 
-void LunaCompositor::destroyClientForWindow(QVariant window)
+void Compositor::destroyClientForWindow(QVariant window)
 {
     QWaylandSurface *surface = 0;
 
@@ -43,66 +47,75 @@ void LunaCompositor::destroyClientForWindow(QVariant window)
     destroyClientForSurface(surface);
 }
 
-void LunaCompositor::setFullscreenSurface(QWaylandSurface *surface)
+void Compositor::setFullscreenSurface(QWaylandSurface *surface)
 {
-    if (surface == m_fullscreenSurface)
+    if (surface == mFullscreenSurface)
         return;
 
-    m_fullscreenSurface = surface;
+    mFullscreenSurface = surface;
     emit fullscreenSurfaceChanged();
 }
 
-void LunaCompositor::surfaceMapped()
+void Compositor::surfaceMapped()
 {
     QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(sender());
-    //Ignore surface if it's not a window surface
+
     if (!surface->hasShellSurface())
         return;
 
-    QWaylandSurfaceItem *item = surface->surfaceItem();
-    //Create a WaylandSurfaceItem if we have not yet
-    if (!item)
-        item = new QWaylandSurfaceItem(surface, rootObject());
+    unsigned int windowId = mNextWindowId++;
+    CompositorWindow *window = new CompositorWindow(windowId, surface, contentItem());
+    window->setSize(surface->size());
+    // FIXME handle disconnecting clients
+    // QObject::connect(window, SIGNAL(destroyed(QObject*)), this, SLOT(windowDestroyed()));
+    mWindows.insert(windowId, window);
 
-    item->setTouchEventsEnabled(true);
-    //item->takeFocus();
-    emit windowAdded(QVariant::fromValue(static_cast<QQuickItem *>(item)));
+    window->setTouchEventsEnabled(true);
+
+    emit windowAdded(QVariant::fromValue(static_cast<QQuickItem *>(window)));
 }
 
-void LunaCompositor::surfaceUnmapped()
+void Compositor::surfaceUnmapped()
 {
     QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(sender());
-    if (surface == m_fullscreenSurface)
-        m_fullscreenSurface = 0;
+    if (surface == mFullscreenSurface)
+        mFullscreenSurface = 0;
 
-    QQuickItem *item = surface->surfaceItem();
-    emit windowDestroyed(QVariant::fromValue(item));
+    CompositorWindow *window = qobject_cast<CompositorWindow*>(surface->surfaceItem());
+
+    mWindows.remove(window->windowId());
+
+    emit windowDestroyed(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+
+    delete window;
 }
 
-void LunaCompositor::surfaceDestroyed(QObject *object)
+void Compositor::surfaceDestroyed(QObject *object)
 {
     QWaylandSurface *surface = static_cast<QWaylandSurface *>(object);
-    if (surface == m_fullscreenSurface)
-        m_fullscreenSurface = 0;
+    if (surface == mFullscreenSurface)
+        mFullscreenSurface = 0;
 
     QQuickItem *item = surface->surfaceItem();
     emit windowDestroyed(QVariant::fromValue(item));
 }
 
-void LunaCompositor::frameSwappedSlot()
+void Compositor::frameSwappedSlot()
 {
-    frameFinished(m_fullscreenSurface);
+    frameFinished(mFullscreenSurface);
 }
 
-void LunaCompositor::resizeEvent(QResizeEvent *event)
+void Compositor::resizeEvent(QResizeEvent *event)
 {
     QQuickView::resizeEvent(event);
     QWaylandCompositor::setOutputGeometry(QRect(0, 0, width(), height()));
 }
 
-void LunaCompositor::surfaceCreated(QWaylandSurface *surface)
+void Compositor::surfaceCreated(QWaylandSurface *surface)
 {
     connect(surface, SIGNAL(destroyed(QObject *)), this, SLOT(surfaceDestroyed(QObject *)));
     connect(surface, SIGNAL(mapped()), this, SLOT(surfaceMapped()));
     connect(surface, SIGNAL(unmapped()), this,SLOT(surfaceUnmapped()));
 }
+
+} // namespace luna
