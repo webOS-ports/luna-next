@@ -41,6 +41,8 @@ public:
 
     QWaylandSurface *fullscreenSurface() const { return mFullscreenSurface; }
 
+    Q_INVOKABLE void clearKeyboardFocus();
+
 signals:
     void windowAdded(QVariant window);
     void windowDestroyed(QVariant window);

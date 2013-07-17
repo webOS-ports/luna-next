@@ -17,6 +17,8 @@
 
 #include "compositor.h"
 
+#include <QWaylandInputDevice>
+
 namespace luna
 {
 
@@ -60,6 +62,11 @@ void Compositor::setFullscreenSurface(QWaylandSurface *surface)
 
     mFullscreenSurface = surface;
     emit fullscreenSurfaceChanged();
+}
+
+void Compositor::clearKeyboardFocus()
+{
+    defaultInputDevice()->setKeyboardFocus(0);
 }
 
 void Compositor::surfaceMapped()

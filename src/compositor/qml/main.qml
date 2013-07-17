@@ -211,6 +211,11 @@ Item {
     function setCurrentMaximizedWindow(window) {
         // switch the state to maximized
         window.windowState = 1;
+
+        if (window.child) {
+            // take focus for receiving input events
+            window.child.takeFocus();
+        }
     }
     function setCurrentFullscreenWindow(window) {
         // switch the state to fullscreen
@@ -219,6 +224,10 @@ Item {
     function restoreWindowToCard(window) {
         // switch the state to card
         window.windowState = 0;
+
+        // we're back to card view so no card should have the focus
+        // for the keyboard anymore
+        compositor.clearKeyboardFocus();
     }
 
     function windowDestroyed(appWindow) {
