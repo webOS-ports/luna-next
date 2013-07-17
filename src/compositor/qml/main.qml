@@ -39,9 +39,13 @@
 ****************************************************************************/
 
 import QtQuick 2.0
+import QtGraphicalEffects 1.0
+
 import "CardView" as CardView
 import "StatusBar" as StatusBar
 import "LaunchBar" as LaunchBar
+import "GestureArea" as GestureArea
+import "NotificationArea" as NotificationArea
 import "Compositor" as Compositor
 import "Compositor/compositor.js" as CompositorLogic
 
@@ -52,37 +56,44 @@ Item {
     property real screenheight: 800
     property real screenSizeInInch: 14   // corresponds to my desktop
 
-    property real screenDotPerMM: (Math.sqrt(screenwidth*screenwidth + screenheight*screenheight) / (screenSizeInInch*25.4))
+    property real screenDPI: (Math.sqrt(screenwidth*screenwidth + screenheight*screenheight) / (screenSizeInInch))
 
     width: screenwidth
     height: screenheight
 
+    property alias maximizedWindowContainer: maximizedWindowContainer
+    property alias fullscreenWindowContainer: fullscreenWindowContainer
+    property alias notificationArea: notificationsContainer.notificationArea
+
+    property variant currentActiveWindow
+
     // background
-    Image {
+    Rectangle {
         id: background
-        Behavior on opacity {
-            NumberAnimation { easing.type: Easing.InCubic; duration: 400; }
-        }
-        anchors.fill: parent
-        fillMode: Image.PreserveAspectCrop
-        source: "background.jpg"
-        smooth: true
-        sourceSize.width: root.width
-        sourceSize.height: root.height
-
-        z: -1; // the background item should always be behind other components
-    }
-
-    // gesture area
-    GestureArea {
-        id: gestureAreaDisplay
-
-        anchors.bottom: root.bottom
+        anchors.top: statusBarDisplay.bottom
+        anchors.bottom: gestureAreaDisplay.top
         anchors.left: root.left
         anchors.right: root.right
-        height: computeFromLength(4);
 
-        z: 3 // the gesture area is in front of everything, always.
+        color: "black"
+
+        z: -1; // the background item should always be behind other components
+
+        Compositor.RoundedItem {
+            anchors.fill: parent
+
+            radius: 20
+            content: Image {
+                id: backgroundImage
+
+                anchors.fill: parent
+                fillMode: Image.PreserveAspectCrop
+                source: "background.jpg"
+                asynchronous: true
+                smooth: true
+                sourceSize: Qt.size(background.width, background.height)
+            }
+        }
     }
 
     // cardview
@@ -101,18 +112,16 @@ Item {
         }
     }
 
-    // maximized window container
-    Item {
-        id: maximizedWindowContainer
+    // bottom area: launcher bar
+    LaunchBar.LaunchBar {
+        id: launchBarDisplay
 
-        opacity: 0
-
-        anchors.top: statusBarDisplay.bottom
         anchors.bottom: gestureAreaDisplay.top
         anchors.left: root.left
         anchors.right: root.right
+        height: computeFromLength(80);
 
-        z: 2
+        z: 1 // on top of cardview
     }
 
     // top area: status bar
@@ -122,63 +131,99 @@ Item {
         anchors.top: root.top
         anchors.left: root.left
         anchors.right: root.right
-        height: computeFromLength(8);
+        height: computeFromLength(30);
 
-        z: 1
+        z: 2 // can only be hidden by a fullscreen window
     }
 
-    // bottom area: launcher bar
-    LaunchBar.LaunchBar {
-        id: launchBarDisplay
+    // notification area
+    NotificationArea.NotificationsContainer {
+        id: notificationsContainer
 
         anchors.bottom: gestureAreaDisplay.top
         anchors.left: root.left
         anchors.right: root.right
-        height: computeFromLength(20);
 
-        z: 1
+        z: 2 // can only be hidden by a fullscreen window
     }
 
-    function windowAdded(window) {
-        /*
-        var windowContainerComponent = Qt.createComponent("Compositor/WindowContainer.qml");
-        var windowContainer = windowContainerComponent.createObject(root);
+    // maximized window container
+    Item {
+        id: maximizedWindowContainer
 
-        window.parent = windowContainer;
+        property variant currentMaximizedWindow
 
-        windowContainer.targetWidth = window.width;
-        windowContainer.targetHeight = window.height;
-        windowContainer.child = window;
+        anchors.top: statusBarDisplay.bottom
+        anchors.bottom: notificationsContainer.top
+        anchors.left: root.left
+        anchors.right: root.right
 
-        CompositorLogic.addWindow(windowContainer);
-        */
-        cardViewDisplay.addWindow(window);
+        z: 2
+
+        onChildrenChanged: currentMaximizedWindow = children[0]
+    }
+
+    // gesture area
+    GestureArea.GestureArea {
+        id: gestureAreaDisplay
+
+        anchors.bottom: root.bottom
+        anchors.left: root.left
+        anchors.right: root.right
+        height: computeFromLength(16);
+
+        z: 3 // the gesture area is in front of everything, like the fullscreen window
+
+        onClickGestureArea:{
+            if(fullscreenWindowContainer.currentFullscreenWindow) {
+                fullscreenWindowContainer.currentFullscreenWindow.windowState=0
+            }
+            else if(maximizedWindowContainer.currentMaximizedWindow) {
+                maximizedWindowContainer.currentMaximizedWindow.windowState=0
+            }
+        }
+    }
+
+    // fullscreen window container
+    Item {
+        id: fullscreenWindowContainer
+
+        property variant currentFullscreenWindow
+
+        anchors.top: root.top
+        anchors.bottom: gestureAreaDisplay.top
+        anchors.left: root.left
+        anchors.right: root.right
+
+        z: 3 // in front of everything
+
+        onChildrenChanged: currentFullscreenWindow = children[0]
+    }
+
+    function windowAdded(appWindow) {
+        var newWindowContainer = CompositorLogic.addWindow(appWindow);
+        cardViewDisplay.addCard(newWindowContainer);
     }
 
     function windowResized(window) {
-        var windowContainer = window.parent;
-        windowContainer.width = window.width;
-        windowContainer.height = window.height;
     }
 
-    function setFullScreenWindow(window) {
-        // first, get the coordinates of the window mapped in the root
-        var coordsInRoot = root.mapFromItem(window, 0, 0, window.width, window.height);
-        // now move the fullscreen window container to match that
-        maximizedWindowContainer.x = coordsInRoot.x;
-        maximizedWindowContainer.y = coordsInRoot.y;
-        maximizedWindowContainer.width = coordsInRoot.width;
-        maximizedWindowContainer.height = coordsInRoot.height;
-        // set the child information
-        maximizedWindowContainer.child = window;
-
+    function setCurrentMaximizedWindow(window) {
+        // switch the state to maximized
+        window.windowState = 1;
+    }
+    function setCurrentFullscreenWindow(window) {
         // switch the state to fullscreen
-        maximizedWindowContainer.state = "fullscreen";
-        // hide the card view
-        cardViewDisplay.opacity = 0;
+        window.windowState = 2;
+    }
+    function restoreWindowToCard(window) {
+        // switch the state to card
+        window.windowState = 0;
     }
 
-    function windowDestroyed(window) {
+    function windowDestroyed(appWindow) {
+        // var windowContainer = appWindow.parent;
+        // cardViewDisplay.removeWindow(windowContainer);
     }
 
     function removeWindow(window) {
@@ -188,10 +233,17 @@ Item {
         windowContainer.destroy();
         */
         cardViewDisplay.removeWindow(window);
+        windowContainer.destroy();
     }
 
-    function computeFromLength(lengthInMillimeter) {
-        return (lengthInMillimeter * root.screenDotPerMM);
+    // Utility to convert a pixel length expressed at DPI=132 to
+    // a pixel length expressed in our DPI
+    function computeFromLength(lengthAt132DPI) {
+        return (lengthAt132DPI * (root.screenDPI / 132.0));
+    }
+
+    function addNotification(notif) {
+        notificationsContainer.addNotification(notif);
     }
 
     function startApp(appName) {
