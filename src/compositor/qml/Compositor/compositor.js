@@ -7,6 +7,8 @@ var windowList = null;
 // add app window window to the compositor
 function addWindow(appWindow)
 {
+    if(!appWindow) return null;
+
     if (windowList == null)
         windowList = new Array(0);
 

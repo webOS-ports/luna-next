@@ -40,7 +40,7 @@ Item {
     }
 
     function addCard(window) {
-        listCardsModel.append({"window": window})
+        listCardsModel.append({"window": window});
     }
 
     function removeWindow(window) {
