@@ -7,32 +7,32 @@ import "../Compositor" as Compositor
 Item {
     id: cardDelegateContainer
 
-    height: listCardsView.height
-    width: listCardsView.cardWindowWidth
+    property real cardWidth
+    property real cardHeight
 
-    // Swipe a card up of down the screen to close the window:
-    // use a movable area containing the card window
     Item {
         id: cardDelegateWindow
 
         y: parent.height/2 - cardDelegateContent.height/2
-        height: parent.width
-        width: parent.width
+        height: parent.cardHeight
+        width: parent.cardWidth
         scale:  (listCardsView.currentIndex === index) ? 1.0: 0.9
 
-        WindowContainer {
+        Item {
             id: cardDelegateContent
 
-            child: window
-            maximizedWindowParent: maximizedWindowContainer
-            normalParent: cardDelegateWindow
+            children: [ window ]
 
-            x: 0; y: 0; width: parent.width; height: parent.height
+            anchors.fill: parent
 
             Component.onCompleted: {
                 window.parent = cardDelegateContent;
-                window.anchors.fill = cardDelegateContent;
-                window.anchors.margins = 20;
+                window.x = 0;
+                window.y = 0;
+                window.width = parent.width;
+                window.height = parent.height
+                window.cardViewParent = cardDelegateContent;
+                window.windowState = 0;
             }
         }
 
@@ -54,18 +54,20 @@ Item {
             NumberAnimation { duration: 100 }
         }
 
+        // Swipe a card up of down the screen to close the window:
+        // use a movable area containing the card window
         MouseArea {
-            anchors.fill: parent
+            anchors.fill: cardDelegateWindow
             drag.target: cardDelegateWindow
             drag.axis: Drag.YAxis
             drag.minimumY: -cardDelegateContent.height;
             drag.maximumY: listCardsView.height;
             drag.filterChildren: true
-            enabled: (listCardsView.currentIndex === index) && (cardDelegateContent.state === "normal")
+            enabled: (listCardsView.currentIndex === index) && (window.windowState === 0)
 
             onClicked: {
                 // maximize window
-                cardViewDisplay.setCurrentWindowMaximizedState(true);
+                root.setCurrentMaximizedWindow(window);
             }
 
             onReleased: {
