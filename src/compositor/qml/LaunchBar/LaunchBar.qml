@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import QtQuick.Layouts 1.0
+// import QtQuick.Layouts 1.0 // Note: Qt 5.1 only
 
 Item {
     id: launchBarDisplay
@@ -32,21 +32,24 @@ Item {
         }
     }
 
-    RowLayout {
+    GridView {
         id: launcherRow
 
         anchors.fill: launchBarDisplay
+        cellWidth : parent.width/4
+        cellHeight : parent.height
 
-        Repeater {
-            model: launcherListModel
-            delegate: Image {
+        model: launcherListModel
+        delegate: Item {
+            width: launcherRow.cellWidth;
+            height: launcherRow.cellHeight
+
+            Image {
                 id: launcherIcon
                 fillMode: Image.PreserveAspectFit
+                anchors.centerIn: parent.Center
                 height: parent.height
                 source: icon
-
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignCenter
 
                 MouseArea {
                     anchors.fill: parent

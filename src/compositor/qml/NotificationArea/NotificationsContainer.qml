@@ -12,20 +12,12 @@ Rectangle {
 
     color: "black"
     opacity: 0.8
-    state: "minimized"
+    state: "closed"
 
     property alias notificationArea: notificationsModel
 
     ListModel {
         id: notificationsModel
-        ListElement {
-            icon: "../GestureArea/glow.png"
-            htmlContent: "full content"
-        }
-        ListElement {
-            icon: "../GestureArea/glow.png"
-            htmlContent: "full content2"
-        }
     }
 
     function addNotification(notif) {

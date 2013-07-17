@@ -1,5 +1,4 @@
 import QtQuick 2.0
-import QtQuick.Controls 1.0
 
 // this should be a plugin import
 import "compositor.js" as CompositorLogic
@@ -18,25 +17,33 @@ Item {
         }
 
         Column {
-            Button {
+            Text {
                 text: "Current mode: " + (dummyWindow.parent?dummyWindow.parent.state:"undefined")
 
-                onClicked: {
-                    var currentState = CompositorLogic.getAppWindowState(dummyWindow);
-                    // switch to the next state
-                    currentState = (currentState+1) % 3;
-                    CompositorLogic.setAppWindowState(dummyWindow, currentState);
+                MouseArea {
+                    anchors.fill: parent;
+
+                    onClicked: {
+                        var currentState = CompositorLogic.getAppWindowState(dummyWindow);
+                        // switch to the next state
+                        currentState = (currentState+1) % 3;
+                        CompositorLogic.setAppWindowState(dummyWindow, currentState);
+                    }
                 }
             }
-            Button {
+            Text {
                 text: "Add notification"
 
-                onClicked: {
-                    var newNotif = {
-                        "icon": "../GestureArea/glow.png",
-                        "content": "this is a new notification from DummyWindow"
-                    };
-                    CompositorLogic.addNotification(newNotif);
+                MouseArea {
+                    anchors.fill: parent;
+
+                    onClicked: {
+                        var newNotif = {
+                            "icon": "../GestureArea/glow.png",
+                            "content": "this is a new notification from DummyWindow"
+                        };
+                        CompositorLogic.addNotification(newNotif);
+                    }
                 }
             }
         }
