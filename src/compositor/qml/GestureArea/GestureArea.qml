@@ -13,7 +13,7 @@ Item {
     }
     Image {
         anchors.fill: parent
-        source: "glow.png"
+        source: "../images/glow.png"
         smooth: true
         fillMode: Image.Stretch
     }
