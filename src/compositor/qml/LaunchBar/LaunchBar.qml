@@ -19,16 +19,16 @@ Item {
         id: launcherListModel
 
         ListElement {
-            icon: "list-add.png"
+            icon: "../images/list-add.png"
         }
         ListElement {
-            icon: "list-add.png"
+            icon: "../images/list-add.png"
         }
         ListElement {
-            icon: "list-add.png"
+            icon: "../images/list-add.png"
         }
         ListElement {
-            icon: "list-add.png"
+            icon: "../images/list-add.png"
         }
     }
 

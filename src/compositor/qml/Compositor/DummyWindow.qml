@@ -39,7 +39,7 @@ Item {
 
                     onClicked: {
                         var newNotif = {
-                            "icon": "../GestureArea/glow.png",
+                            "icon": "../images/glow.png",
                             "content": "this is a new notification from DummyWindow"
                         };
                         CompositorLogic.addNotification(newNotif);

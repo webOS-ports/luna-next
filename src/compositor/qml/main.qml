@@ -88,7 +88,7 @@ Item {
 
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
-                source: "background.jpg"
+                source: "images/background.jpg"
                 asynchronous: true
                 smooth: true
                 sourceSize: Qt.size(background.width, background.height)
