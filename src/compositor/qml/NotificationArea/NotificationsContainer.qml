@@ -21,7 +21,7 @@ Rectangle {
     }
 
     function addNotification(notif) {
-        var icon = "generic-notification.png";
+        var icon = "../images/generic-notification.png";
         if(notif.icon) icon = notif.icon;
         var content = "New notification";
         if(notif.content) content = notif.content;

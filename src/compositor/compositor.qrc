@@ -1,10 +1,10 @@
 <RCC>
     <qresource prefix="/">
         <file>qml/GestureArea/GestureArea.qml</file>
-        <file>qml/GestureArea/glow.png</file>
-        <file>qml/background.jpg</file>
+        <file>qml/images/glow.png</file>
+        <file>qml/images/background.jpg</file>
         <file>qml/LaunchBar/LaunchBar.qml</file>
-        <file>qml/LaunchBar/list-add.png</file>
+        <file>qml/images/list-add.png</file>
         <file>qml/Compositor/WindowContainer.qml</file>
         <file>qml/Compositor/compositor.js</file>
         <file>qml/Compositor/closebutton.png</file>
