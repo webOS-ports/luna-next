@@ -4,7 +4,7 @@ Rectangle {
     id: windowContainer
 
     property variant child
-    property variant root
+    property variant compositor
 
     // enumeration can't be defined in QML, it has to be exposed by C++
     // so let's say:
@@ -39,20 +39,20 @@ Rectangle {
             name: "maximized"
             ParentChange {
                 target: windowContainer
-                parent: root.maximizedWindowContainer
+                parent: compositor.maximizedWindowContainer
                 x: 0; y: 0
-                width: root.maximizedWindowContainer.width
-                height: root.maximizedWindowContainer.height
+                width: compositor.maximizedWindowContainer.width
+                height: compositor.maximizedWindowContainer.height
             }
         },
         State {
            name: "fullscreen"
            ParentChange {
                target: windowContainer
-               parent: root.fullscreenWindowContainer
+               parent: compositor.fullscreenWindowContainer
                x: 0; y: 0
-               width: root.fullscreenWindowContainer.width
-               height: root.fullscreenWindowContainer.height
+               width: compositor.fullscreenWindowContainer.width
+               height: compositor.fullscreenWindowContainer.height
            }
        }
     ]
@@ -62,7 +62,7 @@ Rectangle {
             from: "*"; to: "fullscreen,maximized,card"
             SequentialAnimation {
                 ParentAnimation {
-                    NumberAnimation { properties: "x,y,width,height"; duration: 1000 }
+                    NumberAnimation { properties: "x,y,width,height"; duration: 300 }
                 }
             }
         }

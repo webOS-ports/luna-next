@@ -1,14 +1,13 @@
 import QtQuick 2.0
 
-// This import should not be needed if we separate correctly the Compositor
-// and the CardView. But for the early stage, let's use it here.
-import "../Compositor" as Compositor
-
 Item {
     id: cardDelegateContainer
 
-    property real cardWidth
-    property real cardHeight
+    property real cardWidth: ListView.view.cardWindowWidth
+    property real cardHeight: ListView.view.cardWindowHeight
+
+    signal switchToMaximize();
+    signal destructionRequest()
 
     Item {
         id: cardDelegateWindow
@@ -16,7 +15,7 @@ Item {
         y: parent.height/2 - cardDelegateContent.height/2
         height: parent.cardHeight
         width: parent.cardWidth
-        scale:  (listCardsView.currentIndex === index) ? 1.0: 0.9
+        scale:  (cardDelegateContainer.ListView.isCurrentItem) ? 1.0: 0.9
 
         Item {
             id: cardDelegateContent
@@ -29,10 +28,21 @@ Item {
                 window.parent = cardDelegateContent;
                 window.x = 0;
                 window.y = 0;
-                window.width = parent.width;
-                window.height = parent.height
+                window.width = cardDelegateContainer.cardWidth;
+                window.height = cardDelegateContainer.cardHeight;
                 window.cardViewParent = cardDelegateContent;
                 window.windowState = 0;
+                window.visible = true;
+            }
+            Component.onDestruction: {
+                // If this delegate gets destroyed *and* the window is
+                // in card mode, then we cut the bindings to cardDelegateContent
+                // and we hide the window
+                if( window.windowState === 0 ) {
+                    window.visible = false;
+                    window.width = 100;  // hard-coded random value
+                    window.height = 100; // hard-coded random value
+                }
             }
         }
 
@@ -41,7 +51,7 @@ Item {
             anchors.horizontalCenter: cardDelegateWindow.horizontalCenter
 
             height: 20
-            text: index
+            text: winId
 
             z: 1
         }
@@ -65,17 +75,14 @@ Item {
             drag.filterChildren: true
             enabled: (listCardsView.currentIndex === index) && (window.windowState === 0)
 
-            onClicked: {
-                // maximize window
-                root.setCurrentMaximizedWindow(window);
-            }
+            onClicked: switchToMaximize()
 
             onReleased: {
                 if( cardDelegateWindow.y > -cardDelegateContent.height/2 && cardDelegateWindow.y < listCardsView.height-cardDelegateContent.height/2 ) {
                     cardDelegateWindow.y = cardDelegateContainer.height/2 - cardDelegateContent.height/2;
                 }
                 else {
-                    listCardsModel.remove(index)
+                    destructionRequest()
                 }
             }
         }
