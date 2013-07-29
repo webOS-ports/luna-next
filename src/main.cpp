@@ -24,6 +24,8 @@
 #include <unistd.h>
 #include <stdio.h>
 
+#include <systemd/sd-daemon.h>
+
 #include "compositor.h"
 
 static int convertPermission(const QFileInfo &fileInfo)
@@ -112,6 +114,9 @@ int main(int argc, char *argv[])
     QObject::connect(&compositor, SIGNAL(windowAdded(QVariant)), compositor.rootObject(), SLOT(windowAdded(QVariant)));
     QObject::connect(&compositor, SIGNAL(windowDestroyed(QVariant)), compositor.rootObject(), SLOT(windowDestroyed(QVariant)));
     QObject::connect(&compositor, SIGNAL(windowResized(QVariant)), compositor.rootObject(), SLOT(windowResized(QVariant)));
+
+    if (app.arguments().indexOf("--systemd") >= 0)
+        sd_notify(0, "READY=1");
 
     return app.exec();
 }
