@@ -45,5 +45,7 @@ pkg_check_modules(GLESV2 glesv2 REQUIRED)
 pkg_check_modules(WAYLAND_CLIENT wayland-client REQUIRED)
 pkg_check_modules(WAYLAND_SERVER wayland-server REQUIRED)
 
+pkg_check_modules(SYSTEMD_DAEMON libsystemd-daemon REQUIRED)
+
 add_subdirectory(src)
 add_subdirectory(tests)
