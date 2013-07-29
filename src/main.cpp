@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
     else {
         setenv("EGL_PLATFORM", "fbdev", 0);
         setenv("QT_QPA_PLATFORM", "eglfs", 0);
+        setenv("QT_COMPOSITOR_NEGATE_INVERTED_Y", "1", 0);
     }
 
     // preload all settings for later use
