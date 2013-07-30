@@ -1,9 +1,5 @@
 import QtQuick 2.0
 
-import "../CardView" as CardView
-import "../GestureArea" as GestureArea
-import "../NotificationArea" as NotificationArea
-
 Item {
     id: compositor
 

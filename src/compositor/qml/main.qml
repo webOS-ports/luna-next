@@ -46,7 +46,7 @@ import LunaNext 0.1
 import "CardView" as CardView
 import "StatusBar" as StatusBar
 import "LaunchBar" as LaunchBar
-import "GestureArea" as GestureArea
+import "LunaGestureArea" as LunaGestureArea
 import "NotificationArea" as NotificationArea
 import "Compositor" as Compositor
 import "Compositor/compositor.js" as CompositorLogic
@@ -151,7 +151,7 @@ Compositor.Compositor {
     }
 
     // gesture area
-    GestureArea.GestureArea {
+    LunaGestureArea.LunaGestureArea {
         id: gestureAreaDisplay
 
         anchors.bottom: root.bottom
