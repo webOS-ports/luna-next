@@ -37,7 +37,7 @@ class Compositor : public QQuickView, public QWaylandCompositor
     Q_PROPERTY(QWaylandSurface* fullscreenSurface READ fullscreenSurface WRITE setFullscreenSurface NOTIFY fullscreenSurfaceChanged)
 
 public:
-    Compositor();
+    Compositor(const QUrl& compositorPath);
 
     QWaylandSurface *fullscreenSurface() const { return mFullscreenSurface; }
 

@@ -55,16 +55,10 @@ int main(int argc, char *argv[])
     mkdir(XDG_RUNTIME_DIR_DEFAULT, 0700);
     setenv("XDG_RUNTIME_DIR", XDG_RUNTIME_DIR_DEFAULT, 0);
 
-    luna::Compositor compositor;
+    luna::Compositor compositor(QUrl("qrc:///qml/main.qml"));
     compositor.setTitle(QLatin1String("LunaNext"));
     compositor.setGeometry(QRect(QPoint(0, 0), QGuiApplication::primaryScreen()->size()));
     compositor.show();
-
-    compositor.rootContext()->setContextProperty("compositor", &compositor);
-
-    QObject::connect(&compositor, SIGNAL(windowAdded(QVariant)), compositor.rootObject(), SLOT(windowAdded(QVariant)));
-    QObject::connect(&compositor, SIGNAL(windowDestroyed(QVariant)), compositor.rootObject(), SLOT(windowDestroyed(QVariant)));
-    QObject::connect(&compositor, SIGNAL(windowResized(QVariant)), compositor.rootObject(), SLOT(windowResized(QVariant)));
 
     if (app.arguments().indexOf("--systemd") >= 0)
         sd_notify(0, "READY=1");
