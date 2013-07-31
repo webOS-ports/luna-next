@@ -50,4 +50,5 @@ pkg_check_modules(GLIB2 glib-2.0 REQUIRED)
 pkg_check_modules(LUNA_SYSMGR_COMMON LunaSysMgrCommon REQUIRED)
 
 add_subdirectory(src)
+add_subdirectory(plugins)
 add_subdirectory(tests)
