@@ -41,6 +41,8 @@
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
 
+import LunaNext 0.1
+
 import "CardView" as CardView
 import "StatusBar" as StatusBar
 import "LaunchBar" as LaunchBar
@@ -52,11 +54,9 @@ import "Compositor/compositor.js" as CompositorLogic
 Item {
     id: root
 
-    property real screenwidth: 1280
-    property real screenheight: 800
-    property real screenSizeInInch: 14   // corresponds to my desktop
-
-    property real screenDPI: (Math.sqrt(screenwidth*screenwidth + screenheight*screenheight) / (screenSizeInInch))
+    property real screenwidth: Settings.displayWidth
+    property real screenheight: Settings.displayHeight
+    property real screenDPI: Settings.dpi
 
     width: screenwidth
     height: screenheight
