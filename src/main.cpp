@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 
 #include <systemd/sd-daemon.h>
+#include <Settings.h>
 
 #include "compositor.h"
 
@@ -38,7 +39,11 @@ int main(int argc, char *argv[])
     else {
         setenv("EGL_PLATFORM", "fbdev", 0);
         setenv("QT_QPA_PLATFORM", "eglfs", 0);
+        setenv("QT_COMPOSITOR_NEGATE_INVERTED_Y", "1", 0);
     }
+
+    // preload all settings for later use
+    Settings *settings = Settings::LunaSettings();
 
     QGuiApplication app(argc, argv);
 
@@ -51,16 +56,10 @@ int main(int argc, char *argv[])
     mkdir(XDG_RUNTIME_DIR_DEFAULT, 0700);
     setenv("XDG_RUNTIME_DIR", XDG_RUNTIME_DIR_DEFAULT, 0);
 
-    luna::Compositor compositor;
+    luna::Compositor compositor(QUrl("qrc:///qml/main.qml"));
     compositor.setTitle(QLatin1String("LunaNext"));
     compositor.setGeometry(QRect(QPoint(0, 0), QGuiApplication::primaryScreen()->size()));
     compositor.show();
-
-    compositor.rootContext()->setContextProperty("compositor", &compositor);
-
-    QObject::connect(&compositor, SIGNAL(windowAdded(QVariant)), compositor.rootObject(), SLOT(windowAdded(QVariant)));
-    QObject::connect(&compositor, SIGNAL(windowDestroyed(QVariant)), compositor.rootObject(), SLOT(windowDestroyed(QVariant)));
-    QObject::connect(&compositor, SIGNAL(windowResized(QVariant)), compositor.rootObject(), SLOT(windowResized(QVariant)));
 
     if (app.arguments().indexOf("--systemd") >= 0)
         sd_notify(0, "READY=1");

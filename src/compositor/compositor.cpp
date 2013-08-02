@@ -17,21 +17,29 @@
 
 #include "compositor.h"
 
+#include <QWaylandInputDevice>
+
 namespace luna
 {
 
-Compositor::Compositor()
+Compositor::Compositor(const QUrl& compositorPath)
     : QWaylandCompositor(this),
       mFullscreenSurface(0),
       mNextWindowId(1)
 {
     enableSubSurfaceExtension();
-    setSource(QUrl("qrc:///qml/main.qml"));
+    setSource(compositorPath);
     setResizeMode(QQuickView::SizeRootObjectToView);
     setColor(Qt::black);
     winId();
 
     connect(this, SIGNAL(frameSwapped()), this, SLOT(frameSwappedSlot()));
+
+    rootContext()->setContextProperty("compositor", this);
+
+    connect(this, SIGNAL(windowAdded(QVariant)), rootObject(), SLOT(windowAdded(QVariant)));
+    connect(this, SIGNAL(windowDestroyed(QVariant)), rootObject(), SLOT(windowDestroyed(QVariant)));
+    connect(this, SIGNAL(windowResized(QVariant)), rootObject(), SLOT(windowResized(QVariant)));
 }
 
 void Compositor::destroyWindow(QVariant window)
@@ -54,6 +62,11 @@ void Compositor::setFullscreenSurface(QWaylandSurface *surface)
 
     mFullscreenSurface = surface;
     emit fullscreenSurfaceChanged();
+}
+
+void Compositor::clearKeyboardFocus()
+{
+    defaultInputDevice()->setKeyboardFocus(0);
 }
 
 void Compositor::surfaceMapped()

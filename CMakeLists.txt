@@ -1,6 +1,6 @@
 project(luna-next)
 
-cmake_minimum_required(VERSION 2.8.7)
+cmake_minimum_required(VERSION 2.8.8)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -46,6 +46,9 @@ pkg_check_modules(WAYLAND_CLIENT wayland-client REQUIRED)
 pkg_check_modules(WAYLAND_SERVER wayland-server REQUIRED)
 
 pkg_check_modules(SYSTEMD_DAEMON libsystemd-daemon REQUIRED)
+pkg_check_modules(GLIB2 glib-2.0 REQUIRED)
+pkg_check_modules(LUNA_SYSMGR_COMMON LunaSysMgrCommon REQUIRED)
 
 add_subdirectory(src)
+add_subdirectory(plugins)
 add_subdirectory(tests)
