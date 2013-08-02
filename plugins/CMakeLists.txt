@@ -17,7 +17,7 @@ qt5_use_modules(lunanext-qml Qml Quick)
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/qmldir"
                                                               "${CMAKE_CURRENT_BINARY_DIR}/qmldir")
 
-# FIXME Using ${OE_QMAKE_PATH_IMPORTS} isn't really portable but the only way atm
-set(QMLPLUGIN_INSTALL_PREFIX "${OE_QMAKE_PATH_IMPORTS}/LunaNext")
+# FIXME Using ${OE_QMAKE_PATH_QML} isn't really portable but the only way atm
+set(QMLPLUGIN_INSTALL_PREFIX "${OE_QMAKE_PATH_QML}/LunaNext")
 install(TARGETS lunanext-qml DESTINATION ${QMLPLUGIN_INSTALL_PREFIX})
 install(FILES qmldir DESTINATION ${QMLPLUGIN_INSTALL_PREFIX})
