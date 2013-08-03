@@ -51,7 +51,7 @@ import "NotificationArea" as NotificationArea
 import "Compositor" as Compositor
 import "Compositor/compositor.js" as CompositorLogic
 
-Compositor.Compositor {
+Compositor.WindowManager {
     id: root
 
     property real screenwidth: Settings.displayWidth
@@ -61,6 +61,7 @@ Compositor.Compositor {
     width: screenwidth
     height: screenheight
 
+    compositor: compositor
     notificationsContainer: notificationsContainer
     cardView: cardViewDisplay
     statusBar: statusBarDisplay
