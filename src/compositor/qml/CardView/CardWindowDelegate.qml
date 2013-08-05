@@ -25,14 +25,9 @@ Item {
             anchors.fill: parent
 
             Component.onCompleted: {
-                window.parent = cardDelegateContent;
-                window.x = 0;
-                window.y = 0;
-                window.width = cardDelegateContainer.cardWidth;
-                window.height = cardDelegateContainer.cardHeight;
-                window.cardViewParent = cardDelegateContent;
-                window.windowState = 0;
-                window.visible = true;
+                if( window.windowState === -1 ) {
+                    window.cardViewParent = cardDelegateContent;
+                }
             }
             Component.onDestruction: {
                 // If this delegate gets destroyed *and* the window is

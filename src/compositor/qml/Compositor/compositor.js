@@ -63,7 +63,8 @@ function getAppWindowState(appWindow)
 function setAppWindowState(appWindow, state)
 {
     var windowContainer = appWindow.parent;
-    windowContainer.windowState = state;
+
+    root.setWindowState(windowContainer, state);
 }
 
 function getWindowMaximizedSize(window)

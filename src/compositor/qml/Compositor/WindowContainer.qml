@@ -27,44 +27,46 @@ Rectangle {
     states: [
         State {
            name: "card"
-           ParentChange {
-               target: windowContainer
-               parent: cardViewParent
-               x: 0; y: 0
-               width: cardViewParent.width
-               height: cardViewParent.height
-           }
         },
         State {
             name: "maximized"
-            ParentChange {
-                target: windowContainer
-                parent: compositor.maximizedWindowContainer
-                x: 0; y: 0
-                width: compositor.maximizedWindowContainer.width
-                height: compositor.maximizedWindowContainer.height
-            }
         },
         State {
            name: "fullscreen"
-           ParentChange {
-               target: windowContainer
-               parent: compositor.fullscreenWindowContainer
-               x: 0; y: 0
-               width: compositor.fullscreenWindowContainer.width
-               height: compositor.fullscreenWindowContainer.height
-           }
        }
     ]
 
-    transitions: [
-        Transition {
-            from: "*"; to: "fullscreen,maximized,card"
-            SequentialAnimation {
-                ParentAnimation {
-                    NumberAnimation { properties: "x,y,width,height"; duration: 300 }
-                }
-            }
+    ParentAnimation {
+        id: parentChangeAnimation
+        target: windowContainer
+
+        alwaysRunToEnd: true
+
+        property alias targetWidth: widthTargetAnimation.to
+        property alias targetHeight: heightTargetAnimation.to
+
+        running: false
+        NumberAnimation {
+            target: windowContainer
+            properties: "x,y"; to: 0; duration: 300
         }
-    ]
+        NumberAnimation {
+            id: widthTargetAnimation
+            target: windowContainer
+            properties: "width"; duration: 300
+        }
+        NumberAnimation {
+            id: heightTargetAnimation
+            target: windowContainer
+            properties: "height"; duration: 300
+        }
+    }
+
+    function setNewParent(newParent) {
+        parentChangeAnimation.newParent = newParent;
+        parentChangeAnimation.targetWidth = newParent.width;
+        parentChangeAnimation.targetHeight = newParent.height;
+        parentChangeAnimation.start();
+        parentChangeAnimation.stop();
+    }
 }

@@ -50,7 +50,6 @@ Item {
 
     function appendCard(window, winId) {
         listCardsModel.append({"window": window, "winId": winId});
-
         listCardsView.positionViewAtEnd();
 
         // emit corresponding signal

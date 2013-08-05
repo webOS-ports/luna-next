@@ -109,9 +109,11 @@ Compositor.WindowManager {
 
         Connections {
             target: root
-            onWindowCreated: {
+            onWindowContainerCreated: {
                 // insert a new card at the end
                 cardViewDisplay.appendCard(window, winId);
+                restoreWindowToCard(window);
+                setCurrentMaximizedWindow(window);
             }
         }
     }

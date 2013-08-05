@@ -26,7 +26,7 @@ Item {
         }
     }
 
-    signal windowCreated(variant window, int winId);
+    signal windowContainerCreated(variant window, int winId);
 
     ListModel {
         // This model contains the list of the windows that are managed by the compositor.
@@ -74,8 +74,9 @@ Item {
 
     Connections {
         target: gestureArea
-        onClickGestureArea:{
-            restoreWindowToCard(currentActiveWindow);
+        onSwipeGesture:{
+            if( angle > Math.PI/2 && angle < 3*Math.PI/2  )
+                restoreWindowToCard(currentActiveWindow);
         }
     }
     Connections {
@@ -102,7 +103,7 @@ Item {
         listWindowsModel.insert(0, {"window": windowContainer, "winId": winId});
 
         // emit the signal
-        windowCreated(windowContainer, winId);
+        windowContainerCreated(windowContainer, winId);
     }
 
     function windowResized(appWindow) {
@@ -128,24 +129,47 @@ Item {
         }
     }
 
-    function setCurrentMaximizedWindow(window) {
-        // switch the state to maximized
-        window.windowState = 1;
-        currentActiveWindow = window;
-
-        if (window.child) {
-            // take focus for receiving input events
-            window.child.takeFocus();
+    function setWindowState(windowContainer, windowState) {
+        if( windowState === 1 ) {
+            setCurrentMaximizedWindow(windowContainer);
+        }
+        else if(windowState === 2) {
+            setCurrentFullscreenWindow(windowContainer);
+        }
+        else {
+            restoreWindowToCard(windowContainer);
         }
     }
-    function setCurrentFullscreenWindow(window) {
-        // switch the state to fullscreen
-        window.windowState = 2;
-        currentActiveWindow = window;
+
+    function setCurrentMaximizedWindow(windowContainer) {
+        // switch the state to maximized
+        windowContainer.windowState = 1;
+        currentActiveWindow = windowContainer;
+
+        windowContainer.setNewParent(maximizedWindowContainer);
+
+        if (windowContainer.child) {
+            // take focus for receiving input events
+            windowContainer.child.takeFocus();
+        }
     }
-    function restoreWindowToCard(window) {
+    function setCurrentFullscreenWindow(windowContainer) {
+        // switch the state to fullscreen
+        windowContainer.windowState = 2;
+        currentActiveWindow = windowContainer;
+
+        windowContainer.setNewParent(fullscreenWindowContainer);
+
+        if (windowContainer.child) {
+            // take focus for receiving input events
+            windowContainer.child.takeFocus();
+        }
+    }
+    function restoreWindowToCard(windowContainer) {
         // switch the state to card
-        window.windowState = 0;
+        windowContainer.windowState = 0;
+
+        windowContainer.setNewParent(windowContainer.cardViewParent);
 
         // we're back to card view so no card should have the focus
         // for the keyboard anymore

@@ -48,4 +48,8 @@ Item {
             }
         }
     }
+
+    function takeFocus() {
+        // dummy method
+    }
 }
