@@ -112,8 +112,6 @@ Compositor.WindowManager {
             onWindowContainerCreated: {
                 // insert a new card at the end
                 cardViewDisplay.appendCard(window, winId);
-                restoreWindowToCard(window);
-                setCurrentMaximizedWindow(window);
             }
         }
     }

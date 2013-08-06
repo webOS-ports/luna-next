@@ -1,10 +1,15 @@
 import QtQuick 2.0
 
+import "../Compositor" as Compositor
+
 Item {
     id: cardDelegateContainer
 
     property real cardWidth: ListView.view.cardWindowWidth
     property real cardHeight: ListView.view.cardWindowHeight
+
+    // this is the window container wrapping the app window
+    property variant windowContainer: window
 
     signal switchToMaximize();
     signal destructionRequest()
@@ -12,35 +17,38 @@ Item {
     Item {
         id: cardDelegateWindow
 
-        y: parent.height/2 - cardDelegateContent.height/2
-        height: parent.cardHeight
-        width: parent.cardWidth
+        y: cardDelegateContainer.height/2 - cardDelegateContent.height/2
+        height: cardDelegateContainer.cardHeight
+        width: cardDelegateContainer.cardWidth
         scale:  (cardDelegateContainer.ListView.isCurrentItem) ? 1.0: 0.9
 
         Item {
             id: cardDelegateContent
 
-            children: [ window ]
+            children: [ windowContainer ]
 
             anchors.fill: parent
 
             Component.onCompleted: {
-                if( window.windowState === -1 ) {
-                    window.cardViewParent = cardDelegateContent;
+                windowContainer.cardViewParent = cardDelegateContent;
+                windowContainer.visible = true;
+
+                if( !windowContainer.firstCardDisplayDone ) {
+                    windowContainer.firstCardDisplayDone = true;
                 }
             }
             Component.onDestruction: {
                 // If this delegate gets destroyed *and* the window is
                 // in card mode, then we cut the bindings to cardDelegateContent
                 // and we hide the window
-                if( window.windowState === 0 ) {
-                    window.visible = false;
-                    window.width = 100;  // hard-coded random value
-                    window.height = 100; // hard-coded random value
+                if( windowContainer && windowContainer.windowState === 0 ) {
+                    windowContainer.visible = false;
                 }
             }
         }
 
+        /*
+          *** Tofe: only useful for debugging
         Text {
             anchors.top: cardDelegateWindow.top
             anchors.horizontalCenter: cardDelegateWindow.horizontalCenter
@@ -50,6 +58,7 @@ Item {
 
             z: 1
         }
+        */
 
         Behavior on y {
             NumberAnimation { duration: 100 }

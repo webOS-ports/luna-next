@@ -17,8 +17,20 @@ Item {
         }
 
         Column {
+            anchors.centerIn: parent
+            spacing: 20
+
             Text {
-                text: "Current mode: " + (dummyWindow.parent?dummyWindow.parent.state:"undefined")
+                text: "Test Window App"
+                font.pointSize: 20
+                color: "white"
+            }
+
+            Text {
+                text: "Current mode: " + CompositorLogic.getAppWindowState(dummyWindow)
+                font.pointSize: 20
+                font.underline: true
+                color: "white"
 
                 MouseArea {
                     anchors.fill: parent;
@@ -33,6 +45,9 @@ Item {
             }
             Text {
                 text: "Add notification"
+                font.pointSize: 20
+                font.underline: true
+                color: "white"
 
                 MouseArea {
                     anchors.fill: parent;

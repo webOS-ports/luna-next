@@ -12,6 +12,8 @@ Item {
 
     property Item currentActiveWindow
 
+    property real windowsRadius: 20
+
     property alias maximizedWindowContainer: maximizedWindowContainer
     property alias fullscreenWindowContainer: fullscreenWindowContainer
 
@@ -75,7 +77,7 @@ Item {
     Connections {
         target: gestureArea
         onSwipeGesture:{
-            if( angle > Math.PI/2 && angle < 3*Math.PI/2  )
+            if( Math.abs(angle) > Math.PI/4 && Math.abs(angle) < 3*Math.PI/4  )
                 restoreWindowToCard(currentActiveWindow);
         }
     }
@@ -90,13 +92,11 @@ Item {
         // Create the window container
         var windowContainerComponent = Qt.createComponent("WindowContainer.qml");
         var windowContainer = windowContainerComponent.createObject(root);
+        windowContainer.windowManager = windowManager;
+        windowContainer.cornerRadius = windowsRadius
 
         // Bind the container with its app window
-        appWindow.parent = windowContainer;
-        windowContainer.child = appWindow;
-        windowContainer.compositor = compositor;
-        windowContainer.children = [ appWindow ];
-        appWindow.anchors.fill = windowContainer;
+        windowContainer.setWrappedChild(appWindow);
 
         // insert the window at the beginning of the list
         var winId = localProperties.getNextWinId(); // very simple identifier
@@ -173,6 +173,7 @@ Item {
 
         // we're back to card view so no card should have the focus
         // for the keyboard anymore
-        compositor.clearKeyboardFocus();
+        if( compositor )
+            compositor.clearKeyboardFocus();
     }
 }

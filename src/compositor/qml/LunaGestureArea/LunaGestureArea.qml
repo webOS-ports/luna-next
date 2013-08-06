@@ -41,6 +41,15 @@ Item {
                 (Math.abs(xDiff) > 10 || Math.abs(yDiff) > 10) ) {
                 /* Consider this as a swipe */
                 var angle = Math.atan(yDiff/xDiff);
+
+                /* Convert the angle to a [-PI,PI] interval depending on dx and dy signs */
+                if( xDiff < 0 ) {
+                    if( yDiff < 0 )
+                        angle -= Math.PI;
+                    else
+                        angle += Math.PI;
+                }
+
                 swipeGesture(angle);
             }
         }

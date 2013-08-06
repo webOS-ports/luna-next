@@ -54,16 +54,23 @@ function addNotification(notif)
 /// App window service
 /// Useful services to help the applications request some
 /// info/changes on their window
+function getContainerFromAppWindow(appWindow)
+{
+    if( appWindow && appWindow.parent )
+        return appWindow.parent.parent;
+
+    return null;
+}
+
 function getAppWindowState(appWindow)
 {
-    var windowContainer = appWindow.parent;
-    return windowContainer.windowState;
+    var windowContainer = getContainerFromAppWindow(appWindow);
+    return windowContainer?windowContainer.windowState:-1;
 }
 
 function setAppWindowState(appWindow, state)
 {
-    var windowContainer = appWindow.parent;
-
+    var windowContainer = getContainerFromAppWindow(appWindow);
     root.setWindowState(windowContainer, state);
 }
 
