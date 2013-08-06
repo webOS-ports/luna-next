@@ -1,50 +1,64 @@
 import QtQuick 2.0
 
-// This import should not be needed if we separate correctly the Compositor
-// and the CardView. But for the early stage, let's use it here.
 import "../Compositor" as Compositor
 
 Item {
     id: cardDelegateContainer
 
-    property real cardWidth
-    property real cardHeight
+    property real cardWidth: ListView.view.cardWindowWidth
+    property real cardHeight: ListView.view.cardWindowHeight
+
+    // this is the window container wrapping the app window
+    property variant windowContainer: window
+
+    signal switchToMaximize();
+    signal destructionRequest()
 
     Item {
         id: cardDelegateWindow
 
-        y: parent.height/2 - cardDelegateContent.height/2
-        height: parent.cardHeight
-        width: parent.cardWidth
-        scale:  (listCardsView.currentIndex === index) ? 1.0: 0.9
+        y: cardDelegateContainer.height/2 - cardDelegateContent.height/2
+        height: cardDelegateContainer.cardHeight
+        width: cardDelegateContainer.cardWidth
+        scale:  (cardDelegateContainer.ListView.isCurrentItem) ? 1.0: 0.9
 
         Item {
             id: cardDelegateContent
 
-            children: [ window ]
+            children: [ windowContainer ]
 
             anchors.fill: parent
 
             Component.onCompleted: {
-                window.parent = cardDelegateContent;
-                window.x = 0;
-                window.y = 0;
-                window.width = parent.width;
-                window.height = parent.height
-                window.cardViewParent = cardDelegateContent;
-                window.windowState = 0;
+                windowContainer.cardViewParent = cardDelegateContent;
+                windowContainer.visible = true;
+
+                if( !windowContainer.firstCardDisplayDone ) {
+                    windowContainer.firstCardDisplayDone = true;
+                }
+            }
+            Component.onDestruction: {
+                // If this delegate gets destroyed *and* the window is
+                // in card mode, then we cut the bindings to cardDelegateContent
+                // and we hide the window
+                if( windowContainer && windowContainer.windowState === 0 ) {
+                    windowContainer.visible = false;
+                }
             }
         }
 
+        /*
+          *** Tofe: only useful for debugging
         Text {
             anchors.top: cardDelegateWindow.top
             anchors.horizontalCenter: cardDelegateWindow.horizontalCenter
 
             height: 20
-            text: index
+            text: winId
 
             z: 1
         }
+        */
 
         Behavior on y {
             NumberAnimation { duration: 100 }
@@ -65,17 +79,14 @@ Item {
             drag.filterChildren: true
             enabled: (listCardsView.currentIndex === index) && (window.windowState === 0)
 
-            onClicked: {
-                // maximize window
-                root.setCurrentMaximizedWindow(window);
-            }
+            onClicked: switchToMaximize()
 
             onReleased: {
                 if( cardDelegateWindow.y > -cardDelegateContent.height/2 && cardDelegateWindow.y < listCardsView.height-cardDelegateContent.height/2 ) {
                     cardDelegateWindow.y = cardDelegateContainer.height/2 - cardDelegateContent.height/2;
                 }
                 else {
-                    listCardsModel.remove(index)
+                    destructionRequest()
                 }
             }
         }

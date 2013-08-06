@@ -46,12 +46,12 @@ import LunaNext 0.1
 import "CardView" as CardView
 import "StatusBar" as StatusBar
 import "LaunchBar" as LaunchBar
-import "GestureArea" as GestureArea
+import "LunaGestureArea" as LunaGestureArea
 import "NotificationArea" as NotificationArea
 import "Compositor" as Compositor
 import "Compositor/compositor.js" as CompositorLogic
 
-Item {
+Compositor.WindowManager {
     id: root
 
     property real screenwidth: Settings.displayWidth
@@ -61,11 +61,11 @@ Item {
     width: screenwidth
     height: screenheight
 
-    property alias maximizedWindowContainer: maximizedWindowContainer
-    property alias fullscreenWindowContainer: fullscreenWindowContainer
-    property alias notificationArea: notificationsContainer.notificationArea
-
-    property variant currentActiveWindow
+    compositor: compositor
+    notificationsContainer: notificationsContainer
+    cardView: cardViewDisplay
+    statusBar: statusBarDisplay
+    gestureArea: gestureAreaDisplay
 
     // background
     Rectangle {
@@ -107,8 +107,12 @@ Item {
 
         z: 0
 
-        Behavior on opacity {
-            NumberAnimation { duration: 100 }
+        Connections {
+            target: root
+            onWindowContainerCreated: {
+                // insert a new card at the end
+                cardViewDisplay.appendCard(window, winId);
+            }
         }
     }
 
@@ -147,24 +151,8 @@ Item {
         z: 2 // can only be hidden by a fullscreen window
     }
 
-    // maximized window container
-    Item {
-        id: maximizedWindowContainer
-
-        property variant currentMaximizedWindow
-
-        anchors.top: statusBarDisplay.bottom
-        anchors.bottom: notificationsContainer.top
-        anchors.left: root.left
-        anchors.right: root.right
-
-        z: 2
-
-        onChildrenChanged: currentMaximizedWindow = children[0]
-    }
-
     // gesture area
-    GestureArea.GestureArea {
+    LunaGestureArea.LunaGestureArea {
         id: gestureAreaDisplay
 
         anchors.bottom: root.bottom
@@ -173,76 +161,6 @@ Item {
         height: computeFromLength(16);
 
         z: 3 // the gesture area is in front of everything, like the fullscreen window
-
-        onClickGestureArea:{
-            if(fullscreenWindowContainer.currentFullscreenWindow) {
-                fullscreenWindowContainer.currentFullscreenWindow.windowState=0
-            }
-            else if(maximizedWindowContainer.currentMaximizedWindow) {
-                maximizedWindowContainer.currentMaximizedWindow.windowState=0
-            }
-        }
-    }
-
-    // fullscreen window container
-    Item {
-        id: fullscreenWindowContainer
-
-        property variant currentFullscreenWindow
-
-        anchors.top: root.top
-        anchors.bottom: gestureAreaDisplay.top
-        anchors.left: root.left
-        anchors.right: root.right
-
-        z: 3 // in front of everything
-
-        onChildrenChanged: currentFullscreenWindow = children[0]
-    }
-
-    function windowAdded(appWindow) {
-        var newWindowContainer = CompositorLogic.addWindow(appWindow);
-        cardViewDisplay.addCard(newWindowContainer);
-    }
-
-    function windowResized(window) {
-    }
-
-    function setCurrentMaximizedWindow(window) {
-        // switch the state to maximized
-        window.windowState = 1;
-
-        if (window.child) {
-            // take focus for receiving input events
-            window.child.takeFocus();
-        }
-    }
-    function setCurrentFullscreenWindow(window) {
-        // switch the state to fullscreen
-        window.windowState = 2;
-    }
-    function restoreWindowToCard(window) {
-        // switch the state to card
-        window.windowState = 0;
-
-        // we're back to card view so no card should have the focus
-        // for the keyboard anymore
-        compositor.clearKeyboardFocus();
-    }
-
-    function windowDestroyed(appWindow) {
-        // var windowContainer = appWindow.parent;
-        // cardViewDisplay.removeWindow(windowContainer);
-    }
-
-    function removeWindow(window) {
-        /*
-        var windowContainer = window.parent;
-        CompositorLogic.removeWindow(windowContainer);
-        windowContainer.destroy();
-        */
-        cardViewDisplay.removeWindow(window);
-        windowContainer.destroy();
     }
 
     // Utility to convert a pixel length expressed at DPI=132 to
@@ -256,9 +174,9 @@ Item {
     }
 
     function startApp(appName) {
-        // Simulate the creation of a new window
-        var windowComponent = Qt.createComponent("Compositor/DummyWindow.qml");
-        var window = windowComponent.createObject(root);
-        windowAdded(window);
+        // Simulate the creation of a new app window
+        var windowAppComponent = Qt.createComponent("Compositor/DummyWindow.qml");
+        var windowApp = windowAppComponent.createObject(root);
+        windowAdded(windowApp);
     }
 }
