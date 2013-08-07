@@ -1,6 +1,7 @@
 include_directories(
     ${GLIB2_INCLUDE_DIRS}
     ${LUNA_SYSMGR_COMMON_INCLUDE_DIRS}
+    ${LS2_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${Qt5Gui_PRIVATE_INCLUDE_DIRS})
@@ -9,10 +10,12 @@ set(SOURCES
     lunanextplugin.cpp
     settingsadapter.cpp
     windowstate.cpp
-    reticleitem.cpp)
+    reticleitem.cpp
+    lunaserviceadapter.cpp
+    settingsadapter.cpp)
 
 add_library(lunanext-qml SHARED ${SOURCES})
-target_link_libraries(lunanext-qml ${LUNA_SYSMGR_COMMON_LIBRARIES})
+target_link_libraries(lunanext-qml ${LUNA_SYSMGR_COMMON_LIBRARIES} ${LS2_LIBRARIES})
 
 qt5_use_modules(lunanext-qml Qml Quick)
 
