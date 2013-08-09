@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import LunaNext 0.1
 
 // this should be a plugin import
 import "compositor.js" as CompositorLogic
@@ -38,7 +39,12 @@ Item {
                     onClicked: {
                         var currentState = CompositorLogic.getAppWindowState(dummyWindow);
                         // switch to the next state
-                        currentState = (currentState+1) % 3;
+                        currentState = (currentState+1) % 4;
+
+                        // Skip Invisible state
+                        if (currentState == 0)
+                            currentState = WindowState.Carded;
+
                         CompositorLogic.setAppWindowState(dummyWindow, currentState);
                     }
                 }

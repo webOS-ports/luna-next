@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import LunaNext 0.1
 
 Item {
     id: windowManager
@@ -130,10 +131,10 @@ Item {
     }
 
     function setWindowState(windowContainer, windowState) {
-        if( windowState === 1 ) {
+        if( windowState === WindowState.Maximized ) {
             setCurrentMaximizedWindow(windowContainer);
         }
-        else if(windowState === 2) {
+        else if(windowState === WindowState.Fullscreen) {
             setCurrentFullscreenWindow(windowContainer);
         }
         else {
@@ -143,7 +144,7 @@ Item {
 
     function setCurrentMaximizedWindow(windowContainer) {
         // switch the state to maximized
-        windowContainer.windowState = 1;
+        windowContainer.windowState = WindowState.Maximized;
         currentActiveWindow = windowContainer;
 
         windowContainer.setNewParent(maximizedWindowContainer);
@@ -155,7 +156,7 @@ Item {
     }
     function setCurrentFullscreenWindow(windowContainer) {
         // switch the state to fullscreen
-        windowContainer.windowState = 2;
+        windowContainer.windowState = WindowState.Fullscreen;
         currentActiveWindow = windowContainer;
 
         windowContainer.setNewParent(fullscreenWindowContainer);
@@ -167,7 +168,7 @@ Item {
     }
     function restoreWindowToCard(windowContainer) {
         // switch the state to card
-        windowContainer.windowState = 0;
+        windowContainer.windowState = WindowState.Carded;
 
         windowContainer.setNewParent(windowContainer.cardViewParent);
 

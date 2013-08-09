@@ -15,20 +15,4 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#include "compositorwindow.h"
-
-namespace luna
-{
-
-CompositorWindow::CompositorWindow(unsigned int id, QWaylandSurface *surface, QQuickItem *parent)
-    : QWaylandSurfaceItem(surface, parent),
-      mWindowId(id)
-{
-}
-
-unsigned int CompositorWindow::windowId() const
-{
-    return mWindowId;
-}
-
-} // namespace luna
+#include "windowstate.h"

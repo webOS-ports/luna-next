@@ -7,7 +7,8 @@ include_directories(
 
 set(SOURCES
     lunanextplugin.cpp
-    settingsadapter.cpp)
+    settingsadapter.cpp
+    windowstate.cpp)
 
 add_library(lunanext-qml SHARED ${SOURCES})
 target_link_libraries(lunanext-qml ${LUNA_SYSMGR_COMMON_LIBRARIES})
