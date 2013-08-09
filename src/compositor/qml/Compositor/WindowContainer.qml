@@ -114,6 +114,14 @@ Item {
             target: windowContainer
             properties: "scale"; to: 1; duration: 300
         }
+
+        onStarted: {
+            windowContainer.anchors.fill = undefined;
+        }
+
+        onStopped: {
+            windowContainer.anchors.fill = targetNewParent;
+        }
     }
 
     function setWrappedChild(appWindow) {
