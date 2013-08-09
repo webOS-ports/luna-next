@@ -31,6 +31,7 @@ class SettingsAdapter : public QObject
     Q_PROPERTY(qreal compatDpi READ compatDpi)
     Q_PROPERTY(int displayWidth READ displayWidth)
     Q_PROPERTY(int displayHeight READ displayHeight)
+    Q_PROPERTY(int displayFps READ displayFps)
 
 public:
     SettingsAdapter();
@@ -40,6 +41,7 @@ public:
     qreal compatDpi() const;
     int displayWidth() const;
     int displayHeight() const;
+    bool displayFps() const;
 };
 
 } // namespace luna
