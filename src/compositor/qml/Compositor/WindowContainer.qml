@@ -48,6 +48,7 @@ Item {
         visible: false
     }
     DropShadow {
+        visible: windowState === 0 // don't show the shadow if we are not in card state
         anchors.fill: parent
         horizontalOffset: 5
         verticalOffset: 5
