@@ -48,6 +48,7 @@ Item {
         visible: false
     }
     DropShadow {
+        visible: windowState === 0 // don't show the shadow if we are not in card state
         anchors.fill: parent
         horizontalOffset: 5
         verticalOffset: 5
@@ -113,6 +114,14 @@ Item {
             id: scaleTargetAnimation
             target: windowContainer
             properties: "scale"; to: 1; duration: 300
+        }
+
+        onStarted: {
+            windowContainer.anchors.fill = undefined;
+        }
+
+        onStopped: {
+            windowContainer.anchors.fill = targetNewParent;
         }
     }
 
