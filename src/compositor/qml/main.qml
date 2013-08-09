@@ -71,6 +71,8 @@ Compositor.WindowManager {
     Utils.FpsCounter {
         id: fpsCounter
 
+        visible: Settings.displayFps
+
         anchors.top: parent.top
         anchors.left: parent.left
 
