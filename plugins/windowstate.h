@@ -15,20 +15,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#include "compositorwindow.h"
+#ifndef WINDOWSTATE_H_
+#define WINDOWSTATE_H_
+
+#include <QObject>
 
 namespace luna
 {
 
-CompositorWindow::CompositorWindow(unsigned int id, QWaylandSurface *surface, QQuickItem *parent)
-    : QWaylandSurfaceItem(surface, parent),
-      mWindowId(id)
+class WindowState : public QObject
 {
-}
+	Q_OBJECT
+	Q_ENUMS(State)
 
-unsigned int CompositorWindow::windowId() const
-{
-    return mWindowId;
-}
+public:
+
+	enum State {
+		Invisible,
+		Carded,
+		Maximized,
+		Fullscreen
+	};
+};
 
 } // namespace luna
+
+#endif

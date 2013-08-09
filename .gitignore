@@ -1,2 +1,15 @@
 build/
 *.user
+*.moc
+moc_*
+*.swp
+Makefile
+*.cmake
+CMakeFiles/
+CMakeCache.txt
+*.qrc.depends
+*_automoc.cpp
+qrc_*
+*.so
+src/luna-next
+tests/test_webapp

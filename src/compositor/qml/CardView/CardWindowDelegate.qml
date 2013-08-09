@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import LunaNext 0.1
 
 import "../Compositor" as Compositor
 
@@ -41,7 +42,7 @@ Item {
                 // If this delegate gets destroyed *and* the window is
                 // in card mode, then we cut the bindings to cardDelegateContent
                 // and we hide the window
-                if( windowContainer && windowContainer.windowState === 0 ) {
+                if( windowContainer && windowContainer.windowState === WindowState.Carded ) {
                     windowContainer.visible = false;
                 }
             }
@@ -77,7 +78,7 @@ Item {
             drag.minimumY: -cardDelegateContent.height;
             drag.maximumY: listCardsView.height;
             drag.filterChildren: true
-            enabled: (listCardsView.currentIndex === index) && (window.windowState === 0)
+            enabled: (listCardsView.currentIndex === index) && (window.windowState === WindowState.Carded)
 
             onClicked: switchToMaximize()
 

@@ -27,29 +27,13 @@ namespace luna
 class CompositorWindow : public QWaylandSurfaceItem
 {
     Q_OBJECT
-    Q_ENUMS(WindowState)
-    Q_PROPERTY(WindowState state READ state WRITE setState NOTIFY stateChanged)
 
 public:
     CompositorWindow(unsigned int id, QWaylandSurface *surface, QQuickItem *parent = 0);
 
-    enum WindowState {
-        Invisible,
-        Carded,
-        Maximized,
-        Fullscreen
-    };
-
-    void setState(CompositorWindow::WindowState state);
-    CompositorWindow::WindowState state() const;
-
     unsigned int windowId() const;
 
-signals:
-    void stateChanged();
-
 private:
-    WindowState mState;
     unsigned int mWindowId;
 };
 

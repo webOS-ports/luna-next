@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
+import LunaNext 0.1
 
 Item {
     id: windowContainer
@@ -9,12 +10,10 @@ Item {
     // a backlink to the window manager instance
     property variant windowManager
 
-    // enumeration can't be defined in QML, it has to be exposed by C++
-    // so let's say:
     //   0 is Card
     //   1 is Maximized
     //   2 is Fullscreen
-    property int windowState: 0
+    property int windowState: WindowState.Carded
     property bool firstCardDisplayDone: false
 
     // that part should be moved to a window manager, or maybe to the card view interface
@@ -48,7 +47,7 @@ Item {
         visible: false
     }
     DropShadow {
-        visible: windowState === 0 // don't show the shadow if we are not in card state
+        visible: windowState === WindowState.Carded // don't show the shadow if we are not in card state
         anchors.fill: parent
         horizontalOffset: 5
         verticalOffset: 5
@@ -63,7 +62,7 @@ Item {
         source: childWrapper
         maskSource: cornerMaskSource
     }
-    state: windowState == 2 ? "fullscreen" : windowState == 1 ? "maximized" : "card"
+    state: windowState == WindowState.Fullscreen ? "fullscreen" : windowState == WindowState.Maximized ? "maximized" : "card"
     onFirstCardDisplayDoneChanged: if( firstCardDisplayDone === true ) {
                                        startupAnimation();
                                    }
