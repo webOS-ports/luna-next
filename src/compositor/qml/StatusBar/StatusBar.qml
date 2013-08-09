@@ -1,11 +1,19 @@
 import QtQuick 2.0
 
-// To be completed
 Item {
     id: statusBarDisplay
 
     Rectangle {
         anchors.fill: statusBarDisplay
-        color: "grey"
+        color: "black"
+
+        Text {
+            anchors.centerIn: parent
+            color: "white"
+            font.family: "Prelude"
+            font.pixelSize: 24
+            font.bold: true
+            text: Qt.formatDateTime(new Date(), "dd.MM.yyyy")
+        }
     }
 }
