@@ -15,25 +15,4 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#include <QtQml>
-
-#include "lunanextplugin.h"
-#include "settingsadapter.h"
 #include "windowstate.h"
-
-static QObject *settings_callback(QQmlEngine *e, QJSEngine *)
-{
-    return new luna::SettingsAdapter();
-}
-
-LunaNextPlugin::LunaNextPlugin(QObject *parent) :
-    QQmlExtensionPlugin(parent)
-{
-}
-
-void LunaNextPlugin::registerTypes(const char *uri)
-{
-    Q_ASSERT(uri == QLatin1String("LunaNext"));
-    qmlRegisterSingletonType<luna::SettingsAdapter>(uri, 0, 1, "Settings", settings_callback);
-    qmlRegisterUncreatableType<luna::WindowState>(uri, 0, 1, "WindowState", "WindowState can't be used as component!");
-}

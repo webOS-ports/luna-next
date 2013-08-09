@@ -15,25 +15,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#include <QtQml>
+#ifndef WINDOWSTATE_H_
+#define WINDOWSTATE_H_
 
-#include "lunanextplugin.h"
-#include "settingsadapter.h"
-#include "windowstate.h"
+#include <QObject>
 
-static QObject *settings_callback(QQmlEngine *e, QJSEngine *)
+namespace luna
 {
-    return new luna::SettingsAdapter();
-}
 
-LunaNextPlugin::LunaNextPlugin(QObject *parent) :
-    QQmlExtensionPlugin(parent)
+class WindowState : public QObject
 {
-}
+	Q_OBJECT
+	Q_ENUMS(State)
 
-void LunaNextPlugin::registerTypes(const char *uri)
-{
-    Q_ASSERT(uri == QLatin1String("LunaNext"));
-    qmlRegisterSingletonType<luna::SettingsAdapter>(uri, 0, 1, "Settings", settings_callback);
-    qmlRegisterUncreatableType<luna::WindowState>(uri, 0, 1, "WindowState", "WindowState can't be used as component!");
-}
+public:
+
+	enum State {
+		Invisible,
+		Carded,
+		Maximized,
+		Fullscreen
+	};
+};
+
+} // namespace luna
+
+#endif
