@@ -50,6 +50,7 @@ import "LunaGestureArea" as LunaGestureArea
 import "NotificationArea" as NotificationArea
 import "Compositor" as Compositor
 import "Compositor/compositor.js" as CompositorLogic
+import "Utils" as Utils
 
 Compositor.WindowManager {
     id: root
@@ -66,6 +67,19 @@ Compositor.WindowManager {
     cardView: cardViewDisplay
     statusBar: statusBarDisplay
     gestureArea: gestureAreaDisplay
+
+    Utils.FpsCounter {
+        id: fpsCounter
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+
+        width: 50
+        height: 32
+
+        // always on top of everything else!
+        z: 1000
+    }
 
     // background
     Rectangle {

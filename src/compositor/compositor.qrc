@@ -16,5 +16,7 @@
         <file>qml/main.qml</file>
         <file>qml/NotificationArea/NotificationsContainer.qml</file>
         <file>qml/Compositor/WindowManager.qml</file>
+        <file>qml/images/spinner.png</file>
+        <file>qml/Utils/FpsCounter.qml</file>
     </qresource>
 </RCC>

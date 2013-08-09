@@ -51,4 +51,9 @@ int SettingsAdapter::displayHeight() const
     return Settings::LunaSettings()->displayHeight;
 }
 
+bool SettingsAdapter::displayFps() const
+{
+    return Settings::LunaSettings()->debug_piranhaDisplayFps;
+}
+
 } // namespace luna
