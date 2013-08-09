@@ -22,23 +22,8 @@ namespace luna
 
 CompositorWindow::CompositorWindow(unsigned int id, QWaylandSurface *surface, QQuickItem *parent)
     : QWaylandSurfaceItem(surface, parent),
-      mState(CompositorWindow::Invisible),
       mWindowId(id)
 {
-}
-
-void CompositorWindow::setState(CompositorWindow::WindowState state)
-{
-    if (mState == state)
-        return;
-
-    mState = state;
-    stateChanged();
-}
-
-CompositorWindow::WindowState CompositorWindow::state() const
-{
-    return mState;
 }
 
 unsigned int CompositorWindow::windowId() const
