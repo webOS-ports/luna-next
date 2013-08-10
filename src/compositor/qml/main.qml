@@ -83,6 +83,11 @@ Compositor.WindowManager {
         z: 1000
     }
 
+    Utils.ReticleArea {
+        id: reticleArea
+        anchors.fill: parent
+    }
+
     // background
     Rectangle {
         id: background

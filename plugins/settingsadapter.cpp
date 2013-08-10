@@ -56,4 +56,9 @@ bool SettingsAdapter::displayFps() const
     return Settings::LunaSettings()->debug_piranhaDisplayFps;
 }
 
+bool SettingsAdapter::showReticle() const
+{
+    return Settings::LunaSettings()->showReticle;
+}
+
 } // namespace luna

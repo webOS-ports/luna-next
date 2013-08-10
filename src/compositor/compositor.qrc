@@ -18,5 +18,6 @@
         <file>qml/Compositor/WindowManager.qml</file>
         <file>qml/images/spinner.png</file>
         <file>qml/Utils/FpsCounter.qml</file>
+        <file>qml/Utils/ReticleArea.qml</file>
     </qresource>
 </RCC>
