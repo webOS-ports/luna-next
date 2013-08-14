@@ -42,6 +42,7 @@ import QtQuick 2.0
 import QtGraphicalEffects 1.0
 
 import LunaNext 0.1
+//import "LunaNext.js" as Settings
 
 import "CardView" as CardView
 import "StatusBar" as StatusBar
@@ -95,31 +96,29 @@ Compositor.WindowManager {
     }
 
     // background
-    Rectangle {
+    Item {
         id: background
         anchors.top: statusBarDisplay.bottom
         anchors.bottom: gestureAreaDisplay.top
         anchors.left: root.left
         anchors.right: root.right
 
-        color: "black"
-
         z: -1; // the background item should always be behind other components
+
+        Image {
+            id: backgroundImage
+
+            anchors.fill: parent
+            fillMode: Image.PreserveAspectCrop
+            source: "images/background.jpg"
+            asynchronous: true
+            smooth: true
+            sourceSize: Qt.size(background.width, background.height)
+        }
 
         Compositor.RoundedItem {
             anchors.fill: parent
-
-            radius: 20
-            content: Image {
-                id: backgroundImage
-
-                anchors.fill: parent
-                fillMode: Image.PreserveAspectCrop
-                source: "images/background.jpg"
-                asynchronous: true
-                smooth: true
-                sourceSize: Qt.size(background.width, background.height)
-            }
+            cornerRadius: root.cornerRadius
         }
     }
 

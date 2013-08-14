@@ -13,7 +13,7 @@ Item {
 
     property Item currentActiveWindow
 
-    property real windowsRadius: 20
+    property real cornerRadius: 40
 
     property alias maximizedWindowContainer: maximizedWindowContainer
     property alias fullscreenWindowContainer: fullscreenWindowContainer
@@ -94,7 +94,7 @@ Item {
         var windowContainerComponent = Qt.createComponent("WindowContainer.qml");
         var windowContainer = windowContainerComponent.createObject(root);
         windowContainer.windowManager = windowManager;
-        windowContainer.cornerRadius = windowsRadius
+        windowContainer.cornerRadius = cornerRadius
 
         // Bind the container with its app window
         windowContainer.setWrappedChild(appWindow);

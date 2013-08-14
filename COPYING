@@ -9,6 +9,10 @@ A copy of this license is included in the file
 
 The following files are distributed under the Apache License, Version 2.0 :
 src/compositor/qml/images/glow.png
+src/compositor/qml/images/Wm-corner-bottom-left@4x.png
+src/compositor/qml/images/Wm-corner-bottom-rightt@4x.png
+src/compositor/qml/images/Wm-corner-top-left@4x.png
+src/compositor/qml/images/Wm-corner-top-right@4x.png
 
 A copy of this license is included in the file
 "src/compositor/qml/images/LICENSE-APACHE-2.0.txt"

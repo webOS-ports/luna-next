@@ -26,7 +26,6 @@ Item {
     Item {
         id: childWrapper
         property variant child
-        opacity: 0 // because it has an OpacityMask, see below
 
         anchors.fill: parent;
 
@@ -38,31 +37,21 @@ Item {
         }
     }
 
-    // OpacityMask to make the rounded corners
-    Rectangle {
-        id: cornerMaskSource
+    // Rounded corners
+    RoundedItem {
+        id: cornerStaticMask
         anchors.fill: parent
-        color: "black"
+        visible: false
+        cornerRadius: windowContainer.cornerRadius
+    }
+    CornerShader {
+        id: cornerShader
+        anchors.fill: parent
+        sourceItem: null
         radius: cornerRadius
         visible: false
     }
-    DropShadow {
-        visible: windowState === WindowState.Carded // don't show the shadow if we are not in card state
-        anchors.fill: parent
-        horizontalOffset: 5
-        verticalOffset: 5
-        radius: 2.0
-        samples: 4
-        fast: true
-        color: "#80000000"
-        source: cornerMaskSource // use a canonical shape
-    }
-    OpacityMask {
-        anchors.fill: parent
-        source: childWrapper
-        maskSource: cornerMaskSource
-    }
-    state: windowState == WindowState.Fullscreen ? "fullscreen" : windowState == WindowState.Maximized ? "maximized" : "card"
+    state: windowState == 2 ? "fullscreen" : windowState == 1 ? "maximized" : "card"
     onFirstCardDisplayDoneChanged: if( firstCardDisplayDone === true ) {
                                        startupAnimation();
                                    }
@@ -73,12 +62,18 @@ Item {
         },
         State {
            name: "card"
+           PropertyChanges { target: cornerShader; sourceItem: childWrapper; visible: true }
+           PropertyChanges { target: cornerStaticMask; visible: false }
         },
         State {
             name: "maximized"
+           PropertyChanges { target: cornerShader; sourceItem: null; visible: false }
+           PropertyChanges { target: cornerStaticMask; visible: true }
         },
         State {
            name: "fullscreen"
+           PropertyChanges { target: cornerShader; sourceItem: null; visible: false }
+           PropertyChanges { target: cornerStaticMask; visible: true }
        }
     ]
 

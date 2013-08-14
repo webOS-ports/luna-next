@@ -6,11 +6,11 @@ import "../Compositor" as Compositor
 Item {
     id: cardDelegateContainer
 
-    property real cardWidth: ListView.view.cardWindowWidth
-    property real cardHeight: ListView.view.cardWindowHeight
 
-    // this is the window container wrapping the app window
-    property variant windowContainer: window
+    // this is the card window instance wrapping the window container
+    property variant cardWindow
+    property real cardWidth
+    property real cardHeight
 
     signal switchToMaximize();
     signal destructionRequest()
@@ -18,48 +18,29 @@ Item {
     Item {
         id: cardDelegateWindow
 
-        y: cardDelegateContainer.height/2 - cardDelegateContent.height/2
+        y: cardDelegateContainer.height/2 - cardDelegateContainer.cardHeight/2
         height: cardDelegateContainer.cardHeight
         width: cardDelegateContainer.cardWidth
         scale:  (cardDelegateContainer.ListView.isCurrentItem) ? 1.0: 0.9
 
         Item {
-            id: cardDelegateContent
+            id: cardWindowWrapper
 
-            children: [ windowContainer ]
+            children: [ cardWindow ]
 
             anchors.fill: parent
 
             Component.onCompleted: {
-                windowContainer.cardViewParent = cardDelegateContent;
-                windowContainer.visible = true;
-
-                if( !windowContainer.firstCardDisplayDone ) {
-                    windowContainer.firstCardDisplayDone = true;
-                }
+                cardWindow.parent = cardWindowWrapper;
+                cardWindow.anchors.fill = cardWindowWrapper;
+                cardWindow.visible = true;
             }
             Component.onDestruction: {
-                // If this delegate gets destroyed *and* the window is
-                // in card mode, then we cut the bindings to cardDelegateContent
-                // and we hide the window
-                if( windowContainer && windowContainer.windowState === WindowState.Carded ) {
-                    windowContainer.visible = false;
+                cardWindow.visible = false;
+                cardWindow.anchors.fill = undefined;
+                cardWindow.parent = null;
                 }
             }
-        }
-
-        /*
-          *** Tofe: only useful for debugging
-        Text {
-            anchors.top: cardDelegateWindow.top
-            anchors.horizontalCenter: cardDelegateWindow.horizontalCenter
-
-            height: 20
-            text: winId
-
-            z: 1
-        }
-        */
 
         Behavior on y {
             NumberAnimation { duration: 100 }
@@ -75,16 +56,16 @@ Item {
             anchors.fill: cardDelegateWindow
             drag.target: cardDelegateWindow
             drag.axis: Drag.YAxis
-            drag.minimumY: -cardDelegateContent.height;
+            drag.minimumY: -cardDelegateWindow.height;
             drag.maximumY: listCardsView.height;
             drag.filterChildren: true
-            enabled: (listCardsView.currentIndex === index) && (window.windowState === WindowState.Carded)
+            enabled: cardDelegateContainer.ListView.isCurrentItem && (cardWindow.windowState === WindowState.Carded)
 
             onClicked: switchToMaximize()
 
             onReleased: {
-                if( cardDelegateWindow.y > -cardDelegateContent.height/2 && cardDelegateWindow.y < listCardsView.height-cardDelegateContent.height/2 ) {
-                    cardDelegateWindow.y = cardDelegateContainer.height/2 - cardDelegateContent.height/2;
+                if( cardDelegateWindow.y > -cardDelegateWindow.height/2 && cardDelegateWindow.y < cardDelegateContainer.height-cardDelegateWindow.height/2 ) {
+                    cardDelegateWindow.y = cardDelegateContainer.height/2 - cardDelegateWindow.height/2;
                 }
                 else {
                     destructionRequest()
