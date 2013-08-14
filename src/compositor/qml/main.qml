@@ -42,7 +42,7 @@ import QtQuick 2.0
 import QtGraphicalEffects 1.0
 
 import LunaNext 0.1
-//import "LunaNext.js" as Settings
+//import "Utils/LunaNextStub.js" as Settings
 
 import "CardView" as CardView
 import "StatusBar" as StatusBar
