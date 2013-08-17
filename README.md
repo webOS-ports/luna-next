@@ -1,6 +1,12 @@
 Luna Next
 =========
 
+Summary
+-------
+The new webOS UI of the webOS ports project.
+
+Description
+-----------
 This is the repository of a prototype for a next generation webOS UI. It's meant to be a
 complete replacement for LunaSysMgr/WebAppMgr and is completely based on well known open
 source technologies like Qt 5 and Wayland.

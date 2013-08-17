@@ -17,9 +17,9 @@ qt5_add_resources(RESOURCES compositor/compositor.qrc)
 
 add_executable(luna-next ${SOURCES} ${RESOURCES})
 qt5_use_modules(luna-next Quick Compositor Gui)
-
 target_link_libraries(luna-next
     ${SYSTEMD_DAEMON_LIBRARIES}
     ${LUNA_SYSMGR_COMMON_LIBRARIES})
 
-install(TARGETS luna-next DESTINATION bin)
+webos_build_daemon()
+webos_build_system_bus_files()
