@@ -1,0 +1,14 @@
+{
+    "role": {
+        "exeName":"@WEBOS_INSTALL_SBINDIR@/LunaNext",
+        "type": "privileged",
+        "allowedNames": ["org.webosports.luna",""]
+    },
+    "permissions": [
+        {
+            "service":"org.webosports.luna",
+            "inbound":["*"],
+            "outbound":["*"]
+        }
+    ]
+}
