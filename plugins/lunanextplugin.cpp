@@ -20,6 +20,7 @@
 #include "lunanextplugin.h"
 #include "settingsadapter.h"
 #include "windowstate.h"
+#include "reticleitem.h"
 
 static QObject *settings_callback(QQmlEngine *e, QJSEngine *)
 {
@@ -36,4 +37,5 @@ void LunaNextPlugin::registerTypes(const char *uri)
     Q_ASSERT(uri == QLatin1String("LunaNext"));
     qmlRegisterSingletonType<luna::SettingsAdapter>(uri, 0, 1, "Settings", settings_callback);
     qmlRegisterUncreatableType<luna::WindowState>(uri, 0, 1, "WindowState", "WindowState can't be used as component!");
+    qmlRegisterType<luna::ReticleItem>(uri, 0, 1, "Reticle");
 }

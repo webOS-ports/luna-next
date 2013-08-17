@@ -32,6 +32,7 @@ class SettingsAdapter : public QObject
     Q_PROPERTY(int displayWidth READ displayWidth)
     Q_PROPERTY(int displayHeight READ displayHeight)
     Q_PROPERTY(int displayFps READ displayFps)
+    Q_PROPERTY(int showReticle READ showReticle)
 
 public:
     SettingsAdapter();
@@ -42,6 +43,7 @@ public:
     int displayWidth() const;
     int displayHeight() const;
     bool displayFps() const;
+    bool showReticle() const;
 };
 
 } // namespace luna
