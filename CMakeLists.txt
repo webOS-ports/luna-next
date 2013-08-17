@@ -5,10 +5,9 @@ cmake_minimum_required(VERSION 2.8.8)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
-set(LUNA_NEXT_VERSION_MAJOR 0)
-set(LUNA_NEXT_VERSION_MINOR 1)
-set(LUNA_NEXT_VERSION_PATCH 0)
-set(LUNA_NEXT_VERSION_STRING "${LUNA_NEXT_VERSION_MAJOR}.${LUNA_NEXT_VERSION_MINOR}.${LUNA_NEXT_VERSION_PATCH}")
+include(webOS/webOS)
+webos_modules_init(1 0 0 QUALIFIER RC3)
+webos_component(0 1 0)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden -Wall -std=c++0x")
 
