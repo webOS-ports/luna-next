@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.webosports.luna
+Exec=@WEBOS_INSTALL_SBINDIR@/LunaNext
+Type=static
