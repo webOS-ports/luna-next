@@ -69,25 +69,25 @@ Compositor.WindowManager {
     statusBar: statusBarDisplay
     gestureArea: gestureAreaDisplay
 
-    Text {
-        anchors.top: root.top
-        anchors.let: root.left
+    Loader {
+	    anchors.top: root.top
+	    anchors.let: root.left
 
-        color: "red"
-        font.pixelSize: 20
-        text: fpsCounter.fps + " fps"
+	    width: 50
+	    height: 32
 
-        visible: Settings.displayFps
+	    // always on top of everything else!
+	    z: 1000
 
-        width: 50
-        height: 32
+		sourceComponent: (!Settings.displayFps) ? null : Text {
+		    color: "red"
+		    font.pixelSize: 20
+		    text: fpsCounter.fps + " fps"
 
-        // always on top of everything else!
-        z: 1000
-
-        FpsCounter {
-            id: fpsCounter
-        }
+		    FpsCounter {
+		        id: fpsCounter
+		    }
+		}
     }
 
     Utils.ReticleArea {
@@ -113,7 +113,7 @@ Compositor.WindowManager {
             source: "images/background.jpg"
             asynchronous: true
             smooth: true
-            sourceSize: Qt.size(background.width, background.height)
+            sourceSize: Qt.size(Settings.displayWidth, Settings.displayHeight)
         }
 
         Compositor.RoundedItem {
@@ -149,7 +149,28 @@ Compositor.WindowManager {
         anchors.bottom: gestureAreaDisplay.top
         anchors.left: root.left
         anchors.right: root.right
-        height: computeFromLength(80);
+
+        z: 1 // on top of cardview
+    }
+
+    // bottom area: launcher bar
+    LaunchBar.AppLauncher {
+        id: appLauncherDisplay
+
+        itemAboveLauncher: statusBarDisplay
+        itemUnderLauncher: gestureAreaDisplay
+
+        anchors.left: root.left
+        anchors.right: root.right
+
+        Connections {
+            target: launchBarDisplay
+            onToggleLauncherDisplay: appLauncherDisplay.toggleDisplay()
+        }
+        Connections {
+            target: gestureAreaDisplay
+            onTapGesture: appLauncherDisplay.toggleDisplay()
+        }
 
         z: 1 // on top of cardview
     }

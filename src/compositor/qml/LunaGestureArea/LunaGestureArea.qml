@@ -52,6 +52,10 @@ Item {
 
                 swipeGesture(angle);
             }
+            else
+            {
+                tapGesture();
+            }
         }
     }
 }
