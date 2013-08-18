@@ -66,7 +66,7 @@ Item {
            PropertyChanges { target: cornerStaticMask; visible: false }
         },
         State {
-            name: "maximized"
+           name: "maximized"
            PropertyChanges { target: cornerShader; sourceItem: null; visible: false }
            PropertyChanges { target: cornerStaticMask; visible: true }
         },

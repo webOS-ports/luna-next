@@ -8,7 +8,7 @@ Item {
         anchors.left: parent.left
         width: cornerRadius
         height: cornerRadius
-        source: "../images/Wm-corner-top-left@4x.png"
+        source: "../images/wm-corner-top-left.png"
         sourceSize: Qt.size(cornerRadius, cornerRadius)
     }
     Image {
@@ -16,7 +16,7 @@ Item {
         anchors.right: parent.right
         width: cornerRadius
         height: cornerRadius
-        source: "../images/Wm-corner-top-right@4x.png"
+        source: "../images/wm-corner-top-right.png"
         sourceSize: Qt.size(cornerRadius, cornerRadius)
     }
     Image {
@@ -24,7 +24,7 @@ Item {
         anchors.left: parent.left
         width: cornerRadius
         height: cornerRadius
-        source: "../images/Wm-corner-bottom-left@4x.png"
+        source: "../images/wm-corner-bottom-left.png"
         sourceSize: Qt.size(cornerRadius, cornerRadius)
     }
     Image {
@@ -32,7 +32,7 @@ Item {
         anchors.right: parent.right
         width: cornerRadius
         height: cornerRadius
-        source: "../images/Wm-corner-bottom-right@4x.png"
+        source: "../images/wm-corner-bottom-right.png"
         sourceSize: Qt.size(cornerRadius, cornerRadius)
     }
 }
