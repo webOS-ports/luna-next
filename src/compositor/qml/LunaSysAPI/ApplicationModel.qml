@@ -1,17 +1,14 @@
 import QtQuick 2.0
-//import LunaNext 0.1
-import "../Utils"
+import LunaNext 0.1
 
 ListModel {
     id: applicationModel
 
     property string filter: "*"
-    property QtObject applicationManagerService: LunaServiceStub {
-        id: applicationManagerService
-        name: "com.palm.applicationManager"
-        method: "listApplications"
-
-        onResponseReply: applicationModel.fillFromJSONResult(arguments)
+    property QtObject applicationManagerService: LunaService {
+        id: service
+        name: "org.webosports.webappmanager"
+        usePrivateBus: true
     }
 
     function applyFilter(newFilter) {
@@ -20,7 +17,7 @@ ListModel {
     }
 
     function refresh() {
-        applicationManagerService.call({"filter": filter});
+        service.call("luna://com.palm.applicationManager/listApps", {"filter": filter}, fillFromJSONResult);
     }
 
     function fillFromJSONResult(result) {

@@ -39,10 +39,8 @@
 ****************************************************************************/
 
 import QtQuick 2.0
-import QtGraphicalEffects 1.0
 
 import LunaNext 0.1
-//import "Utils/LunaNextStub.js" as Settings
 
 import "CardView" as CardView
 import "StatusBar" as StatusBar
@@ -90,9 +88,11 @@ Compositor.WindowManager {
 		}
     }
 
-    Utils.ReticleArea {
+
+    Loader {
         id: reticleArea
         anchors.fill: parent
+        source: Settings.showReticle ? "Utils/ReticleArea.qml" : ""
     }
 
     // background

@@ -10,9 +10,10 @@ Item {
     // a backlink to the window manager instance
     property variant windowManager
 
-    //   0 is Card
-    //   1 is Maximized
-    //   2 is Fullscreen
+    //   Available window states:
+    //    * Carded
+    //    * Maximized
+    //    * Fullscreen
     property int windowState: WindowState.Carded
     property bool firstCardDisplayDone: false
 
@@ -51,7 +52,7 @@ Item {
         radius: cornerRadius
         visible: false
     }
-    state: windowState == 2 ? "fullscreen" : windowState == 1 ? "maximized" : "card"
+    state: windowState === WindowState.Fullscreen ? "fullscreen" : windowState === WindowState.Maximized ? "maximized" : "card"
     onFirstCardDisplayDoneChanged: if( firstCardDisplayDone === true ) {
                                        startupAnimation();
                                    }
