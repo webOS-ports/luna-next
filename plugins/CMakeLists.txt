@@ -13,7 +13,8 @@ set(SOURCES
     reticleitem.cpp
     lunaserviceadapter.cpp
     settingsadapter.cpp
-    fpscounter.cpp)
+    fpscounter.cpp
+    screenshooter.cpp)
 
 add_library(lunanext-qml SHARED ${SOURCES})
 target_link_libraries(lunanext-qml ${LUNA_SYSMGR_COMMON_LIBRARIES} ${LS2_LIBRARIES})
