@@ -1,6 +1,6 @@
 {
     "role": {
-        "exeName":"@WEBOS_INSTALL_SBINDIR@/LunaNext",
+        "exeName":"@WEBOS_INSTALL_SBINDIR@/luna-next",
         "type": "privileged",
         "allowedNames": ["org.webosports.luna",""]
     },
