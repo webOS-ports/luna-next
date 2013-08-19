@@ -4,7 +4,7 @@ After=webos-base.target
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/luna-next --systemd
+ExecStart=/usr/sbin/luna-next --systemd
 Restart=always
 
 [Install]
