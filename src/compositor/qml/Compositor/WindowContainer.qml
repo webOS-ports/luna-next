@@ -10,9 +10,10 @@ Item {
     // a backlink to the window manager instance
     property variant windowManager
 
-    //   0 is Card
-    //   1 is Maximized
-    //   2 is Fullscreen
+    //   Available window states:
+    //    * Carded
+    //    * Maximized
+    //    * Fullscreen
     property int windowState: WindowState.Carded
     property bool firstCardDisplayDone: false
 
@@ -26,7 +27,6 @@ Item {
     Item {
         id: childWrapper
         property variant child
-        opacity: 0 // because it has an OpacityMask, see below
 
         anchors.fill: parent;
 
@@ -38,31 +38,21 @@ Item {
         }
     }
 
-    // OpacityMask to make the rounded corners
-    Rectangle {
-        id: cornerMaskSource
+    // Rounded corners
+    RoundedItem {
+        id: cornerStaticMask
         anchors.fill: parent
-        color: "black"
+        visible: false
+        cornerRadius: windowContainer.cornerRadius
+    }
+    CornerShader {
+        id: cornerShader
+        anchors.fill: parent
+        sourceItem: null
         radius: cornerRadius
         visible: false
     }
-    DropShadow {
-        visible: windowState === WindowState.Carded // don't show the shadow if we are not in card state
-        anchors.fill: parent
-        horizontalOffset: 5
-        verticalOffset: 5
-        radius: 2.0
-        samples: 4
-        fast: true
-        color: "#80000000"
-        source: cornerMaskSource // use a canonical shape
-    }
-    OpacityMask {
-        anchors.fill: parent
-        source: childWrapper
-        maskSource: cornerMaskSource
-    }
-    state: windowState == WindowState.Fullscreen ? "fullscreen" : windowState == WindowState.Maximized ? "maximized" : "card"
+    state: windowState === WindowState.Fullscreen ? "fullscreen" : windowState === WindowState.Maximized ? "maximized" : "card"
     onFirstCardDisplayDoneChanged: if( firstCardDisplayDone === true ) {
                                        startupAnimation();
                                    }
@@ -75,7 +65,7 @@ Item {
            name: "card"
         },
         State {
-            name: "maximized"
+           name: "maximized"
         },
         State {
            name: "fullscreen"
@@ -89,6 +79,7 @@ Item {
         property alias targetNewParent: parentChangeAnimation.newParent
         property alias targetWidth: widthTargetAnimation.to
         property alias targetHeight: heightTargetAnimation.to
+        property bool useShaderForNewParent: false
 
         ParentAnimation {
             id: parentChangeAnimation
@@ -117,10 +108,22 @@ Item {
 
         onStarted: {
             windowContainer.anchors.fill = undefined;
+            if( useShaderForNewParent )
+            {
+                cornerShader.sourceItem = childWrapper;
+                cornerShader.visible = true;
+                cornerStaticMask.visible = false;
+            }
         }
 
         onStopped: {
             windowContainer.anchors.fill = targetNewParent;
+            if( !useShaderForNewParent )
+            {
+                cornerShader.sourceItem = null;
+                cornerShader.visible = false;
+                cornerStaticMask.visible = true;
+            }
         }
     }
 
@@ -128,11 +131,13 @@ Item {
         childWrapper.setWrappedChild(appWindow);
     }
 
-    function setNewParent(newParent) {
+    function setNewParent(newParent, useShader) {
         newParentAnimation.targetNewParent = newParent;
         newParentAnimation.targetWidth = newParent.width;
         newParentAnimation.targetHeight = newParent.height;
+        newParentAnimation.useShaderForNewParent = useShader;
         newParentAnimation.start();
+
     }
 
     function startupAnimation() {

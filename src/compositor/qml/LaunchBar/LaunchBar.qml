@@ -1,8 +1,11 @@
 import QtQuick 2.0
-// import QtQuick.Layouts 1.0 // Note: Qt 5.1 only
 
 Item {
     id: launchBarDisplay
+
+    signal toggleLauncherDisplay
+
+    height: root.computeFromLength(80);
 
     // background of quick laucnh
     Rectangle {
@@ -19,41 +22,59 @@ Item {
         id: launcherListModel
 
         ListElement {
-            icon: "../images/list-add.png"
+            icon: "../images/default-app-icon.png"
         }
         ListElement {
-            icon: "../images/list-add.png"
+            icon: "../images/default-app-icon.png"
         }
         ListElement {
-            icon: "../images/list-add.png"
+            icon: "../images/default-app-icon.png"
         }
         ListElement {
-            icon: "../images/list-add.png"
+            icon: "../images/default-app-icon.png"
         }
     }
 
-    GridView {
+    ListView {
         id: launcherRow
 
         anchors.fill: launchBarDisplay
-        cellWidth : parent.width/4
-        cellHeight : parent.height
+        orientation: ListView.Horizontal
 
         model: launcherListModel
         delegate: Item {
-            width: launcherRow.cellWidth;
-            height: launcherRow.cellHeight
+            width: launchBarDisplay.width/(launcherListModel.count+1)
+            height: launchBarDisplay.height
 
             Image {
                 id: launcherIcon
                 fillMode: Image.PreserveAspectFit
-                anchors.centerIn: parent.Center
+                anchors.centerIn: parent
                 height: parent.height
                 source: icon
 
                 MouseArea {
                     anchors.fill: parent
                     onClicked: root.startApp("myApp")
+                }
+            }
+        }
+
+        footer: Item {
+            width: launchBarDisplay.width/(launcherListModel.count+1)
+            height: launchBarDisplay.height
+
+            Image {
+                id: appsIcon
+                fillMode: Image.PreserveAspectFit
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: parent.right
+                height: parent.height
+                source: "../images/empty-launcher.png"
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: launchBarDisplay.toggleLauncherDisplay()
                 }
             }
         }

@@ -13,7 +13,7 @@ Item {
 
     property Item currentActiveWindow
 
-    property real windowsRadius: 20
+    property real cornerRadius: 40
 
     property alias maximizedWindowContainer: maximizedWindowContainer
     property alias fullscreenWindowContainer: fullscreenWindowContainer
@@ -76,13 +76,6 @@ Item {
     }
 
     Connections {
-        target: gestureArea
-        onSwipeGesture:{
-            if( Math.abs(angle) > Math.PI/4 && Math.abs(angle) < 3*Math.PI/4  )
-                restoreWindowToCard(currentActiveWindow);
-        }
-    }
-    Connections {
         target: cardView
         onCardRemoved: {
             removeWindow(window);
@@ -94,7 +87,7 @@ Item {
         var windowContainerComponent = Qt.createComponent("WindowContainer.qml");
         var windowContainer = windowContainerComponent.createObject(root);
         windowContainer.windowManager = windowManager;
-        windowContainer.cornerRadius = windowsRadius
+        windowContainer.cornerRadius = cornerRadius
 
         // Bind the container with its app window
         windowContainer.setWrappedChild(appWindow);
@@ -147,7 +140,7 @@ Item {
         windowContainer.windowState = WindowState.Maximized;
         currentActiveWindow = windowContainer;
 
-        windowContainer.setNewParent(maximizedWindowContainer);
+        windowContainer.setNewParent(maximizedWindowContainer, false);
 
         if (windowContainer.child) {
             // take focus for receiving input events
@@ -159,7 +152,7 @@ Item {
         windowContainer.windowState = WindowState.Fullscreen;
         currentActiveWindow = windowContainer;
 
-        windowContainer.setNewParent(fullscreenWindowContainer);
+        windowContainer.setNewParent(fullscreenWindowContainer, false);
 
         if (windowContainer.child) {
             // take focus for receiving input events
@@ -169,8 +162,9 @@ Item {
     function restoreWindowToCard(windowContainer) {
         // switch the state to card
         windowContainer.windowState = WindowState.Carded;
+        currentActiveWindow = null;
 
-        windowContainer.setNewParent(windowContainer.cardViewParent);
+        windowContainer.setNewParent(windowContainer.cardViewParent, true);
 
         // we're back to card view so no card should have the focus
         // for the keyboard anymore

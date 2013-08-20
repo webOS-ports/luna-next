@@ -5,7 +5,10 @@ Item {
     id: gestureAreaDisplay
 
     signal tapGesture
-    signal swipeGesture(real angle)
+    signal swipeUpGesture(int modifiers)
+    signal swipeDownGesture(int modifiers)
+    signal swipeLeftGesture(int modifiers)
+    signal swipeRightGesture(int modifiers)
 
     // Black rectangle behind, and a glowing image in front
     Rectangle {
@@ -30,6 +33,8 @@ Item {
             pressedX = mouseX;
             pressedY = mouseY;
             timeStampPressed = Date.now();
+
+            mouse.accepted = true;
         }
         onReleased: {
             var xDiff = mouseX - pressedX;
@@ -40,18 +45,28 @@ Item {
             if( diffTime < 500 &&
                 (Math.abs(xDiff) > 10 || Math.abs(yDiff) > 10) ) {
                 /* Consider this as a swipe */
-                var angle = Math.atan(yDiff/xDiff);
+                var angleTanAbs = Math.abs(xDiff/yDiff);
 
-                /* Convert the angle to a [-PI,PI] interval depending on dx and dy signs */
-                if( xDiff < 0 ) {
-                    if( yDiff < 0 )
-                        angle -= Math.PI;
+                /* Separate the various swipe cases */
+                if( angleTanAbs < 1 /*Math.tan(Math.PI/4)*/ ) { // swipe Up or Down
+                    if( yDiff>0 )
+                        swipeDownGesture(mouse.modifiers);
                     else
-                        angle += Math.PI;
+                        swipeUpGesture(mouse.modifiers);
                 }
-
-                swipeGesture(angle);
+                else {  // only posibility left: swipe Left or Right
+                    if( xDiff>0 )
+                        swipeRightGesture(mouse.modifiers);
+                    else
+                        swipeLeftGesture(mouse.modifiers);
+                }
             }
+            else
+            {
+                tapGesture();
+            }
+
+            mouse.accepted = true;
         }
     }
 }
