@@ -1,9 +1,10 @@
 import QtQuick 2.0
+import LunaNext 0.1
 
 Item {
     id: cardWindow
 
-    property variant windowContainer
+    property Item windowContainer
     property Item cardView
 
     visible: false
@@ -12,5 +13,9 @@ Item {
 
     Component.onCompleted: {
         windowContainer.cardViewParent = cardWindow;
+    }
+
+    function isWrappedWindowCarded() {
+        return (windowContainer && windowContainer.windowState === WindowState.Carded);
     }
 }

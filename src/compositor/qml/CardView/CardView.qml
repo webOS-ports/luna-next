@@ -1,5 +1,4 @@
 import QtQuick 2.0
-import QtQml.Models 2.1
 
 import "../Compositor/compositor.js" as CompositorLogic
 
@@ -44,12 +43,12 @@ Item {
 
             onSwitchToMaximize: {
                 // maximize window
-                root.setCurrentMaximizedWindow(window);
+                root.setCurrentMaximizedWindow(cardWindow.windowContainer);
             }
             onDestructionRequest: {
                 // remove card & emit signal
                 listCardsModel.remove(index);
-                cardRemoved(cardWindow);
+                cardRemoved(cardWindow.windowContainer);
             }
         }
     }

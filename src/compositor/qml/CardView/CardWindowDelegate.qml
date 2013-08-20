@@ -39,8 +39,8 @@ Item {
                 cardWindow.visible = false;
                 cardWindow.anchors.fill = undefined;
                 cardWindow.parent = null;
-                }
             }
+        }
 
         Behavior on y {
             NumberAnimation { duration: 100 }
@@ -59,9 +59,11 @@ Item {
             drag.minimumY: -cardDelegateWindow.height;
             drag.maximumY: listCardsView.height;
             drag.filterChildren: true
-            enabled: cardDelegateContainer.ListView.isCurrentItem && (cardWindow.windowState === WindowState.Carded)
+            enabled: cardDelegateContainer.ListView.isCurrentItem && cardWindow.isWrappedWindowCarded()
 
-            onClicked: switchToMaximize()
+            onClicked: {
+                switchToMaximize();
+            }
 
             onReleased: {
                 if( cardDelegateWindow.y > -cardDelegateWindow.height/2 && cardDelegateWindow.y < cardDelegateContainer.height-cardDelegateWindow.height/2 ) {

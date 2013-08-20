@@ -167,10 +167,6 @@ Compositor.WindowManager {
             target: launchBarDisplay
             onToggleLauncherDisplay: appLauncherDisplay.toggleDisplay()
         }
-        Connections {
-            target: gestureAreaDisplay
-            onTapGesture: appLauncherDisplay.toggleDisplay()
-        }
 
         z: 1 // on top of cardview
     }
@@ -208,6 +204,23 @@ Compositor.WindowManager {
         height: computeFromLength(16);
 
         z: 3 // the gesture area is in front of everything, like the fullscreen window
+
+        onSwipeUpGesture:{
+            cardWindowOrShowLauncher();
+        }
+        onTapGesture: {
+            cardWindowOrShowLauncher();
+        }
+
+        function cardWindowOrShowLauncher() {
+            if( currentActiveWindow ) {
+                restoreWindowToCard(currentActiveWindow);
+            }
+            else {
+                // toggle launcher
+                appLauncherDisplay.toggleDisplay();
+            }
+        }
     }
 
     // Utility to convert a pixel length expressed at DPI=132 to

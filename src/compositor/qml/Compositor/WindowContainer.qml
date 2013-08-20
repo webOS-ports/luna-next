@@ -63,18 +63,12 @@ Item {
         },
         State {
            name: "card"
-           PropertyChanges { target: cornerShader; sourceItem: childWrapper; visible: true }
-           PropertyChanges { target: cornerStaticMask; visible: false }
         },
         State {
            name: "maximized"
-           PropertyChanges { target: cornerShader; sourceItem: null; visible: false }
-           PropertyChanges { target: cornerStaticMask; visible: true }
         },
         State {
            name: "fullscreen"
-           PropertyChanges { target: cornerShader; sourceItem: null; visible: false }
-           PropertyChanges { target: cornerStaticMask; visible: true }
        }
     ]
 
@@ -85,6 +79,7 @@ Item {
         property alias targetNewParent: parentChangeAnimation.newParent
         property alias targetWidth: widthTargetAnimation.to
         property alias targetHeight: heightTargetAnimation.to
+        property bool useShaderForNewParent: false
 
         ParentAnimation {
             id: parentChangeAnimation
@@ -113,10 +108,22 @@ Item {
 
         onStarted: {
             windowContainer.anchors.fill = undefined;
+            if( useShaderForNewParent )
+            {
+                cornerShader.sourceItem = childWrapper;
+                cornerShader.visible = true;
+                cornerStaticMask.visible = false;
+            }
         }
 
         onStopped: {
             windowContainer.anchors.fill = targetNewParent;
+            if( !useShaderForNewParent )
+            {
+                cornerShader.sourceItem = null;
+                cornerShader.visible = false;
+                cornerStaticMask.visible = true;
+            }
         }
     }
 
@@ -124,11 +131,13 @@ Item {
         childWrapper.setWrappedChild(appWindow);
     }
 
-    function setNewParent(newParent) {
+    function setNewParent(newParent, useShader) {
         newParentAnimation.targetNewParent = newParent;
         newParentAnimation.targetWidth = newParent.width;
         newParentAnimation.targetHeight = newParent.height;
+        newParentAnimation.useShaderForNewParent = useShader;
         newParentAnimation.start();
+
     }
 
     function startupAnimation() {
