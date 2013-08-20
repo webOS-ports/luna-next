@@ -21,5 +21,9 @@
         <file>qml/images/wm-corner-top-left.png</file>
         <file>qml/images/wm-corner-top-right.png</file>
         <file>qml/Utils/ReticleArea.qml</file>
+        <file>qml/CardView/CardWindow.qml</file>
+        <file>qml/Compositor/CornerShader.qml</file>
+        <file>qml/LaunchBar/AppLauncher.qml</file>
+        <file>qml/LunaSysAPI/ApplicationModel.qml</file>
     </qresource>
 </RCC>
