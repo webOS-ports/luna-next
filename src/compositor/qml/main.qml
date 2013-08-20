@@ -68,19 +68,25 @@ Compositor.WindowManager {
     statusBar: statusBarDisplay
     gestureArea: gestureAreaDisplay
 
-    Utils.FpsCounter {
-        id: fpsCounter
+    Text {
+        anchors.top: root.top
+        anchors.let: root.left
+
+        color: "red"
+        font.pixelSize: 20
+        text: fpsCounter.fps + " fps"
 
         visible: Settings.displayFps
-
-        anchors.top: parent.top
-        anchors.left: parent.left
 
         width: 50
         height: 32
 
         // always on top of everything else!
         z: 1000
+
+        FpsCounter {
+            id: fpsCounter
+        }
     }
 
     Utils.ReticleArea {
