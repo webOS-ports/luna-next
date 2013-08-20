@@ -69,7 +69,7 @@ Compositor.WindowManager {
 
     Loader {
 	    anchors.top: root.top
-	    anchors.let: root.left
+        anchors.left: root.left
 
 	    width: 50
 	    height: 32
@@ -77,15 +77,20 @@ Compositor.WindowManager {
 	    // always on top of everything else!
 	    z: 1000
 
-		sourceComponent: (!Settings.displayFps) ? null : Text {
-		    color: "red"
-		    font.pixelSize: 20
-		    text: fpsCounter.fps + " fps"
+        Component {
+            id: fpsTextComponent
+            Text {
+                color: "red"
+                font.pixelSize: 20
+                text: fpsCounter.fps + " fps"
 
-		    FpsCounter {
-		        id: fpsCounter
-		    }
-		}
+                FpsCounter {
+                    id: fpsCounter
+                }
+            }
+        }
+
+        sourceComponent: Settings.displayFps ? fpsTextComponent : null;
     }
 
 

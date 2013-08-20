@@ -3,5 +3,6 @@ Reticle 0.1 Reticle.qml
 LunaService 0.1 LunaService.qml
 WindowState 0.1 WindowStateStub.js
 Settings 0.1 LunaNextStub.js
+FpsCounter 0.1 FpsCounter.qml
 
 typeinfo LunaNext.qmltypes
