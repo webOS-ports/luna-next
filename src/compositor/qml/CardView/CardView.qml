@@ -5,8 +5,8 @@ import "../Compositor/compositor.js" as CompositorLogic
 Item {
     id: cardViewDisplay
 
-    signal cardAdded(variant window, int winId)
-    signal cardRemoved(variant window, int winId)
+    signal cardAdded(Item cardComponentInstance)
+    signal cardRemoved(Item cardComponentInstance)
 
     ListModel {
         // This model contains the list of the cards
@@ -34,26 +34,38 @@ Item {
 
         delegate: CardWindowDelegate {
             height: listCardsView.height
-            width: cardWidth
+            width: listCardsView.cardWindowWidth
+
+            cardWidth: listCardsView.cardWindowWidth
+            cardHeight: listCardsView.cardWindowHeight
+
+            cardWindow: model.cardWindowInstance
 
             onSwitchToMaximize: {
                 // maximize window
-                root.setCurrentMaximizedWindow(window);
+                root.setCurrentMaximizedWindow(cardWindow.windowContainer);
             }
             onDestructionRequest: {
                 // remove card & emit signal
                 listCardsModel.remove(index);
-                cardRemoved(window, winId);
+                cardRemoved(cardWindow.windowContainer);
             }
         }
     }
 
-    function appendCard(window, winId) {
-        listCardsModel.append({"window": window, "winId": winId});
-        listCardsView.positionViewAtEnd();
+    function appendCard(windowContainer, winId) {
+        // First, instantiate a new card
+        var cardComponent = Qt.createComponent("CardWindow.qml");
+
+        var cardComponentInstance = cardComponent.createObject(listCardsView,
+                           {"view": listCardsView,
+                            "windowContainer": windowContainer});
+
+        listCardsModel.append({"cardWindowInstance": cardComponentInstance});
+        // listCardsView.positionViewAtEnd();
 
         // emit corresponding signal
-        cardAdded(window, winId);
+        cardAdded(cardComponentInstance);
     }
 }
 

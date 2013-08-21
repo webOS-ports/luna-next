@@ -5,6 +5,10 @@ import QtQuick 2.0
 //  - minimized: only notification icons are shown
 //  - open: all notifications with their content are shown
 
+// Todo: 1. see if there is another way to resize the list when an element is
+//          added. This highly dynamic sizing is slow.
+//       2. don't use a listview, because it is flickable and uselessly dynamic.
+
 Rectangle {
     id: notificationsContainer
 
@@ -37,6 +41,7 @@ Rectangle {
 
         x: 0; y: 0; width: parent.width
         height: root.computeFromLength(64);
+        interactive: false
 
         orientation: ListView.Horizontal
         model: notificationsModel
@@ -63,9 +68,11 @@ Rectangle {
 
         x: 0; y: 0; width: parent.width
         height: 0;
+        interactive: false
 
         orientation: ListView.Vertical
         model: notificationsModel
+
         delegate: Row {
                 id: fullNotificationRow
                 Image {

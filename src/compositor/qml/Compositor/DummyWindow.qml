@@ -42,7 +42,7 @@ Item {
                         currentState = (currentState+1) % 4;
 
                         // Skip Invisible state
-                        if (currentState == 0)
+                        if (currentState === 0)
                             currentState = WindowState.Carded;
 
                         CompositorLogic.setAppWindowState(dummyWindow, currentState);

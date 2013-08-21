@@ -39,7 +39,6 @@
 ****************************************************************************/
 
 import QtQuick 2.0
-import QtGraphicalEffects 1.0
 
 import LunaNext 0.1
 
@@ -68,58 +67,63 @@ Compositor.WindowManager {
     statusBar: statusBarDisplay
     gestureArea: gestureAreaDisplay
 
-    Text {
-        anchors.top: root.top
-        anchors.let: root.left
+    Loader {
+	    anchors.top: root.top
+        anchors.left: root.left
 
-        color: "red"
-        font.pixelSize: 20
-        text: fpsCounter.fps + " fps"
+	    width: 50
+	    height: 32
 
-        visible: Settings.displayFps
+	    // always on top of everything else!
+	    z: 1000
 
-        width: 50
-        height: 32
+        Component {
+            id: fpsTextComponent
+            Text {
+                color: "red"
+                font.pixelSize: 20
+                text: fpsCounter.fps + " fps"
 
-        // always on top of everything else!
-        z: 1000
-
-        FpsCounter {
-            id: fpsCounter
+                FpsCounter {
+                    id: fpsCounter
+                }
+            }
         }
+
+        sourceComponent: Settings.displayFps ? fpsTextComponent : null;
     }
 
-    Utils.ReticleArea {
+
+    Loader {
         id: reticleArea
         anchors.fill: parent
+        source: Settings.showReticle ? "Utils/ReticleArea.qml" : ""
     }
 
     // background
-    Rectangle {
+    Item {
         id: background
         anchors.top: statusBarDisplay.bottom
         anchors.bottom: gestureAreaDisplay.top
         anchors.left: root.left
         anchors.right: root.right
 
-        color: "black"
-
         z: -1; // the background item should always be behind other components
+
+        Image {
+            id: backgroundImage
+
+            anchors.fill: parent
+            fillMode: Image.PreserveAspectCrop
+            source: "images/background.jpg"
+            asynchronous: true
+            smooth: true
+            sourceSize: Qt.size(Settings.displayWidth, Settings.displayHeight)
+        }
 
         Compositor.RoundedItem {
             anchors.fill: parent
-
-            radius: 20
-            content: Image {
-                id: backgroundImage
-
-                anchors.fill: parent
-                fillMode: Image.PreserveAspectCrop
-                source: "images/background.jpg"
-                asynchronous: true
-                smooth: true
-                sourceSize: Qt.size(background.width, background.height)
-            }
+            cornerRadius: root.cornerRadius
         }
     }
 
@@ -150,7 +154,24 @@ Compositor.WindowManager {
         anchors.bottom: gestureAreaDisplay.top
         anchors.left: root.left
         anchors.right: root.right
-        height: computeFromLength(80);
+
+        z: 1 // on top of cardview
+    }
+
+    // bottom area: launcher bar
+    LaunchBar.AppLauncher {
+        id: appLauncherDisplay
+
+        itemAboveLauncher: statusBarDisplay
+        itemUnderLauncher: gestureAreaDisplay
+
+        anchors.left: root.left
+        anchors.right: root.right
+
+        Connections {
+            target: launchBarDisplay
+            onToggleLauncherDisplay: appLauncherDisplay.toggleDisplay()
+        }
 
         z: 1 // on top of cardview
     }
@@ -188,6 +209,23 @@ Compositor.WindowManager {
         height: computeFromLength(16);
 
         z: 3 // the gesture area is in front of everything, like the fullscreen window
+
+        onSwipeUpGesture:{
+            cardWindowOrShowLauncher();
+        }
+        onTapGesture: {
+            cardWindowOrShowLauncher();
+        }
+
+        function cardWindowOrShowLauncher() {
+            if( currentActiveWindow ) {
+                restoreWindowToCard(currentActiveWindow);
+            }
+            else {
+                // toggle launcher
+                appLauncherDisplay.toggleDisplay();
+            }
+        }
     }
 
     // Utility to convert a pixel length expressed at DPI=132 to
