@@ -79,8 +79,7 @@ void Compositor::surfaceMapped()
     unsigned int windowId = mNextWindowId++;
     CompositorWindow *window = new CompositorWindow(windowId, surface, contentItem());
     window->setSize(surface->size());
-    // FIXME handle disconnecting clients
-    // QObject::connect(window, SIGNAL(destroyed(QObject*)), this, SLOT(windowDestroyed()));
+    QObject::connect(window, SIGNAL(destroyed(QObject*)), this, SLOT(windowDestroyed(QObject*)));
     mWindows.insert(windowId, window);
 
     window->setTouchEventsEnabled(true);
@@ -92,7 +91,7 @@ void Compositor::surfaceUnmapped()
 {
     QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(sender());
     if (surface == mFullscreenSurface)
-        mFullscreenSurface = 0;
+        setFullscreenSurface(0);
 
     CompositorWindow *window = qobject_cast<CompositorWindow*>(surface->surfaceItem());
 
@@ -107,7 +106,7 @@ void Compositor::surfaceDestroyed(QObject *object)
 {
     QWaylandSurface *surface = static_cast<QWaylandSurface *>(object);
     if (surface == mFullscreenSurface)
-        mFullscreenSurface = 0;
+        setFullscreenSurface(0);
 
     QQuickItem *item = surface->surfaceItem();
     emit windowDestroyed(QVariant::fromValue(item));
