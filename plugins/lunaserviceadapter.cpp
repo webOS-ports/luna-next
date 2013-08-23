@@ -32,10 +32,11 @@ LunaServiceCall::LunaServiceCall(QObject *parent) :
 {
 }
 
-void LunaServiceCall::setup(LSHandle *serviceHandle, QJSValue callback, int responseLimit)
+void LunaServiceCall::setup(LSHandle *serviceHandle, QJSValue callback, QJSValue errorCallback, int responseLimit)
 {
     mServiceHandle = serviceHandle;
     mCallback = callback;
+    mErrorCallback = errorCallback;
     mResponseLimit = responseLimit;
 }
 
@@ -43,11 +44,13 @@ bool LunaServiceCall::execute(const QString& uri, const QString& arguments)
 {
     LSError error;
     LSErrorInit(&error);
+    QString errorMessage;
 
     if (mResponseLimit == 1) {
         if (!LSCallOneReply(mServiceHandle, uri.toUtf8().constData(), arguments.toUtf8().constData(),
                             &LunaServiceCall::responseCallback, this, &mToken, &error)) {
             qWarning("Failed to call remote service %s", uri.toUtf8().constData());
+            errorMessage = QString("Failed to call remote service: %0").arg(error.message);
             goto error;
         }
     }
@@ -55,6 +58,7 @@ bool LunaServiceCall::execute(const QString& uri, const QString& arguments)
         if (!LSCall(mServiceHandle, uri.toUtf8().constData(), arguments.toUtf8().constData(),
                             &LunaServiceCall::responseCallback, this, &mToken, &error)) {
             qWarning("Failed to call remote service %s", uri.toUtf8().constData());
+            errorMessage = QString("Failed to call remote service: %0").arg(error.message);
             goto error;
         }
     }
@@ -66,6 +70,9 @@ error:
         LSErrorPrint(&error, stderr);
         LSErrorFree(&error);
     }
+
+    if (mErrorCallback.isCallable())
+        mErrorCallback.call(QJSValueList() << errorMessage);
 
     return false;
 }
@@ -80,8 +87,10 @@ bool LunaServiceCall::handleResponse(LSHandle *handle, LSMessage *message)
 {
     mResponseCount++;
 
-    QString data = LSMessageGetPayload(message);
-    mCallback.call(QJSValueList() << data);
+    if (mCallback.isCallable()) {
+        QString data = LSMessageGetPayload(message);
+        mCallback.call(QJSValueList() << data);
+    }
 
     const char* category = LSMessageGetCategory(message);
     bool messageInErrorCategory = (category && strcmp(LUNABUS_ERROR_CATEGORY, category) == 0);
@@ -198,22 +207,22 @@ void LunaServiceAdapter::setUsePrivateBus(bool usePrivateBus)
     mUsePrivateBus = usePrivateBus;
 }
 
-LunaServiceCall* LunaServiceAdapter::createAndExecuteCall(const QString& uri, const QString& arguments, QJSValue callback, int responseLimit)
+LunaServiceCall* LunaServiceAdapter::createAndExecuteCall(const QString& uri, const QString& arguments, QJSValue callback,  QJSValue errorCallback, int responseLimit)
 {
     LunaServiceCall *call = new LunaServiceCall();
-    call->setup(mServiceHandle, callback, responseLimit);
+    call->setup(mServiceHandle, callback, errorCallback, responseLimit);
     call->execute(uri, arguments);
     return call;
 }
 
-QObject* LunaServiceAdapter::call(const QString& uri, const QString& arguments, QJSValue callback)
+QObject* LunaServiceAdapter::call(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback)
 {
-    return createAndExecuteCall(uri, arguments, callback, 1);
+    return createAndExecuteCall(uri, arguments, callback, errorCallback, 1);
 }
 
-QObject* LunaServiceAdapter::subscribe(const QString& uri, const QString& arguments, QJSValue callback)
+QObject* LunaServiceAdapter::subscribe(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback)
 {
-    return createAndExecuteCall(uri, arguments, callback, -1);
+    return createAndExecuteCall(uri, arguments, callback, errorCallback, -1);
 }
 
 } // namespace luna
