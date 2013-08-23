@@ -17,7 +17,7 @@ ListModel {
     }
 
     function refresh() {
-        service.call("luna://com.palm.applicationManager/listApps", {"filter": filter}, fillFromJSONResult);
+        service.call("luna://com.palm.applicationManager/listApps", {"filter": filter}, fillFromJSONResult, handleError);
     }
 
     function fillFromJSONResult(result) {
@@ -27,6 +27,10 @@ ListModel {
                 applicationModel.append(result.apps[i]);
             }
         }
+    }
+
+    function handleError(errorMessage) {
+        console.log("Failed to call application manager: " + errorMessage);
     }
 
     Component.onCompleted: refresh();

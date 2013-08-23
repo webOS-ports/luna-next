@@ -26,13 +26,13 @@ namespace luna
 class SettingsAdapter : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(bool tabletUi READ tabletUi)
-    Q_PROPERTY(qreal dpi READ dpi)
-    Q_PROPERTY(qreal compatDpi READ compatDpi)
-    Q_PROPERTY(int displayWidth READ displayWidth)
-    Q_PROPERTY(int displayHeight READ displayHeight)
-    Q_PROPERTY(int displayFps READ displayFps)
-    Q_PROPERTY(int showReticle READ showReticle)
+    Q_PROPERTY(bool tabletUi READ tabletUi CONSTANT)
+    Q_PROPERTY(qreal dpi READ dpi CONSTANT)
+    Q_PROPERTY(qreal compatDpi READ compatDpi CONSTANT)
+    Q_PROPERTY(int displayWidth READ displayWidth CONSTANT)
+    Q_PROPERTY(int displayHeight READ displayHeight CONSTANT)
+    Q_PROPERTY(int displayFps READ displayFps CONSTANT)
+    Q_PROPERTY(int showReticle READ showReticle CONSTANT)
 
 public:
     SettingsAdapter();
