@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     }
 
     // preload all settings for later use
-    Settings *settings = Settings::LunaSettings();
+    Settings::LunaSettings();
 
     QGuiApplication app(argc, argv);
 
