@@ -7,7 +7,7 @@ ListModel {
     property string filter: "*"
     property QtObject applicationManagerService: LunaService {
         id: service
-        name: "org.webosports.webappmanager"
+        name: "org.webosports.luna"
         usePrivateBus: true
     }
 
