@@ -49,6 +49,8 @@ Item {
             }
 
             count++;
+        }, function(errorMessage) {
+            console.log("Got error: " + errorMessage);
         });
 
         console.log("Calling luna://com.palm.applicationManager/listApps ...");
@@ -57,6 +59,6 @@ Item {
 
             var appList = JSON.parse(data);
             console.log(appList.apps);
-        });
+        }, function(errorMessage) { });
     }
 }

@@ -36,7 +36,7 @@ class LunaServiceCall : public QObject
 public:
     explicit LunaServiceCall(QObject *parent = 0);
 
-    void setup(LSHandle *serviceHandle, QJSValue callback, int responseLimit = -1);
+    void setup(LSHandle *serviceHandle, QJSValue callback, QJSValue errorCallback, int responseLimit = -1);
     bool execute(const QString& uri, const QString& arguments);
 
     Q_INVOKABLE void cancel();
@@ -44,6 +44,7 @@ public:
 private:
     LSHandle *mServiceHandle;
     QJSValue mCallback;
+    QJSValue mErrorCallback;
     LSMessageToken mToken;
     int mResponseLimit;
     int mResponseCount;
@@ -72,8 +73,8 @@ public:
     void setName(const QString& name);
     void setUsePrivateBus(bool usePrivateBus);
 
-    Q_INVOKABLE QObject* call(const QString& uri, const QString& arguments, QJSValue callback);
-    Q_INVOKABLE QObject* subscribe(const QString& uri, const QString& arguments, QJSValue callback);
+    Q_INVOKABLE QObject* call(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback);
+    Q_INVOKABLE QObject* subscribe(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback);
 
 private:
     QString mName;
@@ -81,7 +82,7 @@ private:
     LSHandle *mServiceHandle;
     bool mInitialized;
 
-    LunaServiceCall* createAndExecuteCall(const QString& uri, const QString& arguments, QJSValue callback, int responseLimit);
+    LunaServiceCall* createAndExecuteCall(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback, int responseLimit);
 
     static GMainLoop *mainLoop();
 };
