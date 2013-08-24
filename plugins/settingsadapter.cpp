@@ -61,4 +61,9 @@ bool SettingsAdapter::showReticle() const
     return Settings::LunaSettings()->showReticle;
 }
 
+int SettingsAdapter::splashIconSize() const
+{
+    return Settings::LunaSettings()->splashIconSize;
+}
+
 } // namespace luna
