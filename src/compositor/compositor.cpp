@@ -59,8 +59,10 @@ void Compositor::closeWindowWithId(int id)
 {
     CompositorWindow *window = mWindows.value(id, 0);
     if (window) {
-        if (window->surface())
+        if (window->surface() && window->checkIsWebAppMgr())
             window->surface()->destroySurface();
+        else if (window->surface())
+            destroyClientForSurface(window->surface());
 
         delete window;
     }

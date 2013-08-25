@@ -35,6 +35,19 @@ unsigned int CompositorWindow::id() const
     return mId;
 }
 
+bool CompositorWindow::checkIsWebAppMgr()
+{
+    if (!surface())
+        return false;
+
+    QFile procExeEntry(QString("/proc/%0/exe").arg(surface()->processId()));
+    if (!procExeEntry.exists())
+        return false;
+
+    // FIXME make path to WebAppMgr configurable
+    return procExeEntry.symLinkTarget() == "/usr/sbin/WebAppMgr";
+}
+
 void CompositorWindow::setClosed(bool closed)
 {
     mClosed = closed;

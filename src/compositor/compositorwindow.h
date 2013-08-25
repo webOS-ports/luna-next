@@ -37,6 +37,8 @@ public:
     void setClosed(bool closed);
     void tryRemove();
 
+    bool checkIsWebAppMgr();
+
 protected:
     virtual bool event(QEvent *event);
 
