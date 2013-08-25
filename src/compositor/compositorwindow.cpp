@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+#include <QCoreApplication>
+
 #include "compositorwindow.h"
 
 namespace luna
@@ -22,13 +24,40 @@ namespace luna
 
 CompositorWindow::CompositorWindow(unsigned int id, QWaylandSurface *surface, QQuickItem *parent)
     : QWaylandSurfaceItem(surface, parent),
-      mWindowId(id)
+      mId(id),
+      mClosed(false),
+      mRemovePosted(false)
 {
 }
 
-unsigned int CompositorWindow::windowId() const
+unsigned int CompositorWindow::id() const
 {
-    return mWindowId;
+    return mId;
+}
+
+void CompositorWindow::setClosed(bool closed)
+{
+    mClosed = closed;
+}
+
+void CompositorWindow::tryRemove()
+{
+    if (mClosed && !mRemovePosted) {
+        mRemovePosted = true;
+        QCoreApplication::postEvent(this, new QEvent(QEvent::User));
+    }
+}
+
+bool CompositorWindow::event(QEvent *event)
+{
+    bool handled = QWaylandSurfaceItem::event(event);
+
+    if (event->type() == QEvent::User) {
+        mRemovePosted = false;
+        delete this;
+    }
+
+    return handled;
 }
 
 } // namespace luna

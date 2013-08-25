@@ -42,28 +42,28 @@ public:
     QWaylandSurface *fullscreenSurface() const { return mFullscreenSurface; }
 
     Q_INVOKABLE void clearKeyboardFocus();
+    Q_INVOKABLE void closeWindowWithId(int id);
 
 signals:
     void windowAdded(QVariant window);
-    void windowDestroyed(QVariant window);
-    void windowResized(QVariant window);
+    void windowRemoved(QVariant window);
+    void windowHidden(QVariant window);
     void fullscreenSurfaceChanged();
     void windowsChanged();
 
 public slots:
-    void destroyWindow(QVariant window);
-    void destroyClientForWindow(QVariant window);
     void setFullscreenSurface(QWaylandSurface *surface);
 
 private slots:
     void surfaceMapped();
     void surfaceUnmapped();
-    void surfaceDestroyed(QObject *object);
     void frameSwappedSlot();
 
 protected:
     void resizeEvent(QResizeEvent *event);
     void surfaceCreated(QWaylandSurface *surface);
+
+    virtual void surfaceAboutToBeDestroyed(QWaylandSurface *surface);
 
 private:
     QWaylandSurface *mFullscreenSurface;

@@ -4,8 +4,6 @@ import LunaNext 0.1
 Item {
     id: windowManager
 
-    property Item compositor
-
     property Item gestureArea
     property Item cardView
     property Item statusBar
@@ -46,7 +44,7 @@ Item {
                 }
             }
 
-            console.log("Couldn't find window Id:" + winId);
+            console.log("Couldn't find window!");
             return -1;
         }
     }
@@ -78,7 +76,7 @@ Item {
     Connections {
         target: cardView
         onCardRemoved: {
-            removeWindow(window);
+            removeWindow(cardComponentInstance);
         }
     }
 
@@ -92,18 +90,14 @@ Item {
         // Bind the container with its app window
         windowContainer.setWrappedChild(appWindow);
 
-        // insert the window at the beginning of the list
-        var winId = localProperties.getNextWinId(); // very simple identifier
-        listWindowsModel.insert(0, {"window": windowContainer, "winId": winId});
+        var winId = appWindow.id;
+        listWindowsModel.append({"window": windowContainer, "winId": winId});
 
         // emit the signal
         windowContainerCreated(windowContainer, winId);
     }
 
-    function windowResized(appWindow) {
-    }
-
-    function windowDestroyed(appWindow) {
+    function windowRemoved(appWindow) {
         var windowContainer = appWindow.parent;
         var index = listWindowsModel.getIndexFromProperty('window', windowContainer);
         if( index >= 0 )
@@ -113,14 +107,10 @@ Item {
         }
     }
 
-    function removeWindow(window) {
-        var index = listWindowsModel.getIndexFromProperty('window', window);
-        if( index >= 0 )
-        {
-            listWindowsModel.remove(index);
-            cardView.removeWindow(window);
-            window.destroy();
-        }
+    function removeWindow(windowContainer) {
+        // The actual model item will be removed once windowRemoved is called from the
+        // compositor
+        compositor.closeWindowWithId(windowContainer.child.id);
     }
 
     function setWindowState(windowContainer, windowState) {

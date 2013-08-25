@@ -61,7 +61,6 @@ Compositor.WindowManager {
     width: screenwidth
     height: screenheight
 
-    compositor: compositor
     notificationsContainer: notificationsContainer
     cardView: cardViewDisplay
     statusBar: statusBarDisplay
