@@ -6,8 +6,6 @@ include_directories(
 set(SOURCES
     main.cpp)
 
-qt5_add_resources(RESOURCES compositor/compositor.qrc)
-
 add_executable(luna-next ${SOURCES} ${RESOURCES})
 qt5_use_modules(luna-next Quick Gui)
 target_link_libraries(luna-next
