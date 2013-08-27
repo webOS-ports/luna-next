@@ -4,7 +4,8 @@ include_directories(
     ${LUNA_SYSMGR_COMMON_INCLUDE_DIRS})
 
 set(SOURCES
-    main.cpp)
+    main.cpp
+    shellapplication.cpp)
 
 add_executable(luna-next ${SOURCES} ${RESOURCES})
 qt5_use_modules(luna-next Quick Gui)

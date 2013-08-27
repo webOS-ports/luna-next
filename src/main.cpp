@@ -15,10 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-
-#include <QGuiApplication>
-#include <QRect>
-#include <QScreen>
 #include <QDir>
 
 #include <unistd.h>
@@ -28,7 +24,10 @@
 #include <systemd/sd-daemon.h>
 #include <Settings.h>
 
-#define XDG_RUNTIME_DIR_DEFAULT "/tmp/luna-session"
+#include "shellapplication.h"
+
+#define XDG_RUNTIME_DIR_DEFAULT     "/tmp/luna-session"
+#define DEFAULT_SHELL_NAME          "card"
 
 int main(int argc, char *argv[])
 {
@@ -44,8 +43,6 @@ int main(int argc, char *argv[])
     // preload all settings for later use
     Settings::LunaSettings();
 
-    QGuiApplication app(argc, argv);
-
     QDir xdgRuntimeDir(XDG_RUNTIME_DIR_DEFAULT);
 
     // cleanup old sessions and recreate
@@ -54,6 +51,14 @@ int main(int argc, char *argv[])
 
     mkdir(XDG_RUNTIME_DIR_DEFAULT, 0700);
     setenv("XDG_RUNTIME_DIR", XDG_RUNTIME_DIR_DEFAULT, 0);
+
+    QString shellName = qgetenv("LUNA_NEXT_SHELL");
+    if (shellName.isEmpty())
+        shellName = DEFAULT_SHELL_NAME;
+
+    luna::ShellApplication app(argc, argv);
+    if (!app.create(shellName))
+        exit(1);
 
     if (app.arguments().indexOf("--systemd") >= 0)
         sd_notify(0, "READY=1");
