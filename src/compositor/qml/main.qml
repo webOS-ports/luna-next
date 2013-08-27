@@ -43,15 +43,15 @@ import QtQuick 2.0
 import LunaNext 0.1
 
 import "CardView" as CardView
-import "StatusBar" as StatusBar
-import "LaunchBar" as LaunchBar
-import "LunaGestureArea" as LunaGestureArea
-import "NotificationArea" as NotificationArea
-import "Compositor" as Compositor
+import "StatusBar"
+import "LaunchBar"
+import "LunaGestureArea"
+import "NotificationArea"
+import "Compositor"
 import "Compositor/compositor.js" as CompositorLogic
 import "Utils" as Utils
 
-Compositor.WindowManager {
+WindowManager {
     id: root
 
     property real screenwidth: Settings.displayWidth
@@ -120,7 +120,7 @@ Compositor.WindowManager {
             sourceSize: Qt.size(Settings.displayWidth, Settings.displayHeight)
         }
 
-        Compositor.RoundedItem {
+        RoundedItem {
             anchors.fill: parent
             cornerRadius: root.cornerRadius
         }
@@ -147,7 +147,7 @@ Compositor.WindowManager {
     }
 
     // bottom area: launcher bar
-    LaunchBar.LaunchBar {
+    LaunchBar {
         id: launchBarDisplay
 
         anchors.bottom: gestureAreaDisplay.top
@@ -158,7 +158,7 @@ Compositor.WindowManager {
     }
 
     // bottom area: launcher bar
-    LaunchBar.AppLauncher {
+    AppLauncher {
         id: appLauncherDisplay
 
         itemAboveLauncher: statusBarDisplay
@@ -176,7 +176,7 @@ Compositor.WindowManager {
     }
 
     // top area: status bar
-    StatusBar.StatusBar {
+    StatusBar {
         id: statusBarDisplay
 
         anchors.top: root.top
@@ -188,7 +188,7 @@ Compositor.WindowManager {
     }
 
     // notification area
-    NotificationArea.NotificationsContainer {
+    NotificationsContainer {
         id: notificationsContainer
 
         anchors.bottom: gestureAreaDisplay.top
@@ -199,7 +199,7 @@ Compositor.WindowManager {
     }
 
     // gesture area
-    LunaGestureArea.LunaGestureArea {
+    LunaGestureArea {
         id: gestureAreaDisplay
 
         anchors.bottom: root.bottom
