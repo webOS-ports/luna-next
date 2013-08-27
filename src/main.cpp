@@ -28,8 +28,6 @@
 #include <systemd/sd-daemon.h>
 #include <Settings.h>
 
-#include "compositor.h"
-
 #define XDG_RUNTIME_DIR_DEFAULT "/tmp/luna-session"
 
 int main(int argc, char *argv[])
@@ -56,11 +54,6 @@ int main(int argc, char *argv[])
 
     mkdir(XDG_RUNTIME_DIR_DEFAULT, 0700);
     setenv("XDG_RUNTIME_DIR", XDG_RUNTIME_DIR_DEFAULT, 0);
-
-    luna::Compositor compositor(QUrl("qrc:///qml/main.qml"));
-    compositor.setTitle(QLatin1String("LunaNext"));
-    compositor.setGeometry(QRect(QPoint(0, 0), QGuiApplication::primaryScreen()->size()));
-    compositor.show();
 
     if (app.arguments().indexOf("--systemd") >= 0)
         sd_notify(0, "READY=1");

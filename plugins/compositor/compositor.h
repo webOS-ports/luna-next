@@ -25,19 +25,24 @@
 #include <QQmlContext>
 #include <QQuickItem>
 #include <QQuickView>
+#include <QQmlParserStatus>
 
 #include "compositorwindow.h"
 
 namespace luna
 {
 
-class Compositor : public QQuickView, public QWaylandCompositor
+class Compositor : public QQuickView, public QWaylandCompositor,
+                   public QQmlParserStatus
 {
     Q_OBJECT
     Q_PROPERTY(QWaylandSurface* fullscreenSurface READ fullscreenSurface WRITE setFullscreenSurface NOTIFY fullscreenSurfaceChanged)
 
 public:
-    Compositor(const QUrl& compositorPath);
+    Compositor();
+
+    virtual void classBegin();
+    virtual void componentComplete();
 
     QWaylandSurface *fullscreenSurface() const { return mFullscreenSurface; }
 

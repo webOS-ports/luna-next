@@ -22,20 +22,21 @@
 namespace luna
 {
 
-Compositor::Compositor(const QUrl& compositorPath)
+Compositor::Compositor()
     : QWaylandCompositor(this),
       mFullscreenSurface(0),
       mNextWindowId(1)
 {
-    enableSubSurfaceExtension();
-    setSource(compositorPath);
-    setResizeMode(QQuickView::SizeRootObjectToView);
-    setColor(Qt::black);
-    winId();
-
     connect(this, SIGNAL(frameSwapped()), this, SLOT(frameSwappedSlot()));
+}
 
-    rootContext()->setContextProperty("compositor", this);
+void Compositor::classBegin()
+{
+}
+
+void Compositor::componentComplete()
+{
+    QWaylandCompositor::setOutputGeometry(QRect(0, 0, width(), height()));
 }
 
 void Compositor::setFullscreenSurface(QWaylandSurface *surface)

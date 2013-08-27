@@ -1,13 +1,20 @@
+add_definitions(-DQT_COMPOSITOR_QUICK)
+
 include_directories(
     ${GLIB2_INCLUDE_DIRS}
     ${LUNA_SYSMGR_COMMON_INCLUDE_DIRS}
     ${LS2_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${Qt5Gui_PRIVATE_INCLUDE_DIRS})
+    ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
+    ${Qt5Compositor_PRIVATE_INCLUDE_DIRS}
+    ${WAYLAND_SERVER_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/compositor)
 
 set(SOURCES
     lunanextplugin.cpp
+    compositor/compositor.cpp
+    compositor/compositorwindow.cpp
     settingsadapter.cpp
     windowstate.cpp
     reticleitem.cpp
@@ -19,7 +26,7 @@ set(SOURCES
 add_library(lunanext-qml SHARED ${SOURCES})
 target_link_libraries(lunanext-qml ${LUNA_SYSMGR_COMMON_LIBRARIES} ${LS2_LIBRARIES})
 
-qt5_use_modules(lunanext-qml Qml Quick)
+qt5_use_modules(lunanext-qml Qml Quick Compositor)
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/qmldir"
                                                               "${CMAKE_CURRENT_BINARY_DIR}/qmldir")
