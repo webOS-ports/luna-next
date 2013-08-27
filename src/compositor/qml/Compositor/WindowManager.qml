@@ -80,7 +80,13 @@ Item {
         }
     }
 
-    function windowAdded(appWindow) {
+    Connections {
+        target: compositor
+        onWindowAdded: handleWindowAdded(window)
+        onWindowRemoved: handleWindowRemoved(window)
+    }
+
+    function handleWindowAdded(appWindow) {
         // Create the window container
         var windowContainerComponent = Qt.createComponent("WindowContainer.qml");
         var windowContainer = windowContainerComponent.createObject(root);
@@ -97,7 +103,7 @@ Item {
         windowContainerCreated(windowContainer, winId);
     }
 
-    function windowRemoved(appWindow) {
+    function handleWindowRemoved(appWindow) {
         var windowContainer = appWindow.parent;
         var index = listWindowsModel.getIndexFromProperty('window', windowContainer);
         if( index >= 0 )

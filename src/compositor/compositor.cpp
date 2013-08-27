@@ -36,9 +36,6 @@ Compositor::Compositor(const QUrl& compositorPath)
     connect(this, SIGNAL(frameSwapped()), this, SLOT(frameSwappedSlot()));
 
     rootContext()->setContextProperty("compositor", this);
-
-    connect(this, SIGNAL(windowAdded(QVariant)), rootObject(), SLOT(windowAdded(QVariant)));
-    connect(this, SIGNAL(windowRemoved(QVariant)), rootObject(), SLOT(windowRemoved(QVariant)));
 }
 
 void Compositor::setFullscreenSurface(QWaylandSurface *surface)
