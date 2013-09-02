@@ -15,20 +15,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#include "compositorwindow.h"
+#ifndef SHELLAPPLICATION_H_
+#define SHELLAPPLICATION_H_
+
+#include <QGuiApplication>
+#include <QQmlEngine>
+#include <QStringList>
 
 namespace luna
 {
 
-CompositorWindow::CompositorWindow(unsigned int id, QWaylandSurface *surface, QQuickItem *parent)
-    : QWaylandSurfaceItem(surface, parent),
-      mWindowId(id)
+class ShellApplication : public QGuiApplication
 {
-}
+    Q_OBJECT
 
-unsigned int CompositorWindow::windowId() const
-{
-    return mWindowId;
-}
+public:
+    ShellApplication(int argc, char **argv);
+    virtual ~ShellApplication();
+
+    bool create(const QString& name);
+
+private:
+    QQmlEngine mEngine;
+    QStringList mShellStorageDirs;
+
+    bool load(const QString& path);
+};
 
 } // namespace luna
+
+#endif

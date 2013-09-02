@@ -22,37 +22,21 @@
 namespace luna
 {
 
-Compositor::Compositor(const QUrl& compositorPath)
+Compositor::Compositor()
     : QWaylandCompositor(this),
       mFullscreenSurface(0),
       mNextWindowId(1)
 {
-    enableSubSurfaceExtension();
-    setSource(compositorPath);
-    setResizeMode(QQuickView::SizeRootObjectToView);
-    setColor(Qt::black);
-    winId();
-
     connect(this, SIGNAL(frameSwapped()), this, SLOT(frameSwappedSlot()));
-
-    rootContext()->setContextProperty("compositor", this);
-
-    connect(this, SIGNAL(windowAdded(QVariant)), rootObject(), SLOT(windowAdded(QVariant)));
-    connect(this, SIGNAL(windowDestroyed(QVariant)), rootObject(), SLOT(windowDestroyed(QVariant)));
-    connect(this, SIGNAL(windowResized(QVariant)), rootObject(), SLOT(windowResized(QVariant)));
 }
 
-void Compositor::destroyWindow(QVariant window)
+void Compositor::classBegin()
 {
-    qvariant_cast<QObject *>(window)->deleteLater();
 }
 
-void Compositor::destroyClientForWindow(QVariant window)
+void Compositor::componentComplete()
 {
-    QWaylandSurface *surface = 0;
-
-    surface = qobject_cast<QWaylandSurfaceItem *>(qvariant_cast<QObject *>(window))->surface();
-    destroyClientForSurface(surface);
+    QWaylandCompositor::setOutputGeometry(QRect(0, 0, width(), height()));
 }
 
 void Compositor::setFullscreenSurface(QWaylandSurface *surface)
@@ -69,6 +53,19 @@ void Compositor::clearKeyboardFocus()
     defaultInputDevice()->setKeyboardFocus(0);
 }
 
+void Compositor::closeWindowWithId(int id)
+{
+    CompositorWindow *window = mWindows.value(id, 0);
+    if (window) {
+        if (window->surface() && window->checkIsWebAppMgr())
+            window->surface()->destroySurface();
+        else if (window->surface())
+            destroyClientForSurface(window->surface());
+
+        delete window;
+    }
+}
+
 void Compositor::surfaceMapped()
 {
     QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(sender());
@@ -79,12 +76,12 @@ void Compositor::surfaceMapped()
     unsigned int windowId = mNextWindowId++;
     CompositorWindow *window = new CompositorWindow(windowId, surface, contentItem());
     window->setSize(surface->size());
-    QObject::connect(window, SIGNAL(destroyed(QObject*)), this, SLOT(windowDestroyed(QObject*)));
+    // QObject::connect(window, SIGNAL(destroyed(QObject*)), this, SLOT(windowDestroyed(QObject*)));
     mWindows.insert(windowId, window);
 
     window->setTouchEventsEnabled(true);
 
-    emit windowAdded(QVariant::fromValue(static_cast<QQuickItem *>(window)));
+    emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
 }
 
 void Compositor::surfaceUnmapped()
@@ -94,22 +91,24 @@ void Compositor::surfaceUnmapped()
         setFullscreenSurface(0);
 
     CompositorWindow *window = qobject_cast<CompositorWindow*>(surface->surfaceItem());
-
-    mWindows.remove(window->windowId());
-
-    emit windowDestroyed(QVariant::fromValue(static_cast<QQuickItem*>(window)));
-
-    delete window;
+    emit windowHidden(QVariant::fromValue(static_cast<QQuickItem*>(window)));
 }
 
-void Compositor::surfaceDestroyed(QObject *object)
+void Compositor::surfaceAboutToBeDestroyed(QWaylandSurface *surface)
 {
-    QWaylandSurface *surface = static_cast<QWaylandSurface *>(object);
+    CompositorWindow *window = static_cast<CompositorWindow*>(surface->surfaceItem());
+    surface->setSurfaceItem(0);
+
     if (surface == mFullscreenSurface)
         setFullscreenSurface(0);
 
-    QQuickItem *item = surface->surfaceItem();
-    emit windowDestroyed(QVariant::fromValue(item));
+    if (window) {
+        mWindows.remove(window->id());
+        emit windowRemoved(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+
+        window->setClosed(true);
+        window->tryRemove();
+    }
 }
 
 void Compositor::frameSwappedSlot()
@@ -125,7 +124,6 @@ void Compositor::resizeEvent(QResizeEvent *event)
 
 void Compositor::surfaceCreated(QWaylandSurface *surface)
 {
-    connect(surface, SIGNAL(destroyed(QObject *)), this, SLOT(surfaceDestroyed(QObject *)));
     connect(surface, SIGNAL(mapped()), this, SLOT(surfaceMapped()));
     connect(surface, SIGNAL(unmapped()), this,SLOT(surfaceUnmapped()));
 }

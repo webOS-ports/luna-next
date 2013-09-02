@@ -27,14 +27,25 @@ namespace luna
 class CompositorWindow : public QWaylandSurfaceItem
 {
     Q_OBJECT
+    Q_PROPERTY(int id READ id CONSTANT)
 
 public:
     CompositorWindow(unsigned int id, QWaylandSurface *surface, QQuickItem *parent = 0);
 
-    unsigned int windowId() const;
+    unsigned int id() const;
+
+    void setClosed(bool closed);
+    void tryRemove();
+
+    bool checkIsWebAppMgr();
+
+protected:
+    virtual bool event(QEvent *event);
 
 private:
-    unsigned int mWindowId;
+    unsigned int mId;
+    bool mClosed;
+    bool mRemovePosted;
 };
 
 } // namespace luna
