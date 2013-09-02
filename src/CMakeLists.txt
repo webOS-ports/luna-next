@@ -1,22 +1,14 @@
-add_definitions(-DQT_COMPOSITOR_QUICK)
-
 include_directories(
     ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
-    ${Qt5Compositor_PRIVATE_INCLUDE_DIRS}
-    ${WAYLAND_SERVER_INCLUDE_DIRS}
     ${GLIB2_INCLUDE_DIRS}
-    ${LUNA_SYSMGR_COMMON_INCLUDE_DIRS}
-    ${CMAKE_SOURCE_DIR}/src/compositor)
+    ${LUNA_SYSMGR_COMMON_INCLUDE_DIRS})
 
 set(SOURCES
     main.cpp
-    compositor/compositor.cpp
-    compositor/compositorwindow.cpp)
-
-qt5_add_resources(RESOURCES compositor/compositor.qrc)
+    shellapplication.cpp)
 
 add_executable(luna-next ${SOURCES} ${RESOURCES})
-qt5_use_modules(luna-next Quick Compositor Gui)
+qt5_use_modules(luna-next Quick Gui)
 target_link_libraries(luna-next
     ${SYSTEMD_DAEMON_LIBRARIES}
     ${LUNA_SYSMGR_COMMON_LIBRARIES})

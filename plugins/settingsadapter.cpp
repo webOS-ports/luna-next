@@ -61,4 +61,29 @@ bool SettingsAdapter::showReticle() const
     return Settings::LunaSettings()->showReticle;
 }
 
+int SettingsAdapter::splashIconSize() const
+{
+    return Settings::LunaSettings()->splashIconSize;
+}
+
+int SettingsAdapter::gestureAreaHeight() const
+{
+    return Settings::LunaSettings()->gestureAreaHeight;
+}
+
+int SettingsAdapter::positiveSpaceTopPadding() const
+{
+    return Settings::LunaSettings()->positiveSpaceTopPadding;
+}
+
+int SettingsAdapter::positiveSpaceBottomPadding() const
+{
+    return Settings::LunaSettings()->positiveSpaceBottomPadding;
+}
+
+QString SettingsAdapter::fontStatusBar() const
+{
+    return QString::fromStdString(Settings::LunaSettings()->fontStatusBar);
+}
+
 } // namespace luna
