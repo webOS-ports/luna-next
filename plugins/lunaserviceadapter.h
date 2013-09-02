@@ -63,6 +63,7 @@ class LunaServiceAdapter : public QObject,
 
 public:
     LunaServiceAdapter(QObject *parent = 0);
+    virtual ~LunaServiceAdapter();
 
     void classBegin();
     void componentComplete();

@@ -23,6 +23,46 @@
 namespace luna
 {
 
+class LunaServiceHandle
+{
+public:
+    LunaServiceHandle(LSHandle *handle) : mHandle(handle), mRefCount(0) { }
+
+    LSHandle* handle() const
+    {
+        return mHandle;
+    }
+
+    void ref()
+    {
+        mRefCount++;
+    }
+
+    bool unref()
+    {
+        mRefCount--;
+        if (mRefCount == 0) {
+            LSError error;
+            LSErrorInit(&error);
+
+            if (!LSUnregister(mHandle, &error)) {
+                qWarning("Failed to unregister service: %s", error.message);
+                LSErrorFree(&error);
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+private:
+    LSHandle *mHandle;
+    unsigned int mRefCount;
+};
+
+static QMap<QString, LunaServiceHandle*> serviceHandles;
+
 LunaServiceCall::LunaServiceCall(QObject *parent) :
     QObject(parent),
     mServiceHandle(0),
@@ -147,6 +187,17 @@ LunaServiceAdapter::LunaServiceAdapter(QObject *parent) :
 {
 }
 
+LunaServiceAdapter::~LunaServiceAdapter()
+{
+    QString serviceHandleName = mName + (mUsePrivateBus ? "-priv" : "-pub");
+    LunaServiceHandle *handle = serviceHandles.value(serviceHandleName);
+
+    if (handle && !handle->unref()) {
+        serviceHandles.remove(serviceHandleName);
+        delete handle;
+    }
+}
+
 void LunaServiceAdapter::classBegin()
 {
 }
@@ -154,16 +205,28 @@ void LunaServiceAdapter::classBegin()
 void LunaServiceAdapter::componentComplete()
 {
     LSError error;
-    LSErrorInit(&error);
 
-    if (!LSRegisterPubPriv(mName.toUtf8().constData(), &mServiceHandle, !mUsePrivateBus, &error)) {
-        qWarning("Could not register ls2 service handle!");
-        goto error;
+    // check wether we have the handle for the same service already cached
+    QString serviceHandleName = mName + (mUsePrivateBus ? "-priv" : "-pub");
+    if (serviceHandles.contains(serviceHandleName)) {
+        mServiceHandle = serviceHandles.value(serviceHandleName)->handle();
     }
+    else {
+        LSErrorInit(&error);
 
-    if(!LSGmainAttach(mServiceHandle, mainLoop(), &error)) {
-        qWarning("Could not attach to glib main loop!");
-        goto error;
+        if (!LSRegisterPubPriv(mName.toUtf8().constData(), &mServiceHandle, !mUsePrivateBus, &error)) {
+            qWarning("Could not register ls2 service handle!");
+            goto error;
+        }
+
+        if(!LSGmainAttach(mServiceHandle, mainLoop(), &error)) {
+            qWarning("Could not attach to glib main loop!");
+            goto error;
+        }
+
+        LunaServiceHandle *handle = new LunaServiceHandle(mServiceHandle);
+        handle->ref();
+        serviceHandles.insert(serviceHandleName, handle);
     }
 
     mInitialized = true;
