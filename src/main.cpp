@@ -31,15 +31,6 @@
 
 int main(int argc, char *argv[])
 {
-    if (!qgetenv("DISPLAY").isEmpty())
-        setenv("QT_QPA_PLATFORM", "xcb", 0);
-    else {
-        setenv("EGL_PLATFORM", "fbdev", 0);
-        setenv("QT_QPA_PLATFORM", "eglfs", 0);
-        setenv("QT_COMPOSITOR_NEGATE_INVERTED_Y", "1", 0);
-        setenv("QT_QPA_EGLFS_HIDECURSOR", "1", 0);
-    }
-
     // preload all settings for later use
     Settings::LunaSettings();
 
