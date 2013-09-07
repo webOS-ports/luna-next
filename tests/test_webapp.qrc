@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>webapp.qml</file>
-    </qresource>
-</RCC>
