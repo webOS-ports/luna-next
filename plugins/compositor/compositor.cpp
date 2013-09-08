@@ -53,9 +53,9 @@ void Compositor::clearKeyboardFocus()
     defaultInputDevice()->setKeyboardFocus(0);
 }
 
-void Compositor::closeWindowWithId(int id)
+void Compositor::closeWindowWithId(int winId)
 {
-    CompositorWindow *window = mWindows.value(id, 0);
+    CompositorWindow *window = mWindows.value(winId, 0);
     if (window) {
         if (window->surface() && window->checkIsWebAppMgr())
             window->surface()->destroySurface();
@@ -103,7 +103,7 @@ void Compositor::surfaceAboutToBeDestroyed(QWaylandSurface *surface)
         setFullscreenSurface(0);
 
     if (window) {
-        mWindows.remove(window->id());
+        mWindows.remove(window->winId());
         emit windowRemoved(QVariant::fromValue(static_cast<QQuickItem*>(window)));
 
         window->setClosed(true);
