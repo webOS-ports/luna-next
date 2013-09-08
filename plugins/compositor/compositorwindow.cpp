@@ -22,15 +22,15 @@
 namespace luna
 {
 
-CompositorWindow::CompositorWindow(unsigned int id, QWaylandSurface *surface, QQuickItem *parent)
+CompositorWindow::CompositorWindow(unsigned int winId, QWaylandSurface *surface, QQuickItem *parent)
     : QWaylandSurfaceItem(surface, parent),
-      mId(id),
+      mId(winId),
       mClosed(false),
       mRemovePosted(false)
 {
 }
 
-unsigned int CompositorWindow::id() const
+unsigned int CompositorWindow::winId() const
 {
     return mId;
 }
