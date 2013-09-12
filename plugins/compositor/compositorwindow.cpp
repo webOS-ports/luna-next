@@ -73,4 +73,13 @@ bool CompositorWindow::event(QEvent *event)
     return handled;
 }
 
+void CompositorWindow::postEvent(int event)
+{
+    int key = EventType::toKey(event);
+    if (key > 0) {
+        QCoreApplication::postEvent(this, new QKeyEvent(QEvent::KeyPress, key, Qt::NoModifier));
+        QCoreApplication::postEvent(this, new QKeyEvent(QEvent::KeyRelease, key, Qt::NoModifier));
+    }
+}
+
 } // namespace luna

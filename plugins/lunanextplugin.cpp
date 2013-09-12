@@ -25,6 +25,7 @@
 #include "lunaserviceadapter.h"
 #include "fpscounter.h"
 #include "screenshooter.h"
+#include "eventtype.h"
 
 static QObject *settings_callback(QQmlEngine *e, QJSEngine *)
 {
@@ -42,6 +43,7 @@ void LunaNextPlugin::registerTypes(const char *uri)
     qmlRegisterType<luna::Compositor>(uri, 0, 1, "Compositor");
     qmlRegisterSingletonType<luna::SettingsAdapter>(uri, 0, 1, "Settings", settings_callback);
     qmlRegisterUncreatableType<luna::WindowState>(uri, 0, 1, "WindowState", "WindowState can't be used as component!");
+    qmlRegisterUncreatableType<luna::EventType>(uri, 0, 1, "EventType", "EventType can't be used as component!");
     qmlRegisterType<luna::ReticleItem>(uri, 0, 1, "Reticle");
     qmlRegisterType<luna::LunaServiceAdapter>(uri, 0, 1, "LunaService");
     qmlRegisterType<luna::FpsCounter>(uri, 0, 1, "FpsCounter");
