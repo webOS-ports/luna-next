@@ -45,6 +45,7 @@ public:
     virtual void componentComplete();
 
     QWaylandSurface *fullscreenSurface() const { return mFullscreenSurface; }
+    void setFullscreenSurface(QWaylandSurface *surface);
 
     Q_INVOKABLE void clearKeyboardFocus();
     Q_INVOKABLE void closeWindowWithId(int winId);
@@ -55,9 +56,6 @@ signals:
     void windowHidden(QVariant window);
     void fullscreenSurfaceChanged();
     void windowsChanged();
-
-public slots:
-    void setFullscreenSurface(QWaylandSurface *surface);
 
 private slots:
     void surfaceMapped();
