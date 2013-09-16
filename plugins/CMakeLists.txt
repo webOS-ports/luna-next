@@ -17,6 +17,7 @@ set(SOURCES
     compositor/compositorwindow.cpp
     settingsadapter.cpp
     windowstate.cpp
+    windowtype.cpp
     reticleitem.cpp
     lunaserviceadapter.cpp
     settingsadapter.cpp
