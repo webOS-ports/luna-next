@@ -44,7 +44,16 @@ void Compositor::setFullscreenSurface(QWaylandSurface *surface)
     if (surface == mFullscreenSurface)
         return;
 
+    // Prevent flicker when returning to composited mode
+    if (!surface && mFullscreenSurface && mFullscreenSurface->surfaceItem())
+        mFullscreenSurface->surfaceItem()->update();
+
     mFullscreenSurface = surface;
+
+    const bool directRenderingSucceeded = setDirectRenderSurface(mFullscreenSurface, openglContext());
+    if (surface && !directRenderingSucceeded)
+        qWarning() << Q_FUNC_INFO << "failed to set direct rendering surface";
+
     emit fullscreenSurfaceChanged();
 }
 

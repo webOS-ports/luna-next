@@ -19,7 +19,11 @@
 
 #include <unistd.h>
 #include <stdio.h>
+#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <linux/kd.h>
+#include <fcntl.h>
 
 #include <systemd/sd-daemon.h>
 #include <Settings.h>
@@ -29,10 +33,30 @@
 #define XDG_RUNTIME_DIR_DEFAULT     "/tmp/luna-session"
 #define DEFAULT_SHELL_NAME          "card"
 
+void change_console_mode()
+{
+    int fd = open("/dev/tty0", O_RDWR);
+    if (fd == -1) {
+        qWarning("Failed to open /dev/tty0");
+        return;
+    }
+
+    int err =  ioctl(fd, KDSETMODE, KD_GRAPHICS);
+    if (err < 0) {
+        qWarning("Failed to disable console cursor");
+        return;
+    }
+
+    close(fd);
+}
+
 int main(int argc, char *argv[])
 {
     // preload all settings for later use
     Settings::LunaSettings();
+
+    if (Settings::LunaSettings()->hardwareType == Settings::HardwareTypeEmulator)
+        change_console_mode();
 
     QDir xdgRuntimeDir(XDG_RUNTIME_DIR_DEFAULT);
 

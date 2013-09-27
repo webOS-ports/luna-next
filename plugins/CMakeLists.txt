@@ -17,11 +17,13 @@ set(SOURCES
     compositor/compositorwindow.cpp
     settingsadapter.cpp
     windowstate.cpp
+    windowtype.cpp
     reticleitem.cpp
     lunaserviceadapter.cpp
     settingsadapter.cpp
     fpscounter.cpp
-    screenshooter.cpp)
+    screenshooter.cpp
+    eventtype.cpp)
 
 add_library(lunanext-qml SHARED ${SOURCES})
 target_link_libraries(lunanext-qml ${LUNA_SYSMGR_COMMON_LIBRARIES} ${LS2_LIBRARIES})

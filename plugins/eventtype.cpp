@@ -15,46 +15,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#ifndef LUNA_COMPOSITORWINDOW_H_
-#define LUNA_COMPOSITORWINDOW_H_
-
-#include "qwaylandsurface.h"
-#include "qwaylandsurfaceitem.h"
-
 #include "eventtype.h"
 
 namespace luna
 {
 
-class CompositorWindow : public QWaylandSurfaceItem
+int EventType::toKey(EventType::Event event)
 {
-    Q_OBJECT
-    Q_PROPERTY(int winId READ winId CONSTANT)
-    Q_PROPERTY(int windowType READ windowType CONSTANT)
+	int key = -1;
 
-public:
-    CompositorWindow(unsigned int winId, QWaylandSurface *surface, QQuickItem *parent = 0);
+	/* See include/public/messages/SysMgrDeviceKeydefs.h of lun-sysmgr-ipc-messages */
+	switch (event) {
+		case CoreNaviBack:
+			key = 0x1B;
+			break;
+		case CoreNaviNext:
+			key = 0xE0E3;
+		default:
+			break;
+	}
 
-    unsigned int winId() const;
-    unsigned int windowType() const;
-
-    void setClosed(bool closed);
-    void tryRemove();
-
-    bool checkIsWebAppMgr();
-
-    Q_INVOKABLE void postEvent(int event);
-
-protected:
-    virtual bool event(QEvent *event);
-
-private:
-    unsigned int mId;
-    unsigned int mWindowType;
-    bool mClosed;
-    bool mRemovePosted;
-};
+	return key;
+}
 
 } // namespace luna
-
-#endif
