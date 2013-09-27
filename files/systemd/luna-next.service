@@ -3,7 +3,7 @@ Description=The Luna Next UI
 After=webos-base.target
 
 [Service]
-Type=simple
+Type=notify
 EnvironmentFile=-/etc/luna-next/environment.conf
 ExecStart=/usr/sbin/luna-next $LUNA_NEXT_OPTIONS --systemd
 Restart=always

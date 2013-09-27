@@ -18,6 +18,7 @@
 #include <QCoreApplication>
 
 #include "compositorwindow.h"
+#include "windowtype.h"
 
 namespace luna
 {
@@ -25,14 +26,23 @@ namespace luna
 CompositorWindow::CompositorWindow(unsigned int winId, QWaylandSurface *surface, QQuickItem *parent)
     : QWaylandSurfaceItem(surface, parent),
       mId(winId),
+      mWindowType(WindowType::Card),
       mClosed(false),
       mRemovePosted(false)
 {
+    QVariantMap properties = surface->windowProperties();
+    if (properties.contains("WINDOW_TYPE"))
+        mWindowType = WindowType::fromString(properties.value("WINDOW_TYPE").toString());
 }
 
 unsigned int CompositorWindow::winId() const
 {
     return mId;
+}
+
+unsigned int CompositorWindow::windowType() const
+{
+    return mWindowType;
 }
 
 bool CompositorWindow::checkIsWebAppMgr()
@@ -71,6 +81,15 @@ bool CompositorWindow::event(QEvent *event)
     }
 
     return handled;
+}
+
+void CompositorWindow::postEvent(int event)
+{
+    int key = EventType::toKey(event);
+    if (key > 0) {
+        QCoreApplication::postEvent(this, new QKeyEvent(QEvent::KeyPress, key, Qt::NoModifier));
+        QCoreApplication::postEvent(this, new QKeyEvent(QEvent::KeyRelease, key, Qt::NoModifier));
+    }
 }
 
 } // namespace luna

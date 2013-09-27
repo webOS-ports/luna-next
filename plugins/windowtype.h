@@ -15,44 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#ifndef LUNA_COMPOSITORWINDOW_H_
-#define LUNA_COMPOSITORWINDOW_H_
+#ifndef WINDOWTYPE_H_
+#define WINDOWTYPE_H_
 
-#include "qwaylandsurface.h"
-#include "qwaylandsurfaceitem.h"
-
-#include "eventtype.h"
+#include <QObject>
 
 namespace luna
 {
 
-class CompositorWindow : public QWaylandSurfaceItem
+class WindowType : public QObject
 {
-    Q_OBJECT
-    Q_PROPERTY(int winId READ winId CONSTANT)
-    Q_PROPERTY(int windowType READ windowType CONSTANT)
+	Q_OBJECT
+	Q_ENUMS(Type)
 
 public:
-    CompositorWindow(unsigned int winId, QWaylandSurface *surface, QQuickItem *parent = 0);
 
-    unsigned int winId() const;
-    unsigned int windowType() const;
+	enum Type {
+		Card,
+		Launcher,
+		Dashboard,
+		PopupAlert,
+		BannerAlert,
+	};
 
-    void setClosed(bool closed);
-    void tryRemove();
-
-    bool checkIsWebAppMgr();
-
-    Q_INVOKABLE void postEvent(int event);
-
-protected:
-    virtual bool event(QEvent *event);
-
-private:
-    unsigned int mId;
-    unsigned int mWindowType;
-    bool mClosed;
-    bool mRemovePosted;
+	static unsigned int fromString(const QString& str);
 };
 
 } // namespace luna
