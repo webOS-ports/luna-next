@@ -17,13 +17,18 @@
 
 #include <QDir>
 
+#include <string.h>
+#include <errno.h>
+#include <error.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#include <linux/kd.h>
 #include <fcntl.h>
+
+#include <linux/kd.h>
+#include <linux/vt.h>
 
 #include <systemd/sd-daemon.h>
 #include <Settings.h>
@@ -33,21 +38,39 @@
 #define XDG_RUNTIME_DIR_DEFAULT     "/tmp/luna-session"
 #define DEFAULT_SHELL_NAME          "card"
 
-void change_console_mode()
+#ifndef KDSKBMUTE
+#define KDSKBMUTE    0x4B51
+#endif
+
+static int setup_tty()
 {
-    int fd = open("/dev/tty0", O_RDWR);
-    if (fd == -1) {
+    int ttyFd = open("/dev/tty0", O_RDWR);
+    if (ttyFd < 0) {
         qWarning("Failed to open /dev/tty0");
-        return;
+        return -1;
     }
 
-    int err =  ioctl(fd, KDSETMODE, KD_GRAPHICS);
+    // disable kernel special keys and buffering
+    int err = ioctl(ttyFd, KDSKBMUTE, 1) && ioctl(ttyFd, KDSKBMUTE, K_OFF);
     if (err < 0) {
-        qWarning("Failed to disable console cursor");
-        return;
+        err = ioctl(ttyFd, KDSKBMODE, K_OFF);
+        if (err < 0) {
+            qWarning("Failed to set K_OFF keyboard mode: %s", strerror(errno));
+            close(ttyFd);
+            return -1;
+        }
     }
 
-    close(fd);
+    err =  ioctl(ttyFd, KDSETMODE, KD_GRAPHICS);
+    if (err < 0) {
+        qWarning("Failed to set KD_GRAPHICS mode on tty: %s", strerror(errno));
+        close(ttyFd);
+        return -1;
+    }
+
+    close(ttyFd);
+
+    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -55,8 +78,10 @@ int main(int argc, char *argv[])
     // preload all settings for later use
     Settings::LunaSettings();
 
-    if (Settings::LunaSettings()->hardwareType == Settings::HardwareTypeEmulator)
-        change_console_mode();
+    if (Settings::LunaSettings()->hardwareType != Settings::HardwareTypeDesktop) {
+        if (setup_tty() < 0)
+            exit(1);
+    }
 
     QDir xdgRuntimeDir(XDG_RUNTIME_DIR_DEFAULT);
 
