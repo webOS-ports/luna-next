@@ -3,6 +3,7 @@ add_definitions(-DQT_COMPOSITOR_QUICK)
 include_directories(
     ${GLIB2_INCLUDE_DIRS}
     ${LUNA_SYSMGR_COMMON_INCLUDE_DIRS}
+    ${LUNA_SYSMGR_IPC_MESSAGES_INCLUDE_DIRS}
     ${LS2_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
@@ -23,7 +24,10 @@ set(SOURCES
     settingsadapter.cpp
     fpscounter.cpp
     screenshooter.cpp
-    eventtype.cpp)
+    eventtype.cpp
+    btdeviceclass.cpp
+    deviceinfo.cpp
+    statusbarservicesconnector.cpp)
 
 add_library(lunanext-qml SHARED ${SOURCES})
 target_link_libraries(lunanext-qml ${LUNA_SYSMGR_COMMON_LIBRARIES} ${LS2_LIBRARIES})
