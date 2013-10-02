@@ -27,10 +27,16 @@
 #include "screenshooter.h"
 #include "eventtype.h"
 #include "windowtype.h"
+#include "statusbarservicesconnector.h"
 
 static QObject *settings_callback(QQmlEngine *e, QJSEngine *)
 {
     return new luna::SettingsAdapter();
+}
+
+static QObject *statusbarservicesconnector_callback(QQmlEngine *e, QJSEngine *)
+{
+    return luna::StatusBarServicesConnector::instance();
 }
 
 LunaNextPlugin::LunaNextPlugin(QObject *parent) :
@@ -50,4 +56,6 @@ void LunaNextPlugin::registerTypes(const char *uri)
     qmlRegisterType<luna::LunaServiceAdapter>(uri, 0, 1, "LunaService");
     qmlRegisterType<luna::FpsCounter>(uri, 0, 1, "FpsCounter");
     qmlRegisterType<luna::ScreenShooter>(uri, 0, 1, "ScreenShooter");
+    qmlRegisterSingletonType<luna::StatusBarServicesConnector>(uri, 0, 1, "StatusBarServicesConnector",
+        statusbarservicesconnector_callback);
 }

@@ -100,8 +100,7 @@ int main(int argc, char *argv[])
     if (!app.create(shellName))
         exit(1);
 
-    if (app.arguments().indexOf("--systemd") >= 0)
-        sd_notify(0, "READY=1");
+    sd_notify(0, "READY=1");
 
     return app.exec();
 }

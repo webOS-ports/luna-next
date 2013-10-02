@@ -30,6 +30,8 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandSurface *surface,
       mClosed(false),
       mRemovePosted(false)
 {
+    setFlags(QQuickItem::ItemIsFocusScope | flags());
+
     QVariantMap properties = surface->windowProperties();
     if (properties.contains("WINDOW_TYPE"))
         mWindowType = WindowType::fromString(properties.value("WINDOW_TYPE").toString());
