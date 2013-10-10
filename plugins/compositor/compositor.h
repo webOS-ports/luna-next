@@ -54,6 +54,8 @@ signals:
     void windowAdded(QVariant window);
     void windowRemoved(QVariant window);
     void windowHidden(QVariant window);
+    void windowRaised(QVariant window);
+    void windowLowered(QVariant window);
     void fullscreenSurfaceChanged();
     void windowsChanged();
 
@@ -61,6 +63,10 @@ private slots:
     void surfaceMapped();
     void surfaceUnmapped();
     void frameSwappedSlot();
+    void surfaceDamaged(const QRect&);
+    void surfaceSizeChanged();
+    void surfaceRaised();
+    void surfaceLowered();
 
 protected:
     void resizeEvent(QResizeEvent *event);

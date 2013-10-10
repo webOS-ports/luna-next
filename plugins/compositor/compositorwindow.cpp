@@ -92,4 +92,9 @@ void CompositorWindow::postEvent(int event)
     }
 }
 
+void CompositorWindow::changeSize(const QSize& size)
+{
+    surface()->requestSize(size);
+}
+
 } // namespace luna
