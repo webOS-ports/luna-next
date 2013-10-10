@@ -44,6 +44,7 @@ public:
     bool checkIsWebAppMgr();
 
     Q_INVOKABLE void postEvent(int event);
+    Q_INVOKABLE void changeSize(const QSize& size);
 
 protected:
     virtual bool event(QEvent *event);
