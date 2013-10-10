@@ -134,7 +134,44 @@ void Compositor::resizeEvent(QResizeEvent *event)
 void Compositor::surfaceCreated(QWaylandSurface *surface)
 {
     connect(surface, SIGNAL(mapped()), this, SLOT(surfaceMapped()));
-    connect(surface, SIGNAL(unmapped()), this,SLOT(surfaceUnmapped()));
+    connect(surface, SIGNAL(unmapped()), this, SLOT(surfaceUnmapped()));
+    connect(surface, SIGNAL(raiseRequested()), this, SLOT(surfaceRaised()));
+    connect(surface, SIGNAL(lowerRequested()), this, SLOT(surfaceLowered()));
+    connect(surface, SIGNAL(sizeChanged()), this, SLOT(surfaceSizeChanged()));
+    connect(surface, SIGNAL(damaged(const QRect&)), this, SLOT(surfaceDamaged(const QRect&)));
+}
+
+void Compositor::surfaceRaised()
+{
+    QWaylandSurface *surface = qobject_cast<QWaylandSurface*>(sender());
+    CompositorWindow *window = static_cast<CompositorWindow*>(surface->surfaceItem());
+
+    if (window)
+        emit windowRaised(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+}
+
+void Compositor::surfaceLowered()
+{
+    QWaylandSurface *surface = qobject_cast<QWaylandSurface*>(sender());
+    CompositorWindow *window = static_cast<CompositorWindow*>(surface->surfaceItem());
+
+    if (window)
+        emit windowLowered(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+}
+
+void Compositor::surfaceSizeChanged()
+{
+    QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(sender());
+
+    CompositorWindow *window = static_cast<CompositorWindow*>(surface->surfaceItem());
+    if (window)
+        window->setSize(surface->size());
+}
+
+void Compositor::surfaceDamaged(const QRect&)
+{
+    if (!isVisible())
+        frameFinished(0);
 }
 
 } // namespace luna
