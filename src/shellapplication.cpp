@@ -22,6 +22,7 @@
 #include <QQmlComponent>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QFont>
 
 #include "shellapplication.h"
 
@@ -73,6 +74,11 @@ bool ShellApplication::create(const QString& name)
     if (!(root.contains("name") && root.value("name").toString() == name) || !root.contains("main")) {
         qWarning() << "Failed to load shell" << name << "cause of a invalid manifest";
         return false;
+    }
+
+    if (root.contains("defaultFont") && root.value("defaultFont").isString()) {
+        QFont defaultFont(root.value("defaultFont").toString());
+        setFont(defaultFont);
     }
 
     QString mainPath(QString("%1/%2").arg(shellPath).arg(root.value("main").toString()));

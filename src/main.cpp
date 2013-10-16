@@ -42,12 +42,12 @@
 #define KDSKBMUTE    0x4B51
 #endif
 
-static int setup_tty()
+static void setup_tty()
 {
     int ttyFd = open("/dev/tty0", O_RDWR);
     if (ttyFd < 0) {
         qWarning("Failed to open /dev/tty0");
-        return -1;
+        return;
     }
 
     // disable kernel special keys and buffering
@@ -57,7 +57,7 @@ static int setup_tty()
         if (err < 0) {
             qWarning("Failed to set K_OFF keyboard mode: %s", strerror(errno));
             close(ttyFd);
-            return -1;
+            return;
         }
     }
 
@@ -65,12 +65,10 @@ static int setup_tty()
     if (err < 0) {
         qWarning("Failed to set KD_GRAPHICS mode on tty: %s", strerror(errno));
         close(ttyFd);
-        return -1;
+        return;
     }
 
     close(ttyFd);
-
-    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -78,10 +76,8 @@ int main(int argc, char *argv[])
     // preload all settings for later use
     Settings::LunaSettings();
 
-    if (Settings::LunaSettings()->hardwareType != Settings::HardwareTypeDesktop) {
-        if (setup_tty() < 0)
-            exit(1);
-    }
+    if (Settings::LunaSettings()->hardwareType != Settings::HardwareTypeDesktop)
+        setup_tty();
 
     QDir xdgRuntimeDir(XDG_RUNTIME_DIR_DEFAULT);
 
