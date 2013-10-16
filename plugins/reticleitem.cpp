@@ -52,8 +52,8 @@ void ReticleItem::startAt(const QPoint& pos)
 	if (mAnimation)
 		mAnimation->stop();
 
-	setX(pos.x());
-	setY(pos.y());
+	setX(pos.x() - width() / 2);
+	setY(pos.y() - height() / 2);
 	setVisible(true);
 	setOpacity(1);
 	setScale(1);
