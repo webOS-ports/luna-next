@@ -31,8 +31,8 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandSurface *surface,
       mRemovePosted(false)
 {
     QVariantMap properties = surface->windowProperties();
-    if (properties.contains("WINDOW_TYPE"))
-        mWindowType = WindowType::fromString(properties.value("WINDOW_TYPE").toString());
+    if (properties.contains("type"))
+        mWindowType = WindowType::fromString(properties.value("type").toString());
 }
 
 unsigned int CompositorWindow::winId() const
