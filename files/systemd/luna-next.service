@@ -1,6 +1,8 @@
 [Unit]
 Description=The Luna Next UI
 Conflicts=getty@tty1.service
+Requires=LunaSysMgr.service
+After=LunaSysMgr.service
 
 [Service]
 Type=notify
