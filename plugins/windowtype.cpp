@@ -30,6 +30,8 @@ unsigned int WindowType::fromString(const QString& str)
         return WindowType::BannerAlert;
     else if (str == "popupalert")
         return WindowType::PopupAlert;
+    else if (str == "overlay")
+        return WindowType::Overlay;
 
     return WindowType::Card;
 }
