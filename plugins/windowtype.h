@@ -36,6 +36,7 @@ public:
 		Dashboard,
 		PopupAlert,
 		BannerAlert,
+		Overlay,
 	};
 
 	static unsigned int fromString(const QString& str);
