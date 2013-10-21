@@ -47,7 +47,7 @@ unsigned int CompositorWindow::windowType() const
     return mWindowType;
 }
 
-bool CompositorWindow::checkIsWebAppMgr()
+bool CompositorWindow::checkIsAllowedToStay()
 {
     if (!surface())
         return false;
@@ -57,7 +57,8 @@ bool CompositorWindow::checkIsWebAppMgr()
         return false;
 
     // FIXME make path to WebAppMgr configurable
-    return procExeEntry.symLinkTarget() == "/usr/sbin/WebAppMgr";
+    return (procExeEntry.symLinkTarget() == "/usr/sbin/WebAppMgr" ||
+            procExeEntry.symLinkTarget() == "/usr/bin/maliit-server");
 }
 
 void CompositorWindow::setClosed(bool closed)
