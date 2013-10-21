@@ -41,7 +41,7 @@ public:
     void setClosed(bool closed);
     void tryRemove();
 
-    bool checkIsWebAppMgr();
+    bool checkIsAllowedToStay();
 
     Q_INVOKABLE void postEvent(int event);
     Q_INVOKABLE void changeSize(const QSize& size);
