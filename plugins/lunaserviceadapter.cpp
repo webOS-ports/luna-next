@@ -17,6 +17,7 @@
 
 #include <glib.h>
 #include <QJSValueList>
+#include <QDebug>
 
 #include "lunaserviceadapter.h"
 
@@ -231,6 +232,8 @@ void LunaServiceAdapter::componentComplete()
 
     mInitialized = true;
 
+    emit initialized();
+
     return;
 
 error:
@@ -268,6 +271,127 @@ void LunaServiceAdapter::setUsePrivateBus(bool usePrivateBus)
     }
 
     mUsePrivateBus = usePrivateBus;
+}
+
+LunaServiceAdapter::RegisteredMethod::RegisteredMethod(const QString &name, QJSValue callback)
+    : mCallback(callback)
+{
+    memset(&mMethods, 0, sizeof(mMethods));
+    mMethods[0].name = g_strdup(name.toUtf8().constData());
+    mMethods[0].function = &LunaServiceAdapter::serviceMethodCallback;
+}
+
+LunaServiceAdapter::RegisteredMethod::~RegisteredMethod()
+{
+    if (mMethods[0].name != 0)
+        g_free(mMethods[0].name);
+}
+
+LSMethod* LunaServiceAdapter::RegisteredMethod::methods()
+{
+    return mMethods;
+}
+
+QJSValue LunaServiceAdapter::RegisteredMethod::callback()
+{
+    return mCallback;
+}
+
+QString LunaServiceAdapter::buildMethodPath(const QString& category, const QString& method)
+{
+    QString methodPath;
+
+    if (category.endsWith("/"))
+        methodPath = category + method;
+    else
+        methodPath = category + "/" + method;
+
+    return methodPath;
+}
+
+bool LunaServiceAdapter::registerMethod(const QString& category, const QString& name, QJSValue callback)
+{
+    LSError error;
+
+    QString methodPath = buildMethodPath(category, name);
+    if (mServiceMethodCallbacks.contains(methodPath)) {
+        qWarning() << "Method" << name << "for category" << category
+                   << "already has a registered handler";
+        return false;
+    }
+
+    if (!callback.isCallable()) {
+        qWarning() << "Got something as callback which is not callable:" << callback.toString();
+        return false;
+    }
+
+    LSErrorInit(&error);
+
+    RegisteredMethod *m = new RegisteredMethod(name, callback);
+    if (!LSRegisterCategoryAppend(mServiceHandle, category.toUtf8().constData(),
+                                  m->methods(), NULL, &error)) {
+        qWarning() << "Could not register method handler for method"
+                   << name << "in category" << category  << ":" << error.message;
+        LSErrorFree(&error);
+        delete m;
+        return false;
+    }
+
+    // It's not a problem if we override the data here for a category again and again as
+    // we only have one instance per service
+    if (!LSCategorySetData(mServiceHandle, category.toUtf8().constData(), this, &error)) {
+        qWarning() << "Failed to set data for category" << category << ":"
+                   << error.message;
+        LSErrorFree(&error);
+        return false;
+    }
+
+    mServiceMethodCallbacks.insert(methodPath, m);
+
+    return true;
+}
+
+bool LunaServiceAdapter::serviceMethodCallback(LSHandle *handle, LSMessage *message, void *data)
+{
+    LunaServiceAdapter *instance = static_cast<LunaServiceAdapter*>(data);
+    return instance->handleServiceMethodCallback(handle, message);
+}
+
+bool LunaServiceAdapter::handleServiceMethodCallback(LSHandle *handle, LSMessage *message)
+{
+    QString category = LSMessageGetCategory(message);
+    QString method = LSMessageGetMethod(message);
+
+    QString methodPath = buildMethodPath(category, method);
+
+    if (!mServiceMethodCallbacks.contains(methodPath)) {
+        qWarning() << "We don't have a register method" << methodPath;
+        return false;
+    }
+
+    RegisteredMethod *m = mServiceMethodCallbacks.value(methodPath);
+
+    QString data = LSMessageGetPayload(message);
+    QJSValue response = m->callback().call(QJSValueList() << data);
+
+    if (!response.isObject()) {
+        qWarning() << "Got something from callback which isn't an object:" << response.toString();
+        qWarning() << "Not sending response to client";
+        return false;
+    }
+
+    QString responseStr = response.toString();
+    LSError error;
+
+    LSErrorInit(&error);
+
+    if (!LSMessageReply(handle, message, responseStr.toUtf8().constData(), &error)) {
+        qWarning() << "Failed to send response to client:" << error.message;
+        LSErrorFree(&error);
+        return false;
+    }
+
+    return true;
 }
 
 LunaServiceCall* LunaServiceAdapter::createAndExecuteCall(const QString& uri, const QString& arguments, QJSValue callback,  QJSValue errorCallback, int responseLimit)
