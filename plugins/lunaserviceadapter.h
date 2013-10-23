@@ -76,6 +76,10 @@ public:
 
     Q_INVOKABLE QObject* call(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback);
     Q_INVOKABLE QObject* subscribe(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback);
+    Q_INVOKABLE bool registerMethod(const QString& category, const QString& name, QJSValue callback);
+
+signals:
+    void initialized();
 
 private:
     QString mName;
@@ -84,6 +88,27 @@ private:
     bool mInitialized;
 
     LunaServiceCall* createAndExecuteCall(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback, int responseLimit);
+
+    QString buildMethodPath(const QString& category, const QString& method);
+
+    static bool serviceMethodCallback(LSHandle *handle, LSMessage *message, void *data);
+    bool handleServiceMethodCallback(LSHandle *handle, LSMessage *message);
+
+    class RegisteredMethod
+    {
+    public:
+        RegisteredMethod(const QString& name, QJSValue callback);
+        ~RegisteredMethod();
+
+        LSMethod* methods();
+        QJSValue callback();
+
+    private:
+        LSMethod mMethods[2];
+        QJSValue mCallback;
+    };
+
+    QMap<QString, RegisteredMethod*> mServiceMethodCallbacks;
 
     static GMainLoop *mainLoop();
 };
