@@ -82,9 +82,21 @@ void Compositor::surfaceMapped()
     if (!surface->hasShellSurface())
         return;
 
+    // Determine the parent the future CompositorWindow.
+    // If there is a transient parent on the surface, try to put
+    // the corresponding parent for the CompositorWindow.
+    QQuickItem *surfaceItemParent = contentItem();
+    QWaylandSurface *surfaceTransientParent = surface->transientParent();
+    if( surfaceTransientParent ) {
+        CompositorWindow *windowParent = qobject_cast<CompositorWindow*>(surfaceTransientParent->surfaceItem());
+        if( windowParent )
+            surfaceItemParent = windowParent;
+    }
+
     unsigned int windowId = mNextWindowId++;
-    CompositorWindow *window = new CompositorWindow(windowId, surface, contentItem());
+    CompositorWindow *window = new CompositorWindow(windowId, surface, surfaceItemParent);
     window->setSize(surface->size());
+    window->setPosition(surface->pos());
     // QObject::connect(window, SIGNAL(destroyed(QObject*)), this, SLOT(windowDestroyed(QObject*)));
     mWindows.insert(windowId, window);
 
@@ -105,6 +117,25 @@ void Compositor::surfaceUnmapped()
 
 void Compositor::surfaceAboutToBeDestroyed(QWaylandSurface *surface)
 {
+    // First, tell all the transient children windows that they are going to be destroyed too
+    QHash<unsigned int, CompositorWindow*>::iterator i = mWindows.begin();
+    while (i != mWindows.end()) {
+        CompositorWindow *registeredWindow = i.value();
+        ++i;
+        if( registeredWindow ) {
+            QWaylandSurface *registeredSurface = registeredWindow->surface();
+            if( registeredSurface && registeredSurface->transientParent() == surface ) {
+                qWarning() << Q_FUNC_INFO << "the surface " << registeredSurface << " is a child of " << surface << "and will be destroyed too";
+
+                surfaceAboutToBeDestroyed(registeredSurface);
+
+                // The mWindows hash table has been modified, so restart from the beginning.
+                // This should be improved !
+                i = mWindows.begin();
+            }
+        }
+    }
+
     CompositorWindow *window = static_cast<CompositorWindow*>(surface->surfaceItem());
     surface->setSurfaceItem(0);
 
