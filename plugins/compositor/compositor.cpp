@@ -82,27 +82,43 @@ void Compositor::surfaceMapped()
     if (!surface->hasShellSurface())
         return;
 
-    // Determine the parent the future CompositorWindow.
-    // If there is a transient parent on the surface, try to put
-    // the corresponding parent for the CompositorWindow.
-    QQuickItem *surfaceItemParent = contentItem();
-    QWaylandSurface *surfaceTransientParent = surface->transientParent();
-    if( surfaceTransientParent ) {
-        CompositorWindow *windowParent = qobject_cast<CompositorWindow*>(surfaceTransientParent->surfaceItem());
-        if( windowParent )
-            surfaceItemParent = windowParent;
+    bool bIsSurfaceNew = false;
+
+    CompositorWindow *window = qobject_cast<CompositorWindow*>(surface->surfaceItem());
+    //Create a CompositorWindow if we have not yet
+    if (!window) {
+        // Determine the parent the future CompositorWindow.
+        // If there is a transient parent on the surface, try to put
+        // the corresponding parent for the CompositorWindow.
+        QQuickItem *surfaceItemParent = contentItem();
+        QWaylandSurface *surfaceTransientParent = surface->transientParent();
+        if( surfaceTransientParent ) {
+            CompositorWindow *windowParent = qobject_cast<CompositorWindow*>(surfaceTransientParent->surfaceItem());
+            if( windowParent )
+                surfaceItemParent = windowParent;
+        }
+
+        unsigned int windowId = mNextWindowId++;
+        window = new CompositorWindow(windowId, surface, surfaceItemParent);
+        window->setSize(surface->size());
+        window->setPosition(surface->pos());
+        // QObject::connect(window, SIGNAL(destroyed(QObject*)), this, SLOT(windowDestroyed(QObject*)));
+        mWindows.insert(windowId, window);
+
+        bIsSurfaceNew = true;
     }
 
-    unsigned int windowId = mNextWindowId++;
-    CompositorWindow *window = new CompositorWindow(windowId, surface, surfaceItemParent);
-    window->setSize(surface->size());
-    window->setPosition(surface->pos());
-    // QObject::connect(window, SIGNAL(destroyed(QObject*)), this, SLOT(windowDestroyed(QObject*)));
-    mWindows.insert(windowId, window);
-
     window->setTouchEventsEnabled(true);
+    window->setPaintEnabled(true);
 
-    emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+    qWarning() << Q_FUNC_INFO << "the window " << window << "is going to be added/shown";
+
+    if( bIsSurfaceNew ) {
+        emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+    }
+    else {
+        emit windowShown(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+    }
 }
 
 void Compositor::surfaceUnmapped()
@@ -112,11 +128,17 @@ void Compositor::surfaceUnmapped()
         setFullscreenSurface(0);
 
     CompositorWindow *window = qobject_cast<CompositorWindow*>(surface->surfaceItem());
+    qWarning() << Q_FUNC_INFO << "the window " << window << "is going to be hidden";
+    window->setPaintEnabled(false);
+
     emit windowHidden(QVariant::fromValue(static_cast<QQuickItem*>(window)));
 }
 
 void Compositor::surfaceAboutToBeDestroyed(QWaylandSurface *surface)
 {
+    CompositorWindow *window = static_cast<CompositorWindow*>(surface->surfaceItem());
+    //if( window->checkIsAllowedToStay() ) return;
+
     // First, tell all the transient children windows that they are going to be destroyed too
     QHash<unsigned int, CompositorWindow*>::iterator i = mWindows.begin();
     while (i != mWindows.end()) {
@@ -136,7 +158,6 @@ void Compositor::surfaceAboutToBeDestroyed(QWaylandSurface *surface)
         }
     }
 
-    CompositorWindow *window = static_cast<CompositorWindow*>(surface->surfaceItem());
     surface->setSurfaceItem(0);
 
     if (surface == mFullscreenSurface)
@@ -204,5 +225,6 @@ void Compositor::surfaceDamaged(const QRect&)
     if (!isVisible())
         frameFinished(0);
 }
+
 
 } // namespace luna
