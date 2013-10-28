@@ -30,7 +30,7 @@ set(SOURCES
     statusbarservicesconnector.cpp)
 
 add_library(lunanext-qml SHARED ${SOURCES})
-target_link_libraries(lunanext-qml ${LUNA_SYSMGR_COMMON_LIBRARIES} ${LS2_LIBRARIES})
+target_link_libraries(lunanext-qml ${LUNA_SYSMGR_COMMON_LIBRARIES} ${LS2_LIBRARIES} ${LUNA_PREFS_LIBRARIES})
 
 qt5_use_modules(lunanext-qml Qml Quick Compositor)
 

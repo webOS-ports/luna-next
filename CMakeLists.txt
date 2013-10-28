@@ -44,6 +44,7 @@ pkg_check_modules(GLIB2 glib-2.0 REQUIRED)
 pkg_check_modules(LUNA_SYSMGR_COMMON LunaSysMgrCommon REQUIRED)
 pkg_check_modules(LUNA_SYSMGR_IPC_MESSAGES LunaSysMgrIpcMessages REQUIRED)
 pkg_check_modules(LS2 luna-service2 REQUIRED)
+pkg_check_modules(LUNA_PREFS luna-prefs REQUIRED)
 
 add_subdirectory(src)
 add_subdirectory(plugins)

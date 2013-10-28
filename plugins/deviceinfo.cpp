@@ -56,15 +56,12 @@ std::string DeviceInfo::jsonString() const
 
 static bool getLunaPrefSystemValue(const char* key, std::string& value)
 {
-#if defined(HAS_LUNA_PREF)
-
 	char* str = 0;
 	if (LP_ERR_NONE == LPSystemCopyStringValue(key, &str) && str) {
 		value = str;
 		g_free((gchar*) str);
 		return true;
-	}	
-#endif
+	}
 
 	value = LOCALIZED("Unknown");
 	return false;
