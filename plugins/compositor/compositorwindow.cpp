@@ -16,6 +16,8 @@
  */
 
 #include <QCoreApplication>
+#include <QWaylandCompositor>
+#include <QWaylandInputDevice>
 
 #include "compositorwindow.h"
 #include "windowtype.h"
@@ -90,8 +92,13 @@ void CompositorWindow::postEvent(int event)
 {
     int key = EventType::toKey(event);
     if (key > 0) {
-        QCoreApplication::postEvent(this, new QKeyEvent(QEvent::KeyPress, key, Qt::NoModifier));
-        QCoreApplication::postEvent(this, new QKeyEvent(QEvent::KeyRelease, key, Qt::NoModifier));
+        QWaylandInputDevice *inputDevice = surface()->compositor()->defaultInputDevice();
+
+        QKeyEvent *event = new QKeyEvent(QEvent::KeyPress, key, Qt::NoModifier);
+        inputDevice->sendFullKeyEvent(surface(), event);
+
+        event = new QKeyEvent(QEvent::KeyRelease, key, Qt::NoModifier);
+        inputDevice->sendFullKeyEvent(surface(), event);
     }
 }
 
