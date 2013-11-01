@@ -109,7 +109,6 @@ void Compositor::surfaceMapped()
     }
 
     window->setTouchEventsEnabled(true);
-    window->setPaintEnabled(true);
 
     qWarning() << Q_FUNC_INFO << "the window " << window << "is going to be added/shown";
 
@@ -129,7 +128,6 @@ void Compositor::surfaceUnmapped()
 
     CompositorWindow *window = qobject_cast<CompositorWindow*>(surface->surfaceItem());
     qWarning() << Q_FUNC_INFO << "the window " << window << "is going to be hidden";
-    window->setPaintEnabled(false);
 
     emit windowHidden(QVariant::fromValue(static_cast<QQuickItem*>(window)));
 }
@@ -137,7 +135,6 @@ void Compositor::surfaceUnmapped()
 void Compositor::surfaceAboutToBeDestroyed(QWaylandSurface *surface)
 {
     CompositorWindow *window = static_cast<CompositorWindow*>(surface->surfaceItem());
-    //if( window->checkIsAllowedToStay() ) return;
 
     // First, tell all the transient children windows that they are going to be destroyed too
     QHash<unsigned int, CompositorWindow*>::iterator i = mWindows.begin();
