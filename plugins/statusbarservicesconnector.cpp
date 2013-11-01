@@ -2850,7 +2850,7 @@ bool StatusBarServicesConnector::wiFiServiceUpCallback(LSHandle* handle, LSMessa
 				m_wifiSSID.clear();
 				m_wifiRadioOn = false;
 				m_wifiConnected = false;
-				Q_EMIT signalWifiStateChanged(m_wifiRadioOn, m_wifiConnected, m_wifiSSID, "");
+				Q_EMIT signalWifiStateChanged(m_wifiRadioOn, m_wifiConnected, QString::fromStdString(m_wifiSSID), "");
 
 				//Subscribe to Connection Manager Route Status Notifications.
 				result = LSCall(handle, "palm://com.palm.wifi/getstatus", "{\"subscribe\":true}",
@@ -2867,7 +2867,7 @@ bool StatusBarServicesConnector::wiFiServiceUpCallback(LSHandle* handle, LSMessa
 					m_wifiSSID.clear();
 					m_wifiRadioOn = false;
 					Q_EMIT signalWifiIndexChanged(false, StatusBar::WIFI_OFF);
-					Q_EMIT signalWifiStateChanged(m_wifiRadioOn, m_wifiConnected, m_wifiSSID, "");
+					Q_EMIT signalWifiStateChanged(m_wifiRadioOn, m_wifiConnected, QString::fromStdString(m_wifiSSID), "");
 				}
 			}
 		}
@@ -2921,18 +2921,21 @@ bool StatusBarServicesConnector::wifiEventsCallback(LSHandle* handle, LSMessage*
 						if(!strcmp(connectState, "associating") || !strcmp(connectState, "associated")) {
 							m_wifiSSID = std::string(ssid);
 							Q_EMIT signalWifiIndexChanged(true, StatusBar::WIFI_CONNECTING);
-							Q_EMIT signalWifiStateChanged(m_wifiRadioOn, m_wifiConnected, m_wifiSSID, connectState);
+							Q_EMIT signalWifiStateChanged(m_wifiRadioOn, m_wifiConnected,
+								QString::fromStdString(m_wifiSSID), QString::fromStdString(connectState));
 						}
 						else if(!strcmp(connectState, "ipFailed") || !strcmp(connectState, "notAssociated") || !strcmp(connectState, "associationFailed")) {
 							m_wifiSSID.clear();
 							m_wifiConnected = false;
 							Q_EMIT signalWifiIndexChanged(true, StatusBar::WIFI_ON);
-							Q_EMIT signalWifiStateChanged(m_wifiRadioOn, m_wifiConnected, m_wifiSSID, connectState);
+							Q_EMIT signalWifiStateChanged(m_wifiRadioOn, m_wifiConnected,
+								QString::fromStdString(m_wifiSSID), QString::fromStdString(connectState));
 
 						} else if(!strcmp(connectState, "ipConfigured")) {
 							m_wifiConnected = true;
 							m_wifiSSID = std::string(ssid);
-							Q_EMIT signalWifiStateChanged(m_wifiRadioOn, m_wifiConnected, m_wifiSSID, connectState);
+							Q_EMIT signalWifiStateChanged(m_wifiRadioOn, m_wifiConnected,
+								QString::fromStdString(m_wifiSSID), QString::fromStdString(connectState));
 
 							label = json_object_object_get(networkInfo, "signalBars");
 							if (label && !is_error(label) && json_object_is_type(label, json_type_int)) {
@@ -2961,14 +2964,14 @@ bool StatusBarServicesConnector::wifiEventsCallback(LSHandle* handle, LSMessage*
 				m_wifiSSID.clear();
 				m_wifiRadioOn = true;
 				Q_EMIT signalWifiIndexChanged(true, StatusBar::WIFI_ON);
-				Q_EMIT signalWifiStateChanged(m_wifiRadioOn, m_wifiConnected, m_wifiSSID, "");
+				Q_EMIT signalWifiStateChanged(m_wifiRadioOn, m_wifiConnected, QString::fromStdString(m_wifiSSID), "");
 				updateAirplaneModeProgress(AP_MODE_WIFI);
 			} else if(!strcmp(status, "serviceDisabled")) {
 				m_wifiConnected = false;
 				m_wifiSSID.clear();
 				m_wifiRadioOn = false;
 				Q_EMIT signalWifiIndexChanged(false, StatusBar::WIFI_OFF);
-				Q_EMIT signalWifiStateChanged(m_wifiRadioOn, m_wifiConnected, m_wifiSSID, "");
+				Q_EMIT signalWifiStateChanged(m_wifiRadioOn, m_wifiConnected, QString::fromStdString(m_wifiSSID), "");
 				updateAirplaneModeProgress(AP_MODE_WIFI);
 			}
 
