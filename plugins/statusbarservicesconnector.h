@@ -20,6 +20,7 @@
 #define STATUSBARSERVICESCONNECTOR_H
 
 #include <QObject>
+#include <QString>
 #include <luna-service2/lunaservice.h>
 #include <set>
 
@@ -74,8 +75,11 @@ typedef enum PhoneType {
 	PHONE_TYPE_NONE
 } t_phoneType;
 
-class StatusBar
+class StatusBar : public QObject
 {
+	Q_OBJECT
+	Q_ENUMS(IndexRSSI IndexRSSI1x IndexWAN IndexBluetooth IndexWiFi)
+
 public:
 	// Info Items Index Enumerations
 	enum IndexRSSI {
@@ -262,21 +266,21 @@ Q_SIGNALS:
 	void signalBatteryLevelUpdated(int percentage);
 	void signalChargingStateUpdated(bool charging);
 	void signalCarrierTextChanged(const char* text);
-	void signalRssiIndexChanged(bool show, StatusBar::IndexRSSI index);
-	void signalRssi1xIndexChanged(bool show, StatusBar::IndexRSSI1x index);
+	void signalRssiIndexChanged(bool show, int index);
+	void signalRssi1xIndexChanged(bool show, int index);
 	void signalTTYStateChanged(bool enabled);
 	void signalHACStateChanged(bool enabled);
 	void signalCallForwardStateChanged(bool enabled);
 	void signalRoamingStateChanged(bool enabled);
 	void signalVpnStateChanged(bool enabled);
-	void signalWanIndexChanged(bool show, StatusBar::IndexWAN index);
-	void signalBluetoothIndexChanged(bool show, StatusBar::IndexBluetooth index);
-	void signalWifiIndexChanged(bool show, StatusBar::IndexWiFi index);
+	void signalWanIndexChanged(bool show, int index);
+	void signalBluetoothIndexChanged(bool show, int index);
+	void signalWifiIndexChanged(bool show, int index);
 	void signalSystemTimeChanged();
 
 
 	// Signals for the System Menu
-	void signalWifiStateChanged(bool wifiOn, bool wifiConnected, std::string wifiSSID, std::string wifiConnState);
+	void signalWifiStateChanged(bool wifiOn, bool wifiConnected, const QString& wifiSSID, const QString& wifiConnState);
 	void signalWifiAvailableNetworksListUpdate(int numNetworks, t_wifiAccessPoint* list);
 	void signalBluetoothTurnedOn();
 	void signalBluetoothPowerStateChanged(t_radioState radioState);

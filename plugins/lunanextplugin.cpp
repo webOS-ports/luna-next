@@ -64,5 +64,6 @@ void LunaNextPlugin::registerTypes(const char *uri)
     qmlRegisterType<luna::ScreenShooter>(uri, 0, 1, "ScreenShooter");
     qmlRegisterSingletonType<luna::StatusBarServicesConnector>(uri, 0, 1, "StatusBarServicesConnector",
         statusbarservicesconnector_callback);
+    qmlRegisterUncreatableType<luna::StatusBar>(uri, 0, 1, "StatusBarIconIndex", "StatusBarIconIndex can't be used as component");
     qmlRegisterSingletonType<luna::Units>(uri, 0, 1, "Units", units_callback);
 }
