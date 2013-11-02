@@ -53,6 +53,7 @@ public:
 signals:
     void windowAdded(QVariant window);
     void windowRemoved(QVariant window);
+    void windowShown(QVariant window);
     void windowHidden(QVariant window);
     void windowRaised(QVariant window);
     void windowLowered(QVariant window);
