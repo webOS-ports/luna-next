@@ -30,7 +30,7 @@ class Units : public QObject
 public:
     explicit Units();
 
-    float length(int lengthAt132DPI);
+    Q_INVOKABLE float length(int lengthAt132DPI);
 };
 
 }
