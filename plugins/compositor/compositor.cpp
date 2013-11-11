@@ -102,6 +102,9 @@ void Compositor::surfaceMapped()
         window = new CompositorWindow(windowId, surface, surfaceItemParent);
         window->setSize(surface->size());
         window->setPosition(surface->pos());
+        window->setFlag(QQuickItem::ItemIsFocusScope, true);
+        window->setUseTextureAlpha(true);
+
         // QObject::connect(window, SIGNAL(destroyed(QObject*)), this, SLOT(windowDestroyed(QObject*)));
         mWindows.insert(windowId, window);
 
