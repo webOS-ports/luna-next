@@ -15,6 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+#if 0
+// enable the following to be able to use QML debugging/profiling. You have to start
+// luna-next on the device with the following arguments: -qmljsdebugger=port:3768,block
+// (see http://stackoverflow.com/questions/13366495/how-to-qt-qml-debugging-and-or-profiling)
+#define QT_QML_DEBUG
+#endif
+
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
