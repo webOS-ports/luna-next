@@ -87,19 +87,8 @@ void Compositor::surfaceMapped()
     CompositorWindow *window = qobject_cast<CompositorWindow*>(surface->surfaceItem());
     //Create a CompositorWindow if we have not yet
     if (!window) {
-        // Determine the parent the future CompositorWindow.
-        // If there is a transient parent on the surface, try to put
-        // the corresponding parent for the CompositorWindow.
-        QQuickItem *surfaceItemParent = contentItem();
-        QWaylandSurface *surfaceTransientParent = surface->transientParent();
-        if( surfaceTransientParent ) {
-            CompositorWindow *windowParent = qobject_cast<CompositorWindow*>(surfaceTransientParent->surfaceItem());
-            if( windowParent )
-                surfaceItemParent = windowParent;
-        }
-
         unsigned int windowId = mNextWindowId++;
-        window = new CompositorWindow(windowId, surface, surfaceItemParent);
+        window = new CompositorWindow(windowId, surface, contentItem());
         window->setSize(surface->size());
         window->setPosition(surface->pos());
         window->setFlag(QQuickItem::ItemIsFocusScope, true);
@@ -138,25 +127,6 @@ void Compositor::surfaceUnmapped()
 void Compositor::surfaceAboutToBeDestroyed(QWaylandSurface *surface)
 {
     CompositorWindow *window = static_cast<CompositorWindow*>(surface->surfaceItem());
-
-    // First, tell all the transient children windows that they are going to be destroyed too
-    QHash<unsigned int, CompositorWindow*>::iterator i = mWindows.begin();
-    while (i != mWindows.end()) {
-        CompositorWindow *registeredWindow = i.value();
-        ++i;
-        if( registeredWindow ) {
-            QWaylandSurface *registeredSurface = registeredWindow->surface();
-            if( registeredSurface && registeredSurface->transientParent() == surface ) {
-                qWarning() << Q_FUNC_INFO << "the surface " << registeredSurface << " is a child of " << surface << "and will be destroyed too";
-
-                surfaceAboutToBeDestroyed(registeredSurface);
-
-                // The mWindows hash table has been modified, so restart from the beginning.
-                // This should be improved !
-                i = mWindows.begin();
-            }
-        }
-    }
 
     surface->setSurfaceItem(0);
 
