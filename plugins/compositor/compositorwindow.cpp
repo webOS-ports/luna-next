@@ -35,6 +35,8 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandSurface *surface,
     QVariantMap properties = surface->windowProperties();
     if (properties.contains("type"))
         mWindowType = WindowType::fromString(properties.value("type").toString());
+    if (properties.contains("appId"))
+        mAppId = properties.value("appId").toString();
 }
 
 unsigned int CompositorWindow::winId() const
@@ -45,6 +47,11 @@ unsigned int CompositorWindow::winId() const
 unsigned int CompositorWindow::windowType() const
 {
     return mWindowType;
+}
+
+QString CompositorWindow::appId() const
+{
+    return mAppId;
 }
 
 bool CompositorWindow::checkIsAllowedToStay()
