@@ -31,12 +31,14 @@ class CompositorWindow : public QWaylandSurfaceItem
     Q_OBJECT
     Q_PROPERTY(int winId READ winId CONSTANT)
     Q_PROPERTY(int windowType READ windowType CONSTANT)
+    Q_PROPERTY(QString appId READ appId CONSTANT)
 
 public:
     CompositorWindow(unsigned int winId, QWaylandSurface *surface, QQuickItem *parent = 0);
 
     unsigned int winId() const;
     unsigned int windowType() const;
+    QString appId() const;
 
     void setClosed(bool closed);
     void tryRemove();
