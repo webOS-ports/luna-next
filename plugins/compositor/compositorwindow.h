@@ -56,6 +56,7 @@ private:
     unsigned int mWindowType;
     bool mClosed;
     bool mRemovePosted;
+    QString mAppId;
 };
 
 } // namespace luna
