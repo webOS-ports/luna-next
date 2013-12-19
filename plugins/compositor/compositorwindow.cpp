@@ -54,6 +54,13 @@ QString CompositorWindow::appId() const
     return mAppId;
 }
 
+quint64 CompositorWindow::processId() const
+{
+    if (surface())
+        return surface()->processId();
+    return 0;
+}
+
 bool CompositorWindow::checkIsAllowedToStay()
 {
     if (!surface())
