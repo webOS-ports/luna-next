@@ -70,8 +70,7 @@ bool CompositorWindow::checkIsAllowedToStay()
     if (!procExeEntry.exists())
         return false;
 
-    // FIXME make path to WebAppMgr configurable
-    return (procExeEntry.symLinkTarget() == "/usr/sbin/WebAppMgr" ||
+    return (procExeEntry.symLinkTarget() == "/usr/sbin/webapp-launcher" ||
             procExeEntry.symLinkTarget() == "/usr/bin/maliit-server");
 }
 
