@@ -374,13 +374,17 @@ bool LunaServiceAdapter::handleServiceMethodCallback(LSHandle *handle, LSMessage
     QString data = LSMessageGetPayload(message);
     QJSValue response = m->callback().call(QJSValueList() << data);
 
-    if (!response.isObject()) {
-        qWarning() << "Got something from callback which isn't an object:" << response.toString();
-        qWarning() << "Not sending response to client";
-        return false;
+    QString responseStr;
+
+    if (!response.isString()) {
+        qWarning() << "Got something from callback which isn't a string:" << response.toString();
+        qWarning() << "Sending error response to client";
+        responseStr = "{\"returnValue\":false,\"errorText\":\"internal error occured\"}";
+    }
+    else {
+        responseStr = response.toString();
     }
 
-    QString responseStr = response.toString();
     LSError error;
 
     LSErrorInit(&error);
