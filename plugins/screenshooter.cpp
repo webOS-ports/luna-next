@@ -18,6 +18,9 @@
 #include <QQuickWindow>
 #include <QImage>
 #include <QDir>
+#include <QStandardPaths>
+#include <QDateTime>
+#include <QDebug>
 
 #include "screenshooter.h"
 
@@ -31,10 +34,18 @@ ScreenShooter::ScreenShooter(QQuickItem *parent) :
 
 void ScreenShooter::capture(const QString& path) const
 {
+    QString outputPath = path;
     QQuickWindow *parentWindow = window();
     QImage image = parentWindow->grabWindow();
 
-    image.save(path);
+    if (outputPath.isEmpty()) {
+        outputPath = QDir::homePath() + QLatin1String("/screencaptures");
+        outputPath += "/" + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + ".png";
+    }
+
+    qDebug() << "Saving screenshot at" << outputPath;
+
+    image.save(outputPath);
 }
 
 } // namespace luna
