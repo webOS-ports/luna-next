@@ -9,6 +9,7 @@ Type=notify
 EnvironmentFile=-/etc/luna-next/environment.conf
 ExecStart=/usr/sbin/luna-next $LUNA_NEXT_OPTIONS
 Restart=always
+OOMScoreAdjust=-1000
 
 [Install]
 WantedBy=multi-user.target
