@@ -29,6 +29,23 @@
 namespace luna
 {
 
+class LunaServiceMessage : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(QString payload READ payload CONSTANT)
+
+public:
+    LunaServiceMessage(LSMessage *message, QObject *parent = 0);
+    ~LunaServiceMessage();
+
+    QString payload() const;
+
+    LSMessage* messageObject() const;
+
+private:
+    LSMessage *mMessage;
+};
+
 class LunaServiceCall : public QObject
 {
     Q_OBJECT
@@ -77,6 +94,8 @@ public:
     Q_INVOKABLE QObject* call(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback);
     Q_INVOKABLE QObject* subscribe(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback);
     Q_INVOKABLE bool registerMethod(const QString& category, const QString& name, QJSValue callback);
+    Q_INVOKABLE bool addSubscription(const QString& key, QJSValue message);
+    Q_INVOKABLE bool replyToSubscribers(const QString& key, const QString& payload);
 
 signals:
     void initialized();

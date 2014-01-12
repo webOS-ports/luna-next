@@ -18,6 +18,9 @@
 #include <glib.h>
 #include <QJSValueList>
 #include <QDebug>
+#include <QQmlEngine>
+#include <QQmlContext>
+#include <QTimer>
 
 #include "lunaserviceadapter.h"
 
@@ -63,6 +66,28 @@ private:
 };
 
 static QMap<QString, LunaServiceHandle*> serviceHandles;
+
+LunaServiceMessage::LunaServiceMessage(LSMessage *message, QObject *parent) :
+    QObject(parent),
+    mMessage(message)
+{
+    LSMessageRef(mMessage);
+}
+
+LunaServiceMessage::~LunaServiceMessage()
+{
+    LSMessageUnref(mMessage);
+}
+
+QString LunaServiceMessage::payload() const
+{
+    return QString(LSMessageGetPayload(mMessage));
+}
+
+LSMessage* LunaServiceMessage::messageObject() const
+{
+    return mMessage;
+}
 
 LunaServiceCall::LunaServiceCall(QObject *parent) :
     QObject(parent),
@@ -126,11 +151,12 @@ bool LunaServiceCall::responseCallback(LSHandle *handle, LSMessage *message, voi
 
 bool LunaServiceCall::handleResponse(LSHandle *handle, LSMessage *message)
 {
+    LunaServiceMessage msg(message);
     mResponseCount++;
 
     if (mCallback.isCallable()) {
-        QString data = LSMessageGetPayload(message);
-        mCallback.call(QJSValueList() << data);
+        QQmlContext *context = QQmlEngine::contextForObject(parent());
+        mCallback.call(QJSValueList() << context->engine()->newQObject(&msg));
     }
 
     const char* category = LSMessageGetCategory(message);
@@ -371,16 +397,21 @@ bool LunaServiceAdapter::handleServiceMethodCallback(LSHandle *handle, LSMessage
 
     RegisteredMethod *m = mServiceMethodCallbacks.value(methodPath);
 
-    QString data = LSMessageGetPayload(message);
-    QJSValue response = m->callback().call(QJSValueList() << data);
+    LunaServiceMessage msg(message);
+    QQmlContext *context = QQmlEngine::contextForObject(this);
 
-    if (!response.isObject()) {
-        qWarning() << "Got something from callback which isn't an object:" << response.toString();
-        qWarning() << "Not sending response to client";
-        return false;
+    QJSValue response = m->callback().call(QJSValueList() << context->engine()->newQObject(&msg));
+
+    QString responseStr;
+    if (!response.isString()) {
+        qWarning() << "Got something from callback which isn't a string:" << response.toString();
+        qWarning() << "Sending error response to client";
+        responseStr = "{\"returnValue\":false,\"errorText\":\"internal error occured\"}";
+    }
+    else {
+        responseStr = response.toString();
     }
 
-    QString responseStr = response.toString();
     LSError error;
 
     LSErrorInit(&error);
@@ -396,7 +427,7 @@ bool LunaServiceAdapter::handleServiceMethodCallback(LSHandle *handle, LSMessage
 
 LunaServiceCall* LunaServiceAdapter::createAndExecuteCall(const QString& uri, const QString& arguments, QJSValue callback,  QJSValue errorCallback, int responseLimit)
 {
-    LunaServiceCall *call = new LunaServiceCall();
+    LunaServiceCall *call = new LunaServiceCall(this);
     call->setup(mServiceHandle, callback, errorCallback, responseLimit);
     call->execute(uri, arguments);
     return call;
@@ -410,6 +441,32 @@ QObject* LunaServiceAdapter::call(const QString& uri, const QString& arguments, 
 QObject* LunaServiceAdapter::subscribe(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback)
 {
     return createAndExecuteCall(uri, arguments, callback, errorCallback, -1);
+}
+
+bool LunaServiceAdapter::addSubscription(const QString& key, QJSValue message)
+{
+    LunaServiceMessage *msg = 0;
+
+    if (!message.isQObject())
+        return false;
+
+    msg = qobject_cast<LunaServiceMessage*>(message.toQObject());
+    if (msg == 0)
+        return false;
+
+    if (!LSSubscriptionAdd(mServiceHandle, key.toUtf8().constData(), msg->messageObject(), NULL))
+        return false;
+
+    return true;
+}
+
+bool LunaServiceAdapter::replyToSubscribers(const QString& key, const QString& payload)
+{
+    if (!LSSubscriptionReply(mServiceHandle, key.toUtf8().constData(),
+                             payload.toUtf8().constData(), NULL))
+        return false;
+
+    return true;
 }
 
 } // namespace luna
