@@ -443,4 +443,30 @@ QObject* LunaServiceAdapter::subscribe(const QString& uri, const QString& argume
     return createAndExecuteCall(uri, arguments, callback, errorCallback, -1);
 }
 
+bool LunaServiceAdapter::addSubscription(const QString& key, QJSValue message)
+{
+    LunaServiceMessage *msg = 0;
+
+    if (!message.isQObject())
+        return false;
+
+    msg = qobject_cast<LunaServiceMessage*>(message.toQObject());
+    if (msg == 0)
+        return false;
+
+    if (!LSSubscriptionAdd(mServiceHandle, key.toUtf8().constData(), msg->messageObject(), NULL))
+        return false;
+
+    return true;
+}
+
+bool LunaServiceAdapter::replyToSubscribers(const QString& key, const QString& payload)
+{
+    if (!LSSubscriptionReply(mServiceHandle, key.toUtf8().constData(),
+                             payload.toUtf8().constData(), NULL))
+        return false;
+
+    return true;
+}
+
 } // namespace luna

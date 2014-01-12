@@ -94,6 +94,8 @@ public:
     Q_INVOKABLE QObject* call(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback);
     Q_INVOKABLE QObject* subscribe(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback);
     Q_INVOKABLE bool registerMethod(const QString& category, const QString& name, QJSValue callback);
+    Q_INVOKABLE bool addSubscription(const QString& key, QJSValue message);
+    Q_INVOKABLE bool replyToSubscribers(const QString& key, const QString& payload);
 
 signals:
     void initialized();
