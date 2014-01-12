@@ -18,6 +18,9 @@
 #include <glib.h>
 #include <QJSValueList>
 #include <QDebug>
+#include <QQmlEngine>
+#include <QQmlContext>
+#include <QTimer>
 
 #include "lunaserviceadapter.h"
 
@@ -63,6 +66,28 @@ private:
 };
 
 static QMap<QString, LunaServiceHandle*> serviceHandles;
+
+LunaServiceMessage::LunaServiceMessage(LSMessage *message, QObject *parent) :
+    QObject(parent),
+    mMessage(message)
+{
+    LSMessageRef(mMessage);
+}
+
+LunaServiceMessage::~LunaServiceMessage()
+{
+    LSMessageUnref(mMessage);
+}
+
+QString LunaServiceMessage::payload() const
+{
+    return QString(LSMessageGetPayload(mMessage));
+}
+
+LSMessage* LunaServiceMessage::messageObject() const
+{
+    return mMessage;
+}
 
 LunaServiceCall::LunaServiceCall(QObject *parent) :
     QObject(parent),
@@ -126,11 +151,12 @@ bool LunaServiceCall::responseCallback(LSHandle *handle, LSMessage *message, voi
 
 bool LunaServiceCall::handleResponse(LSHandle *handle, LSMessage *message)
 {
+    LunaServiceMessage msg(message);
     mResponseCount++;
 
     if (mCallback.isCallable()) {
-        QString data = LSMessageGetPayload(message);
-        mCallback.call(QJSValueList() << data);
+        QQmlContext *context = QQmlEngine::contextForObject(parent());
+        mCallback.call(QJSValueList() << context->engine()->newQObject(&msg));
     }
 
     const char* category = LSMessageGetCategory(message);
@@ -371,11 +397,12 @@ bool LunaServiceAdapter::handleServiceMethodCallback(LSHandle *handle, LSMessage
 
     RegisteredMethod *m = mServiceMethodCallbacks.value(methodPath);
 
-    QString data = LSMessageGetPayload(message);
-    QJSValue response = m->callback().call(QJSValueList() << data);
+    LunaServiceMessage msg(message);
+    QQmlContext *context = QQmlEngine::contextForObject(this);
+
+    QJSValue response = m->callback().call(QJSValueList() << context->engine()->newQObject(&msg));
 
     QString responseStr;
-
     if (!response.isString()) {
         qWarning() << "Got something from callback which isn't a string:" << response.toString();
         qWarning() << "Sending error response to client";
@@ -400,7 +427,7 @@ bool LunaServiceAdapter::handleServiceMethodCallback(LSHandle *handle, LSMessage
 
 LunaServiceCall* LunaServiceAdapter::createAndExecuteCall(const QString& uri, const QString& arguments, QJSValue callback,  QJSValue errorCallback, int responseLimit)
 {
-    LunaServiceCall *call = new LunaServiceCall();
+    LunaServiceCall *call = new LunaServiceCall(this);
     call->setup(mServiceHandle, callback, errorCallback, responseLimit);
     call->execute(uri, arguments);
     return call;

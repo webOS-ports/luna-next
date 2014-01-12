@@ -29,6 +29,23 @@
 namespace luna
 {
 
+class LunaServiceMessage : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(QString payload READ payload CONSTANT)
+
+public:
+    LunaServiceMessage(LSMessage *message, QObject *parent = 0);
+    ~LunaServiceMessage();
+
+    QString payload() const;
+
+    LSMessage* messageObject() const;
+
+private:
+    LSMessage *mMessage;
+};
+
 class LunaServiceCall : public QObject
 {
     Q_OBJECT
