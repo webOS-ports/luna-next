@@ -28,7 +28,8 @@ set(SOURCES
     btdeviceclass.cpp
     deviceinfo.cpp
     statusbarservicesconnector.cpp
-    units.cpp)
+    units.cpp
+    displaycontroller.cpp)
 
 add_library(lunanext-qml SHARED ${SOURCES})
 target_link_libraries(lunanext-qml ${LUNA_SYSMGR_COMMON_LIBRARIES} ${LS2_LIBRARIES} ${LUNA_PREFS_LIBRARIES})
