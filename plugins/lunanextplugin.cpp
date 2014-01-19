@@ -29,6 +29,7 @@
 #include "windowtype.h"
 #include "statusbarservicesconnector.h"
 #include "units.h"
+#include "displaycontroller.h"
 
 static QObject *settings_callback(QQmlEngine *e, QJSEngine *)
 {
@@ -43,6 +44,11 @@ static QObject *units_callback(QQmlEngine *e, QJSEngine *)
 static QObject *statusbarservicesconnector_callback(QQmlEngine *e, QJSEngine *)
 {
     return luna::StatusBarServicesConnector::instance();
+}
+
+static QObject *displaycontroller_callback(QQmlEngine *e, QJSEngine *)
+{
+    return new luna::DisplayController();
 }
 
 LunaNextPlugin::LunaNextPlugin(QObject *parent) :
@@ -66,4 +72,5 @@ void LunaNextPlugin::registerTypes(const char *uri)
         statusbarservicesconnector_callback);
     qmlRegisterUncreatableType<luna::StatusBar>(uri, 0, 1, "StatusBarIconIndex", "StatusBarIconIndex can't be used as component");
     qmlRegisterSingletonType<luna::Units>(uri, 0, 1, "Units", units_callback);
+    qmlRegisterSingletonType<luna::DisplayController>(uri, 0, 1, "DisplayController", displaycontroller_callback);
 }
