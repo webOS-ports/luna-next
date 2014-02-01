@@ -30,6 +30,7 @@
 #include "statusbarservicesconnector.h"
 #include "units.h"
 #include "displaycontroller.h"
+#include "windowmodel.h"
 
 static QObject *settings_callback(QQmlEngine *e, QJSEngine *)
 {
@@ -60,6 +61,7 @@ void LunaNextPlugin::registerTypes(const char *uri)
 {
     Q_ASSERT(uri == QLatin1String("LunaNext"));
     qmlRegisterType<luna::Compositor>(uri, 0, 1, "Compositor");
+    qmlRegisterType<luna::WindowModel>(uri, 0, 1, "WindowModel");
     qmlRegisterSingletonType<luna::SettingsAdapter>(uri, 0, 1, "Settings", settings_callback);
     qmlRegisterUncreatableType<luna::WindowState>(uri, 0, 1, "WindowState", "WindowState can't be used as component!");
     qmlRegisterUncreatableType<luna::WindowType>(uri, 0, 1, "WindowType", "WindowType can't be used as component!");

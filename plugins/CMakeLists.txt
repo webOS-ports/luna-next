@@ -16,6 +16,7 @@ set(SOURCES
     lunanextplugin.cpp
     compositor/compositor.cpp
     compositor/compositorwindow.cpp
+    compositor/windowmodel.cpp
     settingsadapter.cpp
     windowstate.cpp
     windowtype.cpp

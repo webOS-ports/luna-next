@@ -16,18 +16,31 @@
  */
 
 #include "compositor.h"
+#include "windowmodel.h"
 
 #include <QWaylandInputDevice>
 
 namespace luna
 {
 
+Compositor* Compositor::mInstance = 0;
+
 Compositor::Compositor()
     : QWaylandCompositor(this),
       mFullscreenSurface(0),
       mNextWindowId(1)
 {
+    if (mInstance)
+        qFatal("Compositor: Only one compositor instance per process is supported");
+
+    mInstance = this;
+
     connect(this, SIGNAL(frameSwapped()), this, SLOT(frameSwappedSlot()));
+}
+
+Compositor* Compositor::instance()
+{
+    return mInstance;
 }
 
 void Compositor::classBegin()
@@ -37,6 +50,24 @@ void Compositor::classBegin()
 void Compositor::componentComplete()
 {
     QWaylandCompositor::setOutputGeometry(QRect(0, 0, width(), height()));
+}
+
+void Compositor::registerWindowModel(WindowModel *model)
+{
+    mWindowModels.append(model);
+}
+
+void Compositor::unregisterWindowModel(WindowModel *model)
+{
+    mWindowModels.removeAll(model);
+}
+
+CompositorWindow* Compositor::windowForId(int id)
+{
+    if (!mWindows.contains(id))
+        return 0;
+
+    return mWindows[id];
 }
 
 void Compositor::setFullscreenSurface(QWaylandSurface *surface)
@@ -106,6 +137,9 @@ void Compositor::surfaceMapped()
     else {
         emit windowShown(QVariant::fromValue(static_cast<QQuickItem*>(window)));
     }
+
+    foreach (WindowModel *model, mWindowModels)
+        model->addWindow(window);
 }
 
 void Compositor::surfaceUnmapped()
@@ -118,6 +152,9 @@ void Compositor::surfaceUnmapped()
     qWarning() << Q_FUNC_INFO << "the window " << window << "is going to be hidden";
 
     emit windowHidden(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+
+    foreach (WindowModel *model, mWindowModels)
+        model->removeWindow(window);
 }
 
 void Compositor::surfaceAboutToBeDestroyed(QWaylandSurface *surface)

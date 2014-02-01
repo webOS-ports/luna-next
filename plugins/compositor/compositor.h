@@ -26,11 +26,14 @@
 #include <QQuickItem>
 #include <QQuickView>
 #include <QQmlParserStatus>
+#include <QList>
 
 #include "compositorwindow.h"
 
 namespace luna
 {
+
+class WindowModel;
 
 class Compositor : public QQuickView, public QWaylandCompositor,
                    public QQmlParserStatus
@@ -49,6 +52,13 @@ public:
 
     Q_INVOKABLE void clearKeyboardFocus();
     Q_INVOKABLE void closeWindowWithId(int winId);
+
+    void registerWindowModel(WindowModel *model);
+    void unregisterWindowModel(WindowModel *model);
+
+    static Compositor *instance();
+
+    CompositorWindow* windowForId(int id);
 
 signals:
     void windowAdded(QVariant window);
@@ -76,9 +86,14 @@ protected:
     virtual void surfaceAboutToBeDestroyed(QWaylandSurface *surface);
 
 private:
+    friend class WindowModel;
+
     QWaylandSurface *mFullscreenSurface;
     unsigned int mNextWindowId;
     QHash<unsigned int, CompositorWindow*> mWindows;
+    QList<WindowModel*> mWindowModels;
+
+    static Compositor *mInstance;
 };
 
 } // namespace luna
