@@ -61,6 +61,20 @@ quint64 CompositorWindow::processId() const
     return 0;
 }
 
+QVariant CompositorWindow::userData() const
+{
+    return mUserData;
+}
+
+void CompositorWindow::setUserData(QVariant data)
+{
+    if (mUserData == data)
+        return;
+
+    mUserData = data;
+    emit userDataChanged();
+}
+
 bool CompositorWindow::checkIsAllowedToStay()
 {
     if (!surface())

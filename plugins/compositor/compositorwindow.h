@@ -33,6 +33,7 @@ class CompositorWindow : public QWaylandSurfaceItem
     Q_PROPERTY(int windowType READ windowType CONSTANT)
     Q_PROPERTY(QString appId READ appId CONSTANT)
     Q_PROPERTY(quint64 processId READ processId CONSTANT)
+    Q_PROPERTY(QVariant userData READ userData WRITE setUserData NOTIFY userDataChanged)
 
 public:
     CompositorWindow(unsigned int winId, QWaylandSurface *surface, QQuickItem *parent = 0);
@@ -42,6 +43,9 @@ public:
     QString appId() const;
     quint64 processId() const;
 
+    QVariant userData() const;
+    void setUserData(QVariant);
+
     void setClosed(bool closed);
     void tryRemove();
 
@@ -49,6 +53,9 @@ public:
 
     Q_INVOKABLE void postEvent(int event);
     Q_INVOKABLE void changeSize(const QSize& size);
+
+signals:
+    void userDataChanged();
 
 protected:
     virtual bool event(QEvent *event);
@@ -59,6 +66,7 @@ private:
     bool mClosed;
     bool mRemovePosted;
     QString mAppId;
+    QVariant mUserData;
 };
 
 } // namespace luna

@@ -30,6 +30,7 @@
 #include "statusbarservicesconnector.h"
 #include "units.h"
 #include "displaycontroller.h"
+#include "windowmodel.h"
 
 static QObject *settings_callback(QQmlEngine *e, QJSEngine *)
 {
@@ -60,6 +61,7 @@ void LunaNextPlugin::registerTypes(const char *uri)
 {
     Q_ASSERT(uri == QLatin1String("LunaNext"));
     qmlRegisterType<luna::Compositor>(uri, 0, 1, "Compositor");
+    qmlRegisterType<luna::WindowModel>(uri, 0, 1, "WindowModel");
     qmlRegisterSingletonType<luna::SettingsAdapter>(uri, 0, 1, "Settings", settings_callback);
     qmlRegisterUncreatableType<luna::WindowState>(uri, 0, 1, "WindowState", "WindowState can't be used as component!");
     qmlRegisterUncreatableType<luna::WindowType>(uri, 0, 1, "WindowType", "WindowType can't be used as component!");
@@ -68,9 +70,12 @@ void LunaNextPlugin::registerTypes(const char *uri)
     qmlRegisterType<luna::LunaServiceAdapter>(uri, 0, 1, "LunaService");
     qmlRegisterType<luna::FpsCounter>(uri, 0, 1, "FpsCounter");
     qmlRegisterType<luna::ScreenShooter>(uri, 0, 1, "ScreenShooter");
-    qmlRegisterSingletonType<luna::StatusBarServicesConnector>(uri, 0, 1, "statusBarServicesConnector",
-        statusbarservicesconnector_callback);
     qmlRegisterUncreatableType<luna::StatusBar>(uri, 0, 1, "StatusBarIconIndex", "StatusBarIconIndex can't be used as component");
     qmlRegisterSingletonType<luna::Units>(uri, 0, 1, "Units", units_callback);
     qmlRegisterSingletonType<luna::DisplayController>(uri, 0, 1, "DisplayController", displaycontroller_callback);
+}
+
+void LunaNextPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
+{
+    engine->rootContext()->setContextProperty("statusBarServicesConnector", luna::StatusBarServicesConnector::instance());
 }
