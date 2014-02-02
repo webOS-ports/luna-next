@@ -120,11 +120,11 @@ StatusBarServicesConnector::StatusBarServicesConnector()
 
 StatusBarServicesConnector* StatusBarServicesConnector::instance()
 {
-	if(s_instance)
-		return s_instance;
+    if(s_instance)
+        return s_instance;
 
-	s_instance = new StatusBarServicesConnector();
-	return s_instance;
+    s_instance = new StatusBarServicesConnector();
+    return s_instance;
 }
 
 StatusBarServicesConnector::~StatusBarServicesConnector()
@@ -570,6 +570,8 @@ bool StatusBarServicesConnector::statusBarPowerdBatteryEventsCallback(LSHandle* 
 bool StatusBarServicesConnector::powerdBatteryEventsCallback(LSHandle* handle, LSMessage* message, void* ctxt)
 {
 	g_message("StatusBar - powerdBatteryEventsCallback %s", LSMessageGetPayload(message));
+
+    g_message("payload %s", LSMessageGetPayload(message));
 
 	// Look for percent_ui
 	struct json_object* json = json_tokener_parse(LSMessageGetPayload(message));

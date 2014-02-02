@@ -28,6 +28,7 @@ class Q_DECL_EXPORT LunaNextPlugin : public QQmlExtensionPlugin
 public:
     explicit LunaNextPlugin(QObject *parent = 0);
     void registerTypes(const char *uri);
+    void initializeEngine(QQmlEngine * engine, const char * uri);
 };
 
 #endif

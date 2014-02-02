@@ -146,7 +146,7 @@ class StatusBarServicesConnector : public QObject
 	Q_OBJECT
 
 public:
-	static StatusBarServicesConnector* instance();
+    static StatusBarServicesConnector* instance();
 
 	~StatusBarServicesConnector();
 
@@ -380,7 +380,7 @@ private:
 	std::string m_signalMsgPayloadBuffer;
 	std::string m_phoneEventNetworkPayload;
 
-	StatusBarServicesConnector();
+    StatusBarServicesConnector();
 	void init();
 
 	void requestBluetoothConnectedProfilesInfo();
