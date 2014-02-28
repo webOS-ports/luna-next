@@ -30,7 +30,7 @@ DisplayController::DisplayController(QObject *parent) :
 
 void DisplayController::displayOn()
 {
-    QGuiApplication::platformNativeInterface()->nativeResourceForIntegration("DisplayOff");
+    QGuiApplication::platformNativeInterface()->nativeResourceForIntegration("DisplayOn");
 }
 
 void DisplayController::displayOff()

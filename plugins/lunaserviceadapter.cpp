@@ -236,7 +236,9 @@ void LunaServiceAdapter::componentComplete()
     // check wether we have the handle for the same service already cached
     QString serviceHandleName = mName + (mUsePrivateBus ? "-priv" : "-pub");
     if (serviceHandles.contains(serviceHandleName)) {
-        mServiceHandle = serviceHandles.value(serviceHandleName)->handle();
+        LunaServiceHandle *serviceHandle = serviceHandles.value(serviceHandleName);
+        serviceHandle->ref();
+        mServiceHandle = serviceHandle->handle();
     }
     else {
         LSErrorInit(&error);
