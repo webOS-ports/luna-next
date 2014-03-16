@@ -201,6 +201,8 @@ void Compositor::surfaceRaised()
     QWaylandSurface *surface = qobject_cast<QWaylandSurface*>(sender());
     CompositorWindow *window = static_cast<CompositorWindow*>(surface->surfaceItem());
 
+    qWarning() << Q_FUNC_INFO << "the window " << window << "is going to be raised";
+
     if (window)
         emit windowRaised(QVariant::fromValue(static_cast<QQuickItem*>(window)));
 }
@@ -209,6 +211,8 @@ void Compositor::surfaceLowered()
 {
     QWaylandSurface *surface = qobject_cast<QWaylandSurface*>(sender());
     CompositorWindow *window = static_cast<CompositorWindow*>(surface->surfaceItem());
+
+    qWarning() << Q_FUNC_INFO << "the window " << window << "is going to be lowered";
 
     if (window)
         emit windowLowered(QVariant::fromValue(static_cast<QQuickItem*>(window)));
