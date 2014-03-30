@@ -49,6 +49,10 @@ public:
     void addWindow(CompositorWindow *window);
     void removeWindow(CompositorWindow *window);
 
+    Q_INVOKABLE int getIndexByWindowId(int winId);
+    Q_INVOKABLE QVariant getByIndex(int index);
+    Q_INVOKABLE QVariant getByWindowId(int winId);
+
 protected:
     virtual void classBegin();
     virtual void componentComplete();
