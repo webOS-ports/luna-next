@@ -59,6 +59,8 @@ unsigned int WindowModel::windowTypeFilter() const
 
 void WindowModel::refresh()
 {
+    qDebug() << __PRETTY_FUNCTION__ << mWindowTypeFilter;
+
     beginResetModel();
 
     mWindows.clear();
@@ -114,6 +116,24 @@ QHash<int, QByteArray> WindowModel::roleNames() const
     QHash<int, QByteArray> roles;
     roles[Qt::UserRole + 1] = "window";
     return roles;
+}
+
+int WindowModel::getIndexByWindowId(int winId)
+{
+    return mWindows.indexOf(winId);
+}
+
+QVariant WindowModel::getByIndex(int index)
+{
+    return QVariant::fromValue(static_cast<QQuickItem*>(Compositor::instance()->windowForId(mWindows[index])));
+}
+
+QVariant WindowModel::getByWindowId(int winId)
+{
+    CompositorWindow *window = Compositor::instance()->windowForId(winId);
+    if (window->windowType() != mWindowTypeFilter)
+        return QVariant();
+    return QVariant::fromValue(static_cast<QQuickItem*>(window));
 }
 
 } // namespace luna

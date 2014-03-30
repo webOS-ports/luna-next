@@ -26,9 +26,6 @@ set(SOURCES
     fpscounter.cpp
     screenshooter.cpp
     eventtype.cpp
-    btdeviceclass.cpp
-    deviceinfo.cpp
-    statusbarservicesconnector.cpp
     units.cpp
     displaycontroller.cpp)
 
