@@ -75,7 +75,7 @@ void WindowModel::refresh()
 
 void WindowModel::addWindow(CompositorWindow *window)
 {
-    if (!window)
+    if (!window || window->windowType() != mWindowTypeFilter)
         return;
 
     beginInsertRows(QModelIndex(), mWindows.count(), mWindows.count());
@@ -85,6 +85,9 @@ void WindowModel::addWindow(CompositorWindow *window)
 
 void WindowModel::removeWindow(CompositorWindow *window)
 {
+    if (!window)
+        return;
+
     int index = mWindows.indexOf(window->winId());
     if (index == -1)
         return;
