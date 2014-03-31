@@ -38,6 +38,7 @@ class SettingsAdapter : public QObject
     Q_PROPERTY(int positiveSpaceTopPadding READ positiveSpaceTopPadding CONSTANT)
     Q_PROPERTY(int positiveSpaceBottomPadding READ positiveSpaceBottomPadding CONSTANT)
     Q_PROPERTY(QString fontStatusBar READ fontStatusBar CONSTANT)
+    Q_PROPERTY(QString lunaSystemResourcesPath READ lunaSystemResourcesPath CONSTANT)
 
 public:
     SettingsAdapter();
@@ -54,6 +55,7 @@ public:
     int positiveSpaceTopPadding() const;
     int positiveSpaceBottomPadding() const;
     QString fontStatusBar() const;
+    QString lunaSystemResourcesPath() const;
 };
 
 } // namespace luna

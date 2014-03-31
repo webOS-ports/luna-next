@@ -17,57 +17,37 @@
 
 #include <QtQml>
 
-#include "lunanextplugin.h"
-#include "compositor/compositor.h"
-#include "settingsadapter.h"
+#include "plugin.h"
+#include "compositor.h"
 #include "windowstate.h"
-#include "reticleitem.h"
-#include "lunaserviceadapter.h"
-#include "fpscounter.h"
 #include "screenshooter.h"
 #include "eventtype.h"
 #include "windowtype.h"
-#include "units.h"
 #include "displaycontroller.h"
 #include "windowmodel.h"
-
-static QObject *settings_callback(QQmlEngine *e, QJSEngine *)
-{
-    return new luna::SettingsAdapter();
-}
-
-static QObject *units_callback(QQmlEngine *e, QJSEngine *)
-{
-    return new luna::Units();
-}
 
 static QObject *displaycontroller_callback(QQmlEngine *e, QJSEngine *)
 {
     return new luna::DisplayController();
 }
 
-LunaNextPlugin::LunaNextPlugin(QObject *parent) :
+LunaNextCompositorPlugin::LunaNextCompositorPlugin(QObject *parent) :
     QQmlExtensionPlugin(parent)
 {
 }
 
-void LunaNextPlugin::registerTypes(const char *uri)
+void LunaNextCompositorPlugin::registerTypes(const char *uri)
 {
-    Q_ASSERT(uri == QLatin1String("LunaNext"));
+    Q_ASSERT(uri == QLatin1String("LunaNext.Compositor"));
     qmlRegisterType<luna::Compositor>(uri, 0, 1, "Compositor");
     qmlRegisterType<luna::WindowModel>(uri, 0, 1, "WindowModel");
-    qmlRegisterSingletonType<luna::SettingsAdapter>(uri, 0, 1, "Settings", settings_callback);
     qmlRegisterUncreatableType<luna::WindowState>(uri, 0, 1, "WindowState", "WindowState can't be used as component!");
     qmlRegisterUncreatableType<luna::WindowType>(uri, 0, 1, "WindowType", "WindowType can't be used as component!");
     qmlRegisterUncreatableType<luna::EventType>(uri, 0, 1, "EventType", "EventType can't be used as component!");
-    qmlRegisterType<luna::ReticleItem>(uri, 0, 1, "Reticle");
-    qmlRegisterType<luna::LunaServiceAdapter>(uri, 0, 1, "LunaService");
-    qmlRegisterType<luna::FpsCounter>(uri, 0, 1, "FpsCounter");
-    qmlRegisterType<luna::ScreenShooter>(uri, 0, 1, "ScreenShooter");
-    qmlRegisterSingletonType<luna::Units>(uri, 0, 1, "Units", units_callback);
     qmlRegisterSingletonType<luna::DisplayController>(uri, 0, 1, "DisplayController", displaycontroller_callback);
+    qmlRegisterType<luna::ScreenShooter>(uri, 0, 1, "ScreenShooter");
 }
 
-void LunaNextPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
+void LunaNextCompositorPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
 {
 }

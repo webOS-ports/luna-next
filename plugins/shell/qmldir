@@ -1,0 +1,2 @@
+module LunaNext.Shell
+plugin lunanext-shell-qml

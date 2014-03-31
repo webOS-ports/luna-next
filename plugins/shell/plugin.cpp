@@ -15,20 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#ifndef LUNAPLUGIN_H_
-#define LUNAPLUGIN_H_
+#include <QtQml>
 
-#include <QQmlExtensionPlugin>
+#include "plugin.h"
+#include "reticleitem.h"
+#include "fpscounter.h"
 
-class Q_DECL_EXPORT LunaNextPlugin : public QQmlExtensionPlugin
+LunaNextShellPlugin::LunaNextShellPlugin(QObject *parent) :
+    QQmlExtensionPlugin(parent)
 {
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
+}
 
-public:
-    explicit LunaNextPlugin(QObject *parent = 0);
-    void registerTypes(const char *uri);
-    void initializeEngine(QQmlEngine * engine, const char * uri);
-};
+void LunaNextShellPlugin::registerTypes(const char *uri)
+{
+    Q_ASSERT(uri == QLatin1String("LunaNext.Shell"));
+    qmlRegisterType<luna::ReticleItem>(uri, 0, 1, "Reticle");
+    qmlRegisterType<luna::FpsCounter>(uri, 0, 1, "FpsCounter");
+}
 
-#endif
+void LunaNextShellPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
+{
+}
