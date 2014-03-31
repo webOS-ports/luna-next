@@ -86,4 +86,9 @@ QString SettingsAdapter::fontStatusBar() const
     return QString::fromStdString(Settings::LunaSettings()->fontStatusBar);
 }
 
+QString SettingsAdapter::lunaSystemResourcesPath() const
+{
+    return QString::fromStdString(Settings::LunaSettings()->lunaSystemResourcesPath);
+}
+
 } // namespace luna

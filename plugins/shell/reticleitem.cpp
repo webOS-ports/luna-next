@@ -21,7 +21,6 @@
 #include <QPropertyAnimation>
 #include <QPainter>
 
-#include <Settings.h>
 #include <AnimationSettings.h>
 #include <QtUtils.h>
 
@@ -31,15 +30,11 @@ namespace luna
 {
 
 ReticleItem::ReticleItem(QQuickItem *parent)
-	: QQuickPaintedItem(parent)
+    : QQuickPaintedItem(parent),
+      mReady(false)
 {
 	setVisible(false);
 
-	std::string filePath = Settings::LunaSettings()->lunaSystemResourcesPath + "/penindicator-ripple.png";
-	mPixmap = QPixmap::fromImage(QImage(qFromUtf8Stl(filePath)));
-
-	setWidth(mPixmap.width());
-	setHeight(mPixmap.height());
 }
 
 ReticleItem::~ReticleItem()
@@ -47,8 +42,36 @@ ReticleItem::~ReticleItem()
 	delete mAnimation;
 }
 
+void ReticleItem::componentComplete()
+{
+    QQuickPaintedItem::componentComplete();
+
+    if (mImagePath.size() == 0)
+        return;
+
+    mPixmap = QPixmap::fromImage(QImage(mImagePath));
+
+    setWidth(mPixmap.width());
+    setHeight(mPixmap.height());
+
+    mReady = true;
+}
+
+QString ReticleItem::imagePath() const
+{
+    return mImagePath;
+}
+
+void ReticleItem::setImagePath(const QString &path)
+{
+    mImagePath = path;
+}
+
 void ReticleItem::startAt(const QPoint& pos)
 {
+    if (!mReady)
+        return;
+
 	if (mAnimation)
 		mAnimation->stop();
 

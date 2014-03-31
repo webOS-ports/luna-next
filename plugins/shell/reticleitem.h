@@ -31,10 +31,16 @@ namespace luna
 class ReticleItem : public QQuickPaintedItem
 {
 	Q_OBJECT
+    Q_PROPERTY(QString imagePath WRITE setImagePath)
 
 public:
 	ReticleItem(QQuickItem *parent = 0);
 	virtual ~ReticleItem();
+
+    virtual void componentComplete();
+
+    QString imagePath() const;
+    void setImagePath(const QString& path);
 
 	virtual void paint(QPainter* painter);
 
@@ -47,6 +53,8 @@ private Q_SLOTS:
 private:
 	QPointer<QAnimationGroup> mAnimation;
 	QPixmap mPixmap;
+    QString mImagePath;
+    bool mReady;
 };
 
 } // namespace luna
