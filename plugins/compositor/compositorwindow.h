@@ -37,6 +37,7 @@ class CompositorWindow : public QWaylandSurfaceItem
 
 public:
     CompositorWindow(unsigned int winId, QWaylandSurface *surface, QQuickItem *parent = 0);
+    virtual ~CompositorWindow();
 
     unsigned int winId() const;
     unsigned int windowType() const;

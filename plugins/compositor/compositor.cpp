@@ -97,8 +97,6 @@ void Compositor::closeWindowWithId(int winId)
             window->surface()->destroySurface();
         else if (window->surface())
             destroyClientForSurface(window->surface());
-
-        delete window;
     }
 }
 
