@@ -136,8 +136,7 @@ void Compositor::surfaceMapped()
         emit windowShown(QVariant::fromValue(static_cast<QQuickItem*>(window)));
     }
 
-    foreach (WindowModel *model, mWindowModels)
-        model->addWindow(window);
+    WindowModel::addWindowForEachModel(mWindowModels, window);
 }
 
 void Compositor::surfaceUnmapped()
@@ -151,8 +150,7 @@ void Compositor::surfaceUnmapped()
 
     emit windowHidden(QVariant::fromValue(static_cast<QQuickItem*>(window)));
 
-    foreach (WindowModel *model, mWindowModels)
-        model->removeWindow(window);
+    WindowModel::removeWindowForEachModel(mWindowModels, window);
 }
 
 void Compositor::surfaceAboutToBeDestroyed(QWaylandSurface *surface)

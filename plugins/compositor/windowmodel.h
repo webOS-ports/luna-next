@@ -21,6 +21,7 @@
 
 #include <QAbstractListModel>
 #include <QQmlParserStatus>
+#include <QList>
 
 namespace luna
 {
@@ -46,8 +47,8 @@ public:
     unsigned int windowTypeFilter() const;
     void setWindowTypeFilter(int windowType);
 
-    void addWindow(CompositorWindow *window);
-    void removeWindow(CompositorWindow *window);
+    static void addWindowForEachModel(QList<WindowModel*> windowModels, CompositorWindow *window);
+    static void removeWindowForEachModel(QList<WindowModel*> windowModels, CompositorWindow *window);
 
     Q_INVOKABLE int getIndexByWindowId(int winId);
     Q_INVOKABLE QVariant getByIndex(int index);
