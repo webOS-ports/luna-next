@@ -35,10 +35,13 @@ class WindowModel : public QAbstractListModel,
     Q_INTERFACES(QQmlParserStatus)
 
     Q_PROPERTY(unsigned int windowTypeFilter READ windowTypeFilter WRITE setWindowTypeFilter)
+    Q_PROPERTY(unsigned int count READ count)
 
 public:
     WindowModel();
     ~WindowModel();
+
+    unsigned int count() const { return rowCount(); }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role) const;
