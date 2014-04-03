@@ -41,6 +41,11 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandSurface *surface,
         mWindowType = WindowType::Launcher;
 }
 
+CompositorWindow::~CompositorWindow()
+{
+    qWarning() << Q_FUNC_INFO << "appId = " << mAppId;
+}
+
 unsigned int CompositorWindow::winId() const
 {
     return mId;

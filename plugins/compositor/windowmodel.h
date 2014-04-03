@@ -21,6 +21,7 @@
 
 #include <QAbstractListModel>
 #include <QQmlParserStatus>
+#include <QList>
 
 namespace luna
 {
@@ -34,10 +35,13 @@ class WindowModel : public QAbstractListModel,
     Q_INTERFACES(QQmlParserStatus)
 
     Q_PROPERTY(unsigned int windowTypeFilter READ windowTypeFilter WRITE setWindowTypeFilter)
+    Q_PROPERTY(unsigned int count READ count)
 
 public:
     WindowModel();
     ~WindowModel();
+
+    unsigned int count() const { return rowCount(); }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role) const;
@@ -46,8 +50,8 @@ public:
     unsigned int windowTypeFilter() const;
     void setWindowTypeFilter(int windowType);
 
-    void addWindow(CompositorWindow *window);
-    void removeWindow(CompositorWindow *window);
+    static void addWindowForEachModel(QList<WindowModel*> windowModels, CompositorWindow *window);
+    static void removeWindowForEachModel(QList<WindowModel*> windowModels, CompositorWindow *window);
 
     Q_INVOKABLE int getIndexByWindowId(int winId);
     Q_INVOKABLE QVariant getByIndex(int index);

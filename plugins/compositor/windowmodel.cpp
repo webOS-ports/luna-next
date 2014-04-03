@@ -73,28 +73,50 @@ void WindowModel::refresh()
     endResetModel();
 }
 
-void WindowModel::addWindow(CompositorWindow *window)
+void WindowModel::addWindowForEachModel(QList<WindowModel*> windowModels, CompositorWindow *window)
 {
-    if (!window || window->windowType() != mWindowTypeFilter)
-        return;
+    if( !window ) return;
 
-    beginInsertRows(QModelIndex(), mWindows.count(), mWindows.count());
-    mWindows.append(window->winId());
-    endInsertRows();
+    foreach (WindowModel *model, windowModels)
+    {
+        if( window->windowType() == model->mWindowTypeFilter )
+            model->beginInsertRows(QModelIndex(), model->mWindows.count(), model->mWindows.count());
+    }
+    foreach (WindowModel *model, windowModels)
+    {
+        if( window->windowType() == model->mWindowTypeFilter )
+            model->mWindows.append(window->winId());
+    }
+    foreach (WindowModel *model, windowModels)
+    {
+        if( window->windowType() == model->mWindowTypeFilter )
+            model->endInsertRows();
+    }
 }
 
-void WindowModel::removeWindow(CompositorWindow *window)
+void WindowModel::removeWindowForEachModel(QList<WindowModel*> windowModels, CompositorWindow *window)
 {
-    if (!window)
-        return;
+    if( !window ) return;
 
-    int index = mWindows.indexOf(window->winId());
-    if (index == -1)
-        return;
-
-    beginRemoveRows(QModelIndex(), index, index);
-    mWindows.removeAt(index);
-    endRemoveRows();
+    QList<WindowModel*> impactedWindowModels;
+    foreach (WindowModel *model, windowModels)
+    {
+        int index = model->mWindows.indexOf(window->winId());
+        if( window->windowType() == model->mWindowTypeFilter && index != -1 )
+        {
+            impactedWindowModels.append(model);
+            model->beginRemoveRows(QModelIndex(), index, index);
+        }
+    }
+    foreach (WindowModel *model, impactedWindowModels)
+    {
+        int index = model->mWindows.indexOf(window->winId());
+        model->mWindows.removeAt(index);
+    }
+    foreach (WindowModel *model, impactedWindowModels)
+    {
+        model->endRemoveRows();
+    }
 }
 
 int WindowModel::rowCount(const QModelIndex &) const
