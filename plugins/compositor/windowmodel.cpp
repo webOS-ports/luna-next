@@ -77,18 +77,15 @@ void WindowModel::addWindowForEachModel(QList<WindowModel*> windowModels, Compos
 {
     if( !window ) return;
 
-    foreach (WindowModel *model, windowModels)
-    {
+    foreach (WindowModel *model, windowModels) {
         if( window->windowType() == model->mWindowTypeFilter )
             model->beginInsertRows(QModelIndex(), model->mWindows.count(), model->mWindows.count());
     }
-    foreach (WindowModel *model, windowModels)
-    {
+    foreach (WindowModel *model, windowModels) {
         if( window->windowType() == model->mWindowTypeFilter )
             model->mWindows.append(window->winId());
     }
-    foreach (WindowModel *model, windowModels)
-    {
+    foreach (WindowModel *model, windowModels) {
         if( window->windowType() == model->mWindowTypeFilter )
             model->endInsertRows();
     }
@@ -99,22 +96,18 @@ void WindowModel::removeWindowForEachModel(QList<WindowModel*> windowModels, Com
     if( !window ) return;
 
     QList<WindowModel*> impactedWindowModels;
-    foreach (WindowModel *model, windowModels)
-    {
+    foreach (WindowModel *model, windowModels) {
         int index = model->mWindows.indexOf(window->winId());
-        if( window->windowType() == model->mWindowTypeFilter && index != -1 )
-        {
+        if( window->windowType() == model->mWindowTypeFilter && index != -1 ) {
             impactedWindowModels.append(model);
             model->beginRemoveRows(QModelIndex(), index, index);
         }
     }
-    foreach (WindowModel *model, impactedWindowModels)
-    {
+    foreach (WindowModel *model, impactedWindowModels) {
         int index = model->mWindows.indexOf(window->winId());
         model->mWindows.removeAt(index);
     }
-    foreach (WindowModel *model, impactedWindowModels)
-    {
+    foreach (WindowModel *model, impactedWindowModels) {
         model->endRemoveRows();
     }
 }
