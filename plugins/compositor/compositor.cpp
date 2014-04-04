@@ -163,6 +163,8 @@ void Compositor::surfaceAboutToBeDestroyed(QWaylandSurface *surface)
         setFullscreenSurface(0);
 
     if (window) {
+        WindowModel::removeWindowForEachModel(mWindowModels, window);
+
         mWindows.remove(window->winId());
         emit windowRemoved(QVariant::fromValue(static_cast<QQuickItem*>(window)));
 
