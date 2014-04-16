@@ -4,7 +4,6 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR})
 
-
 set(SOURCES
     plugin.cpp
     reticleitem.cpp
@@ -21,3 +20,5 @@ execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_S
 set(QMLPLUGIN_INSTALL_PREFIX "${OE_QMAKE_PATH_QML}/LunaNext/Shell")
 install(TARGETS lunanext-shell-qml DESTINATION ${QMLPLUGIN_INSTALL_PREFIX})
 install(FILES qmldir DESTINATION ${QMLPLUGIN_INSTALL_PREFIX})
+
+add_subdirectory(notifications)

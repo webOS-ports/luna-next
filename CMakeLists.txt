@@ -31,6 +31,16 @@ if(NOT Qt5Compositor_FOUND)
     message(FATAL_ERROR "Qt5Compositor module is required!")
 endif()
 
+find_package(Qt5DBus REQUIRED)
+if(NOT Qt5DBus_FOUND)
+    message(FATAL_ERROR "Qt5DBus module is required!")
+endif()
+
+find_package(Qt5Sql REQUIRED)
+if(NOT Qt5Sql_FOUND)
+    message(FATAL_ERROR "Qt5Sql module is required!")
+endif()
+
 find_package(PkgConfig "0.22" REQUIRED)
 
 pkg_check_modules(EGL egl REQUIRED)
