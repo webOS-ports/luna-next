@@ -15,19 +15,57 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+#include <QtCore/qmath.h>
 #include <Settings.h>
 #include "units.h"
+
+#define ENV_GRID_UNIT_PX "GRID_UNIT_PX"
+#define DEFAULT_GRID_UNIT_PX 8
 
 namespace luna
 {
 
+static float getEnvFloat(const char* name, float defaultValue)
+{
+    QByteArray stringValue = qgetenv(name);
+    bool ok;
+    float value = stringValue.toFloat(&ok);
+    return ok ? value : defaultValue;
+}
+
 Units::Units()
 {
+    mGridUnit = getEnvFloat(ENV_GRID_UNIT_PX, Settings::LunaSettings()->gridUnit);
 }
 
 float Units::length(int lengthAt132DPI)
 {
     return (lengthAt132DPI * Settings::LunaSettings()->layoutScale);
+}
+
+float Units::gridUnit()
+{
+    return mGridUnit;
+}
+
+void Units::setGridUnit(float gridUnit)
+{
+    mGridUnit = gridUnit;
+    Q_EMIT gridUnitChanged();
+}
+
+float Units::dp(float value)
+{
+    const float ratio = mGridUnit / DEFAULT_GRID_UNIT_PX;
+    if (value <= 2.0)
+        // for values under 2dp, return only multiples of the value
+        return qRound(value * qFloor(ratio));
+    return qRound(value * ratio);
+}
+
+float Units::gu(float value)
+{
+    return qRound(value * mGridUnit);
 }
 
 } // luna

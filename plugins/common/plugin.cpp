@@ -21,6 +21,7 @@
 #include "settingsadapter.h"
 #include "lunaserviceadapter.h"
 #include "units.h"
+#include "fontutils.h"
 
 static QObject *settings_callback(QQmlEngine *e, QJSEngine *)
 {
@@ -29,7 +30,12 @@ static QObject *settings_callback(QQmlEngine *e, QJSEngine *)
 
 static QObject *units_callback(QQmlEngine *e, QJSEngine *)
 {
-    return new luna::Units();
+    return luna::Units::instance();
+}
+
+static QObject *fontutils_callback(QQmlEngine *e, QJSEngine *)
+{
+    return luna::FontUtils::instance();
 }
 
 LunaNextCommonPlugin::LunaNextCommonPlugin(QObject *parent) :
@@ -43,6 +49,7 @@ void LunaNextCommonPlugin::registerTypes(const char *uri)
     qmlRegisterSingletonType<luna::SettingsAdapter>(uri, 0, 1, "Settings", settings_callback);
     qmlRegisterType<luna::LunaServiceAdapter>(uri, 0, 1, "LunaService");
     qmlRegisterSingletonType<luna::Units>(uri, 0, 1, "Units", units_callback);
+    qmlRegisterSingletonType<luna::FontUtils>(uri, 0, 1, "FontUtils", fontutils_callback);
 }
 
 void LunaNextCommonPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
