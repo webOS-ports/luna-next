@@ -26,11 +26,31 @@ namespace luna
 class Units : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(float gridUnit READ gridUnit WRITE setGridUnit NOTIFY gridUnitChanged)
 
 public:
-    explicit Units();
+    static Units* instance()
+    {
+        static Units instance;
+        return &instance;
+    }
 
     Q_INVOKABLE float length(int lengthAt132DPI);
+
+    Q_INVOKABLE float dp(float value);
+    Q_INVOKABLE float gu(float value);
+    QString resolveResource(const QUrl& url);
+
+    float gridUnit();
+    void setGridUnit(float gridUnit);
+
+Q_SIGNALS:
+    void gridUnitChanged();
+
+private:
+    explicit Units();
+
+    float mGridUnit;
 };
 
 }

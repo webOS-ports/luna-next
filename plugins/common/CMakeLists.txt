@@ -11,6 +11,7 @@ set(SOURCES
     settingsadapter.cpp
     lunaserviceadapter.cpp
     settingsadapter.cpp
+    fontutils.cpp
     units.cpp)
 
 add_library(lunanext-common-qml SHARED ${SOURCES})
