@@ -41,6 +41,10 @@ ShellApplication::ShellApplication(int argc, char **argv) :
     mEngine(this)
 {
     mShellStorageDirs << "/usr/palm/luna-next/shells";
+
+    connect(&mEngine, &QQmlEngine::quit, [=]() {
+        this->quit();
+    });
 }
 
 ShellApplication::~ShellApplication()
