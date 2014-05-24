@@ -39,7 +39,7 @@ void ScreenShooter::capture(const QString& path) const
     QImage image = parentWindow->grabWindow();
 
     if (outputPath.isEmpty()) {
-        outputPath = QDir::homePath() + QLatin1String("/screencaptures");
+        outputPath = QLatin1String("/media/internal/screencaptures");
         outputPath += "/" + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + ".png";
     }
 
