@@ -1,0 +1,2 @@
+module LunaNext.Shell.Notifications
+plugin lunanext-shell-notifications-qml
