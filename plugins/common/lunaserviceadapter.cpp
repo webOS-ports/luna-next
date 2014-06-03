@@ -84,6 +84,11 @@ QString LunaServiceMessage::payload() const
     return QString(LSMessageGetPayload(mMessage));
 }
 
+QString LunaServiceMessage::applicationId() const
+{
+    return QString(LSMessageGetApplicationID(mMessage));
+}
+
 LSMessage* LunaServiceMessage::messageObject() const
 {
     return mMessage;

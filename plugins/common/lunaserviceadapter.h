@@ -39,6 +39,7 @@ public:
     ~LunaServiceMessage();
 
     QString payload() const;
+    QString applicationId() const;
 
     LSMessage* messageObject() const;
 
