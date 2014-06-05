@@ -18,9 +18,19 @@ NotificationManagerWrapper::NotificationManagerWrapper()
     NotificationManager::instance();
 }
 
+Notification* NotificationManagerWrapper::getNotificationById(uint id)
+{
+    return NotificationManager::instance()->notification(id);
+}
+
 uint NotificationManagerWrapper::notify(const QString &appName, uint replacesId, const QString &appIcon,
                                                     const QString &summary, const QString &body, const QStringList &actions,
                                                     const QVariantHash &hints, int expireTimeout)
 {
     return NotificationManager::instance()->Notify(appName, replacesId, appIcon, summary, body, actions, hints, expireTimeout);
+}
+
+void NotificationManagerWrapper::closeById(uint id, NotificationManager::NotificationClosedReason reason)
+{
+    return NotificationManager::instance()->CloseNotification(id, reason);
 }

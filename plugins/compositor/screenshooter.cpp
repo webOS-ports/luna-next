@@ -32,20 +32,19 @@ ScreenShooter::ScreenShooter(QQuickItem *parent) :
 {
 }
 
-void ScreenShooter::capture(const QString& path) const
+QString ScreenShooter::capture() const
 {
-    QString outputPath = path;
     QQuickWindow *parentWindow = window();
     QImage image = parentWindow->grabWindow();
 
-    if (outputPath.isEmpty()) {
-        outputPath = QDir::homePath() + QLatin1String("/screencaptures");
-        outputPath += "/" + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + ".png";
-    }
+    QString outputPath = QLatin1String("/media/internal/screencaptures");
+    outputPath += "/" + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + ".png";
 
     qDebug() << "Saving screenshot at" << outputPath;
 
     image.save(outputPath);
+
+    return outputPath;
 }
 
 } // namespace luna
