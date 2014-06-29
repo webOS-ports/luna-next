@@ -30,6 +30,8 @@
 #include <linux/kd.h>
 #include <linux/vt.h>
 
+#include <glib.h>
+
 #include <systemd/sd-daemon.h>
 #include <Settings.h>
 
@@ -41,6 +43,38 @@
 #ifndef KDSKBMUTE
 #define KDSKBMUTE    0x4B51
 #endif
+
+static gboolean option_verbose = FALSE;
+
+static GOptionEntry options[] = {
+    { "verbose", 0, 0, G_OPTION_ARG_NONE, &option_verbose, "Enable verbose logging" },
+    { NULL },
+};
+
+void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    QString timeStr = QTime::currentTime().toString("hh:mm:ss.zzz");
+
+    switch(type)
+    {
+    case QtDebugMsg:
+        if (option_verbose)
+            fprintf(stdout, "DEBUG: %s: %s\n", timeStr.toUtf8().constData(), msg.toUtf8().constData());
+        break;
+    case QtWarningMsg:
+        fprintf(stdout, "WARNING: %s: %s\n", timeStr.toUtf8().constData(), msg.toUtf8().constData());
+        break;
+    case QtCriticalMsg:
+        fprintf(stdout, "CRITICAL: %s: %s\n", timeStr.toUtf8().constData(), msg.toUtf8().constData());
+        break;
+    case QtFatalMsg:
+        fprintf(stdout, "FATAL: %s: %s\n", timeStr.toUtf8().constData(), msg.toUtf8().constData());
+        break;
+    default:
+        fprintf(stdout, "INFO: %s: %s\n", timeStr.toUtf8().constData(), msg.toUtf8().constData());
+        break;
+    }
+}
 
 static void setup_tty()
 {
@@ -73,6 +107,26 @@ static void setup_tty()
 
 int main(int argc, char *argv[])
 {
+    GError *error = NULL;
+    GOptionContext *context;
+
+    qInstallMessageHandler(messageHandler);
+
+    context = g_option_context_new(NULL);
+    g_option_context_add_main_entries(context, options, NULL);
+
+    if (!g_option_context_parse(context, &argc, &argv, &error)) {
+        if (error) {
+            g_printerr("%s\n", error->message);
+            g_error_free(error);
+        }
+        else
+            g_printerr("An unknown error occurred\n");
+        exit(1);
+    }
+
+    g_option_context_free(context);
+
     // preload all settings for later use
     Settings::LunaSettings();
 
