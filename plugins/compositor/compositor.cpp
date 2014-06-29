@@ -75,6 +75,8 @@ void Compositor::setFullscreenSurface(QWaylandSurface *surface)
     if (surface == mFullscreenSurface)
         return;
 
+    qDebug() << Q_FUNC_INFO << surface;
+
     // Prevent flicker when returning to composited mode
     if (!surface && mFullscreenSurface && mFullscreenSurface->surfaceItem())
         mFullscreenSurface->surfaceItem()->update();
@@ -91,6 +93,8 @@ void Compositor::clearKeyboardFocus()
 
 void Compositor::closeWindowWithId(int winId)
 {
+    qDebug() << Q_FUNC_INFO << "winId" << winId;
+
     CompositorWindow *window = mWindows.value(winId, 0);
     if (window) {
         if (window->surface() && window->checkIsAllowedToStay())
@@ -107,10 +111,9 @@ void Compositor::surfaceMapped()
     if (!surface->hasShellSurface())
         return;
 
-    bool bIsSurfaceNew = false;
+    bool isSurfaceNew = false;
 
     CompositorWindow *window = qobject_cast<CompositorWindow*>(surface->surfaceItem());
-    //Create a CompositorWindow if we have not yet
     if (!window) {
         unsigned int windowId = mNextWindowId++;
         window = new CompositorWindow(windowId, surface, contentItem());
@@ -119,22 +122,18 @@ void Compositor::surfaceMapped()
         window->setFlag(QQuickItem::ItemIsFocusScope, true);
         window->setUseTextureAlpha(true);
 
-        // QObject::connect(window, SIGNAL(destroyed(QObject*)), this, SLOT(windowDestroyed(QObject*)));
         mWindows.insert(windowId, window);
-
-        bIsSurfaceNew = true;
+        isSurfaceNew = true;
     }
 
     window->setTouchEventsEnabled(true);
 
-    qWarning() << Q_FUNC_INFO << "the window " << window << "is going to be added/shown";
+    qWarning() << Q_FUNC_INFO << window;
 
-    if( bIsSurfaceNew ) {
+    if (isSurfaceNew)
         emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
-    }
-    else {
+    else
         emit windowShown(QVariant::fromValue(static_cast<QQuickItem*>(window)));
-    }
 
     WindowModel::addWindowForEachModel(mWindowModels, window);
 }
@@ -146,7 +145,7 @@ void Compositor::surfaceUnmapped()
         setFullscreenSurface(0);
 
     CompositorWindow *window = qobject_cast<CompositorWindow*>(surface->surfaceItem());
-    qWarning() << Q_FUNC_INFO << "the window " << window << "is going to be hidden";
+    qWarning() << Q_FUNC_INFO << window;
 
     emit windowHidden(QVariant::fromValue(static_cast<QQuickItem*>(window)));
 
@@ -155,6 +154,8 @@ void Compositor::surfaceUnmapped()
 
 void Compositor::surfaceAboutToBeDestroyed(QWaylandSurface *surface)
 {
+    qDebug() << Q_FUNC_INFO << surface;
+
     CompositorWindow *window = static_cast<CompositorWindow*>(surface->surfaceItem());
 
     surface->setSurfaceItem(0);

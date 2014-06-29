@@ -39,11 +39,13 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandSurface *surface,
         mAppId = properties.value("appId").toString();
     if (mAppId == "com.palm.launcher")
         mWindowType = WindowType::Launcher;
+
+    qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
 }
 
 CompositorWindow::~CompositorWindow()
 {
-    qWarning() << Q_FUNC_INFO << "appId = " << mAppId;
+    qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
 }
 
 unsigned int CompositorWindow::winId() const
