@@ -16,6 +16,7 @@
  */
 
 #include <QDir>
+#include <QTime>
 
 #include <string.h>
 #include <errno.h>
