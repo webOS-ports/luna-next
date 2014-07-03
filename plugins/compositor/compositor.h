@@ -74,7 +74,11 @@ private slots:
     void surfaceMapped();
     void surfaceUnmapped();
     void frameSwappedSlot();
+#if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
+    void surfaceDamaged(const QRegion &);
+#else
     void surfaceDamaged(const QRect&);
+#endif
     void surfaceSizeChanged();
     void surfaceRaised();
     void surfaceLowered();

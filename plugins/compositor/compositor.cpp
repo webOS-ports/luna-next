@@ -176,7 +176,11 @@ void Compositor::surfaceAboutToBeDestroyed(QWaylandSurface *surface)
 
 void Compositor::frameSwappedSlot()
 {
-    frameFinished(mFullscreenSurface);
+#if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
+    sendFrameCallbacks(surfaces());
+#else
+    frameFinished(surfaces());
+#endif
 }
 
 void Compositor::resizeEvent(QResizeEvent *event)
@@ -192,7 +196,11 @@ void Compositor::surfaceCreated(QWaylandSurface *surface)
     connect(surface, SIGNAL(raiseRequested()), this, SLOT(surfaceRaised()));
     connect(surface, SIGNAL(lowerRequested()), this, SLOT(surfaceLowered()));
     connect(surface, SIGNAL(sizeChanged()), this, SLOT(surfaceSizeChanged()));
-    connect(surface, SIGNAL(damaged(const QRect&)), this, SLOT(surfaceDamaged(const QRect&)));
+#if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
+    connect(surface, SIGNAL(damaged(const QRegion)), this, SLOT(surfaceDamaged(QRegion)));
+#else
+    connect(surface, SIGNAL(damaged(const QRect)), this, SLOT(surfaceDamaged(QRect)));
+#endif
 }
 
 void Compositor::surfaceRaised()
@@ -226,10 +234,18 @@ void Compositor::surfaceSizeChanged()
         window->setSize(surface->size());
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
+void Compositor::surfaceDamaged(const QRegion &)
+#else
 void Compositor::surfaceDamaged(const QRect&)
+#endif
 {
     if (!isVisible())
+#if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
+        sendFrameCallbacks(surfaces());
+#else
         frameFinished(0);
+#endif
 }
 
 
