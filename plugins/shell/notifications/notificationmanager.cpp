@@ -123,6 +123,11 @@ QList<uint> NotificationManager::notificationIds() const
     return notifications.keys();
 }
 
+uint NotificationManager::GetIdForNotification(Notification *notification) const
+{
+    return notifications.key(notification, 0);
+}
+
 QStringList NotificationManager::GetCapabilities()
 {
     return QStringList() << "body" << "actions" << HINT_ICON << HINT_ITEM_COUNT << HINT_TIMESTAMP << HINT_PREVIEW_ICON << HINT_PREVIEW_BODY << HINT_PREVIEW_SUMMARY << "x-nemo-remote-actions" << HINT_USER_REMOVABLE << "x-nemo-get-notifications";

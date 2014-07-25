@@ -138,6 +138,8 @@ public:
      */
     QList<uint> notificationIds() const;
 
+    uint GetIdForNotification(Notification *notification) const;
+
     /*!
      * Returns an array of strings. Each string describes an optional capability
      * implemented by the server. Refer to the Desktop Notification Specifications for

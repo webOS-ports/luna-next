@@ -34,3 +34,16 @@ void NotificationManagerWrapper::closeById(uint id, NotificationManager::Notific
 {
     return NotificationManager::instance()->CloseNotification(id, reason);
 }
+
+void NotificationManagerWrapper::closeAllByAppName(const QString &appName)
+{
+    NotificationManager *manager = NotificationManager::instance();
+    NotificationList notificationList = manager->GetNotifications(appName);
+    Q_FOREACH(Notification *notification, notificationList.notifications()) {
+        uint id = manager->GetIdForNotification(notification);
+        // zero is an invalid notification id so ignore it
+        if (id == 0)
+            continue;
+        manager->CloseNotification(id);
+    }
+}
