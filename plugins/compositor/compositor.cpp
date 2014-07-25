@@ -20,6 +20,8 @@
 
 #include <QWaylandInputDevice>
 
+#include <QtCore/QtGlobal>
+
 namespace luna
 {
 
@@ -176,10 +178,10 @@ void Compositor::surfaceAboutToBeDestroyed(QWaylandSurface *surface)
 
 void Compositor::frameSwappedSlot()
 {
-#if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
+#if QT_VERSION > QT_VERSION_CHECK(5,2,1)
     sendFrameCallbacks(surfaces());
 #else
-    frameFinished(surfaces());
+    frameFinished(mFullscreenSurface);
 #endif
 }
 
@@ -196,10 +198,10 @@ void Compositor::surfaceCreated(QWaylandSurface *surface)
     connect(surface, SIGNAL(raiseRequested()), this, SLOT(surfaceRaised()));
     connect(surface, SIGNAL(lowerRequested()), this, SLOT(surfaceLowered()));
     connect(surface, SIGNAL(sizeChanged()), this, SLOT(surfaceSizeChanged()));
-#if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
+#if QT_VERSION > QT_VERSION_CHECK(5,2,1)
     connect(surface, SIGNAL(damaged(const QRegion)), this, SLOT(surfaceDamaged(QRegion)));
 #else
-    connect(surface, SIGNAL(damaged(const QRect)), this, SLOT(surfaceDamaged(QRect)));
+    connect(surface, SIGNAL(damaged(const QRect)), this, SLOT(surfaceDamaged(const QRect&)));
 #endif
 }
 
@@ -234,14 +236,14 @@ void Compositor::surfaceSizeChanged()
         window->setSize(surface->size());
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
+#if QT_VERSION > QT_VERSION_CHECK(5,2,1)
 void Compositor::surfaceDamaged(const QRegion &)
 #else
 void Compositor::surfaceDamaged(const QRect&)
 #endif
 {
     if (!isVisible())
-#if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
+#if QT_VERSION > QT_VERSION_CHECK(5,2,1)
         sendFrameCallbacks(surfaces());
 #else
         frameFinished(0);
