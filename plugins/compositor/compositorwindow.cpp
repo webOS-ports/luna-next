@@ -96,6 +96,7 @@ bool CompositorWindow::checkIsAllowedToStay()
     // FIXME this should be moved to a configuration file so we don't have to touch the
     // source code for changing the list of allowed processes
     return (procExeEntry.symLinkTarget() == "/usr/sbin/webapp-launcher" ||
+            procExeEntry.symLinkTarget() == "/usr/sbin/LunaWebAppManager" ||
             procExeEntry.symLinkTarget() == "/usr/bin/maliit-server" ||
             procExeEntry.symLinkTarget() == "/usr/palm/applications/org.webosports.app.phone/org.webosports.app.phone");
 }
