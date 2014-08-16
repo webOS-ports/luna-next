@@ -10,7 +10,7 @@ set(SOURCES
 add_executable(luna-next ${SOURCES} ${RESOURCES})
 qt5_use_modules(luna-next Quick Gui)
 target_link_libraries(luna-next
-    ${SYSTEMD_DAEMON_LIBRARIES}
+    ${SYSTEMD_LIBRARIES}
     ${LUNA_SYSMGR_COMMON_LIBRARIES}
     ${GLIB2_LIBRARIES})
 
