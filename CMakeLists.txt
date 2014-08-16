@@ -49,7 +49,7 @@ pkg_check_modules(GLESV2 glesv2 REQUIRED)
 pkg_check_modules(WAYLAND_CLIENT wayland-client REQUIRED)
 pkg_check_modules(WAYLAND_SERVER wayland-server REQUIRED)
 
-pkg_check_modules(SYSTEMD_DAEMON libsystemd-daemon REQUIRED)
+pkg_check_modules(SYSTEMD libsystemd REQUIRED)
 pkg_check_modules(GLIB2 glib-2.0 REQUIRED)
 pkg_check_modules(LUNA_SYSMGR_COMMON LunaSysMgrCommon REQUIRED)
 pkg_check_modules(LUNA_SYSMGR_IPC_MESSAGES LunaSysMgrIpcMessages REQUIRED)
