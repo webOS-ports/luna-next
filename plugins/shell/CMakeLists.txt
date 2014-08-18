@@ -7,7 +7,8 @@ include_directories(
 set(SOURCES
     plugin.cpp
     reticleitem.cpp
-    fpscounter.cpp)
+    fpscounter.cpp
+    devicekeyhandler.cpp)
 
 add_library(lunanext-shell-qml SHARED ${SOURCES})
 qt5_use_modules(lunanext-shell-qml Qml Quick)

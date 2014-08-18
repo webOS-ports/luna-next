@@ -20,6 +20,7 @@
 #include "plugin.h"
 #include "reticleitem.h"
 #include "fpscounter.h"
+#include "devicekeyhandler.h"
 
 LunaNextShellPlugin::LunaNextShellPlugin(QObject *parent) :
     QQmlExtensionPlugin(parent)
@@ -31,6 +32,7 @@ void LunaNextShellPlugin::registerTypes(const char *uri)
     Q_ASSERT(uri == QLatin1String("LunaNext.Shell"));
     qmlRegisterType<luna::ReticleItem>(uri, 0, 1, "Reticle");
     qmlRegisterType<luna::FpsCounter>(uri, 0, 1, "FpsCounter");
+    qmlRegisterType<luna::DeviceKeyHandler>(uri, 0, 1, "DeviceKeyHandler");
 }
 
 void LunaNextShellPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
