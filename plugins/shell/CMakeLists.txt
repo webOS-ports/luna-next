@@ -8,6 +8,7 @@ set(SOURCES
     plugin.cpp
     reticleitem.cpp
     fpscounter.cpp
+    reticlehandler.cpp
     devicekeyhandler.cpp)
 
 add_library(lunanext-shell-qml SHARED ${SOURCES})
