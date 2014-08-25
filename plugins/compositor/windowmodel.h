@@ -35,7 +35,7 @@ class WindowModel : public QAbstractListModel,
     Q_INTERFACES(QQmlParserStatus)
 
     Q_PROPERTY(unsigned int windowTypeFilter READ windowTypeFilter WRITE setWindowTypeFilter)
-    Q_PROPERTY(unsigned int count READ count)
+    Q_PROPERTY(unsigned int count READ count NOTIFY countChanged)
 
 public:
     WindowModel();
@@ -52,10 +52,14 @@ public:
 
     static void addWindowForEachModel(QList<WindowModel*> windowModels, CompositorWindow *window);
     static void removeWindowForEachModel(QList<WindowModel*> windowModels, CompositorWindow *window);
+    static bool isWindowAlreadyAdded(QList<WindowModel*> windowModels, CompositorWindow *window);
 
     Q_INVOKABLE int getIndexByWindowId(int winId);
     Q_INVOKABLE QVariant getByIndex(int index);
     Q_INVOKABLE QVariant getByWindowId(int winId);
+
+signals:
+    countChanged();
 
 protected:
     virtual void classBegin();

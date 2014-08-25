@@ -106,6 +106,48 @@ void Compositor::closeWindowWithId(int winId)
     }
 }
 
+CompositorWindow* Compositor::createWindowForSurface(QWaylandSurface *surface)
+{
+    unsigned int windowId = mNextWindowId++;
+
+    CompositorWindow *window = new CompositorWindow(windowId, surface, contentItem());
+    window->setSize(surface->size());
+    window->setPosition(surface->pos());
+    window->setFlag(QQuickItem::ItemIsFocusScope, true);
+    window->setUseTextureAlpha(true);
+
+    mWindows.insert(windowId, window);
+
+    return window;
+}
+
+void Compositor::surfaceShellSurfaceReady()
+{
+    QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(sender());
+
+    qDebug() << __PRETTY_FUNCTION__ << surface;
+
+    bool isSurfaceNew = (qobject_cast<CompositorWindow*>(surface->surfaceItem()) == 0);
+    if (!isSurfaceNew)
+        return;
+
+    CompositorWindow *window = createWindowForSurface(surface);
+
+    connect(window, SIGNAL(readyChanged()), this, SLOT(windowIsReady()));
+}
+
+void Compositor::windowIsReady()
+{
+    CompositorWindow *window = static_cast<CompositorWindow*>(sender());
+
+    qDebug() << __PRETTY_FUNCTION__ << "appId" << window->appId() << "windowType" << window->windowType();
+
+    if (window->appId() == "com.palm.launcher") {
+        emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+        WindowModel::addWindowForEachModel(mWindowModels, window);
+    }
+}
+
 void Compositor::surfaceMapped()
 {
     QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(sender());
@@ -113,31 +155,19 @@ void Compositor::surfaceMapped()
     if (!surface->hasShellSurface())
         return;
 
-    bool isSurfaceNew = false;
-
     CompositorWindow *window = qobject_cast<CompositorWindow*>(surface->surfaceItem());
-    if (!window) {
-        unsigned int windowId = mNextWindowId++;
-        window = new CompositorWindow(windowId, surface, contentItem());
-        window->setSize(surface->size());
-        window->setPosition(surface->pos());
-        window->setFlag(QQuickItem::ItemIsFocusScope, true);
-        window->setUseTextureAlpha(true);
-
-        mWindows.insert(windowId, window);
-        isSurfaceNew = true;
-    }
 
     window->setTouchEventsEnabled(true);
 
-    qWarning() << Q_FUNC_INFO << window;
+    qDebug() << __PRETTY_FUNCTION__ << window << "appId" << window->appId() << "windowType" << window->windowType();
 
-    if (isSurfaceNew)
-        emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
-    else
+    if (WindowModel::isWindowAlreadyAdded(mWindowModels, window)) {
         emit windowShown(QVariant::fromValue(static_cast<QQuickItem*>(window)));
-
-    WindowModel::addWindowForEachModel(mWindowModels, window);
+    }
+    else {
+        emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+        WindowModel::addWindowForEachModel(mWindowModels, window);
+    }
 }
 
 void Compositor::surfaceUnmapped()
@@ -193,6 +223,9 @@ void Compositor::resizeEvent(QResizeEvent *event)
 
 void Compositor::surfaceCreated(QWaylandSurface *surface)
 {
+    qDebug() << __PRETTY_FUNCTION__ << surface << "hasShellSurface" << surface->hasShellSurface();
+
+    connect(surface, SIGNAL(shellSurfaceReady()), this, SLOT(surfaceShellSurfaceReady()));
     connect(surface, SIGNAL(mapped()), this, SLOT(surfaceMapped()));
     connect(surface, SIGNAL(unmapped()), this, SLOT(surfaceUnmapped()));
     connect(surface, SIGNAL(raiseRequested()), this, SLOT(surfaceRaised()));

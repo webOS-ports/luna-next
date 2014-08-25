@@ -28,6 +28,9 @@ WindowModel::WindowModel() :
     mComponentComplete(false)
 {
     Compositor::instance()->registerWindowModel(this);
+
+    connect(this, &WindowModel::rowsInserted, [=]() { emit countChanged(); });
+    connect(this, &WindowModel::rowsRemoved, [=]() { emit countChanged(); });
 }
 
 WindowModel::~WindowModel()
@@ -110,6 +113,20 @@ void WindowModel::removeWindowForEachModel(QList<WindowModel*> windowModels, Com
     foreach (WindowModel *model, impactedWindowModels) {
         model->endRemoveRows();
     }
+}
+
+bool WindowModel::isWindowAlreadyAdded(QList<WindowModel*> windowModels, CompositorWindow *window)
+{
+    if (!window)
+        return false;
+
+    foreach (WindowModel *model, windowModels) {
+        int index = model->mWindows.indexOf(window->winId());
+        if (index != -1)
+            return true;
+    }
+
+    return false;
 }
 
 int WindowModel::rowCount(const QModelIndex &) const

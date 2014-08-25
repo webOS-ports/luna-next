@@ -82,6 +82,8 @@ private slots:
     void surfaceSizeChanged();
     void surfaceRaised();
     void surfaceLowered();
+    void surfaceShellSurfaceReady();
+    void windowIsReady();
 
 protected:
     void resizeEvent(QResizeEvent *event);
@@ -98,6 +100,8 @@ private:
     QList<WindowModel*> mWindowModels;
 
     static Compositor *mInstance;
+
+    CompositorWindow* createWindowForSurface(QWaylandSurface *surface);
 };
 
 } // namespace luna
