@@ -30,15 +30,21 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandSurface *surface,
       mId(winId),
       mWindowType(WindowType::Card),
       mClosed(false),
-      mRemovePosted(false)
+      mRemovePosted(false),
+      mReady(false)
 {
     QVariantMap properties = surface->windowProperties();
+
     if (properties.contains("type"))
         mWindowType = WindowType::fromString(properties.value("type").toString());
-    if (properties.contains("appId"))
+
+    if (properties.contains("appId")) {
         mAppId = properties.value("appId").toString();
-    if (mAppId == "com.palm.launcher")
-        mWindowType = WindowType::Launcher;
+        if (mAppId == "com.palm.launcher")
+            mWindowType = WindowType::Launcher;
+    }
+
+    connect(surface, SIGNAL(windowPropertyChanged(const QString&,const QVariant&)), this, SLOT(onWindowPropertyChanged(const QString&, const QVariant&)));
 
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
 }
@@ -46,6 +52,32 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandSurface *surface,
 CompositorWindow::~CompositorWindow()
 {
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
+}
+
+void CompositorWindow::checkStatus()
+{
+    if (mReady)
+        return;
+
+    if (mAppId.length() > 0) {
+        mReady = true;
+        emit readyChanged();
+    }
+}
+
+void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVariant &value)
+{
+    if (name == "appId") {
+        mAppId = value.toString();
+
+        if (mAppId == "com.palm.launcher")
+            mWindowType = WindowType::Launcher;
+    }
+    else if (name == "type") {
+        mWindowType = WindowType::fromString(value.toString());
+    }
+
+    checkStatus();
 }
 
 unsigned int CompositorWindow::winId() const
