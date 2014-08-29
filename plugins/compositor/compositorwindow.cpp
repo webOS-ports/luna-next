@@ -158,7 +158,7 @@ bool CompositorWindow::event(QEvent *event)
     return handled;
 }
 
-void CompositorWindow::postEvent(int event)
+void CompositorWindow::postEvent(EventType::Event event)
 {
     int key = EventType::toKey(event);
     if (key > 0) {

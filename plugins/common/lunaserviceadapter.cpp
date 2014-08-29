@@ -317,7 +317,7 @@ LunaServiceAdapter::RegisteredMethod::RegisteredMethod(const QString &name, QJSV
 LunaServiceAdapter::RegisteredMethod::~RegisteredMethod()
 {
     if (mMethods[0].name != 0)
-        g_free(mMethods[0].name);
+        g_free(const_cast<char *>(mMethods[0].name));
 }
 
 LSMethod* LunaServiceAdapter::RegisteredMethod::methods()
