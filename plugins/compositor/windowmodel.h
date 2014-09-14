@@ -59,7 +59,7 @@ public:
     Q_INVOKABLE QVariant getByWindowId(int winId);
 
 signals:
-    countChanged();
+    void countChanged();
 
 protected:
     virtual void classBegin();
