@@ -13,51 +13,56 @@
 **
 ****************************************************************************/
 
-#include <QDBusArgument>
+#include <QTimer>
+
 #include "notificationmanager.h"
 #include "notification.h"
 
-Notification::Notification(const QString &appName, uint replacesId, const QString &appIcon, const QString &summary, const QString &body, const QStringList &actions, const QVariantHash &hints, int expireTimeout, QObject *parent) :
+Notification::Notification(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam, const QString &title, const QString &body, const QUrl &iconUrl, int priority, int expireTimeout, QObject *parent) :
     QObject(parent),
-    appName_(appName),
+    ownerId_(ownerId),
     replacesId_(replacesId),
-    appIcon_(appIcon),
-    summary_(summary),
+    launchId_(launchId),
+    launchParam_(launchParam),
+    title_(title),
     body_(body),
-    actions_(actions),
-    hints_(hints),
-    expireTimeout_(expireTimeout)
+    iconUrl_(iconUrl),
+    priority_(priority),
+    expireTimeout_(expireTimeout),
+    timestamp_(QDateTime::currentDateTimeUtc())
 {
 }
 
 Notification::Notification(QObject *parent) :
     QObject(parent),
     replacesId_(0),
-    expireTimeout_(-1)
+    expireTimeout_(-1),
+    timestamp_(QDateTime::currentDateTimeUtc())
 {
 }
 
 Notification::Notification(const Notification &notification) :
     QObject(notification.parent()),
-    appName_(notification.appName_),
+    ownerId_(notification.ownerId_),
     replacesId_(notification.replacesId_),
-    appIcon_(notification.appIcon_),
-    summary_(notification.summary_),
+    launchId_(notification.launchId_),
+    title_(notification.title_),
     body_(notification.body_),
-    actions_(notification.actions_),
-    hints_(notification.hints_),
-    expireTimeout_(notification.expireTimeout_)
+    iconUrl_(notification.iconUrl_),
+    priority_(notification.priority_),
+    expireTimeout_(notification.expireTimeout_),
+    timestamp_(notification.timestamp_)
 {
 }
 
-QString Notification::appName() const
+QString Notification::ownerId() const
 {
-    return appName_;
+    return ownerId_;
 }
 
-void Notification::setAppName(const QString &appName)
+void Notification::setOwnerId(const QString &ownerId)
 {
-    appName_ = appName;
+    ownerId_ = ownerId;
 }
 
 uint Notification::replacesId() const
@@ -65,26 +70,36 @@ uint Notification::replacesId() const
     return replacesId_;
 }
 
-QString Notification::appIcon() const
+QString Notification::launchId() const
 {
-    return appIcon_;
+    return launchId_;
 }
 
-void Notification::setAppIcon(const QString &appIcon)
+void Notification::setLaunchId(const QString &launchId)
 {
-    appIcon_ = appIcon;
+    launchId_ = launchId;
 }
 
-QString Notification::summary() const
+QString Notification::launchParam() const
 {
-    return summary_;
+    return launchParam_;
 }
 
-void Notification::setSummary(const QString &summary)
+void Notification::setLaunchParam(const QString &launchParam)
 {
-    if (summary_ != summary) {
-        summary_ = summary;
-        emit summaryChanged();
+    launchParam_ = launchParam;
+}
+
+QString Notification::title() const
+{
+    return title_;
+}
+
+void Notification::setTitle(const QString &title)
+{
+    if (title_ != title) {
+        title_ = title;
+        emit titleChanged();
     }
 }
 
@@ -101,69 +116,29 @@ void Notification::setBody(const QString &body)
     }
 }
 
-QStringList Notification::actions() const
+QUrl Notification::iconUrl() const
 {
-    return actions_;
+    return iconUrl_;
 }
 
-void Notification::setActions(const QStringList &actions)
+void Notification::setIconUrl(const QUrl &iconUrl)
 {
-    actions_ = actions;
+    if (iconUrl_ != iconUrl) {
+        iconUrl_ = iconUrl;
+        emit iconUrlChanged();
+    }
 }
 
-QVariantHash Notification::hints() const
+int Notification::priority() const
 {
-    return hints_;
+    return priority_;
 }
 
-void Notification::setHints(const QVariantHash &hints)
+void Notification::setPriority(int priority)
 {
-    QString oldIcon = icon();
-    QDateTime oldTimestamp = timestamp();
-    QString oldPreviewIcon = previewIcon();
-    QString oldPreviewSummary = previewSummary();
-    QString oldPreviewBody = previewBody();
-    int oldUrgency = urgency();
-    int oldItemCount = itemCount();
-    int oldPriority = priority();
-    QString oldCategory = category();
-
-    hints_ = hints;
-
-    if (oldIcon != icon()) {
-        emit iconChanged();
-    }
-
-    if (oldTimestamp != timestamp()) {
-        emit timestampChanged();
-    }
-
-    if (oldPreviewIcon != previewIcon()) {
-        emit previewIconChanged();
-    }
-
-    if (oldPreviewSummary != previewSummary()) {
-        emit previewSummaryChanged();
-    }
-
-    if (oldPreviewBody != previewBody()) {
-        emit previewBodyChanged();
-    }
-
-    if (oldUrgency != urgency()) {
-        emit urgencyChanged();
-    }
-
-    if (oldItemCount != itemCount()) {
-        emit itemCountChanged();
-    }
-
-    if (oldPriority != priority()) {
+    if (priority_ != priority) {
+        priority_ = priority;
         emit priorityChanged();
-    }
-
-    if (oldCategory != category()) {
-        emit categoryChanged();
     }
 }
 
@@ -177,84 +152,14 @@ void Notification::setExpireTimeout(int expireTimeout)
     expireTimeout_ = expireTimeout;
 }
 
-QString Notification::icon() const
-{
-    return appIcon_.isEmpty() ? hints_.value(NotificationManager::HINT_ICON).toString() : appIcon_;
-}
-
 QDateTime Notification::timestamp() const
 {
-    return hints_.value(NotificationManager::HINT_TIMESTAMP).toDateTime();
+    return timestamp_;
 }
 
-QString Notification::previewIcon() const
+void Notification::resetTimeStamp()
 {
-    return hints_.value(NotificationManager::HINT_PREVIEW_ICON).toString();
-}
-
-QString Notification::previewSummary() const
-{
-    return hints_.value(NotificationManager::HINT_PREVIEW_SUMMARY).toString();
-}
-
-QString Notification::previewBody() const
-{
-    return hints_.value(NotificationManager::HINT_PREVIEW_BODY).toString();
-}
-
-int Notification::urgency() const
-{
-    return hints_.value(NotificationManager::HINT_URGENCY).toInt();
-}
-
-int Notification::itemCount() const
-{
-    return hints_.value(NotificationManager::HINT_ITEM_COUNT).toInt();
-}
-
-int Notification::priority() const
-{
-    return hints_.value(NotificationManager::HINT_PRIORITY).toInt();
-}
-
-QString Notification::category() const
-{
-    return hints_.value(NotificationManager::HINT_CATEGORY).toString();
-}
-
-bool Notification::isUserRemovable() const
-{
-    return hints_.value(NotificationManager::HINT_USER_REMOVABLE, QVariant(true)).toBool();
-}
-
-QDBusArgument &operator<<(QDBusArgument &argument, const Notification &notification)
-{
-    argument.beginStructure();
-    argument << notification.appName_;
-    argument << notification.replacesId_;
-    argument << notification.appIcon_;
-    argument << notification.summary_;
-    argument << notification.body_;
-    argument << notification.actions_;
-    argument << notification.hints_;
-    argument << notification.expireTimeout_;
-    argument.endStructure();
-    return argument;
-}
-
-const QDBusArgument &operator>>(const QDBusArgument &argument, Notification &notification)
-{
-    argument.beginStructure();
-    argument >> notification.appName_;
-    argument >> notification.replacesId_;
-    argument >> notification.appIcon_;
-    argument >> notification.summary_;
-    argument >> notification.body_;
-    argument >> notification.actions_;
-    argument >> notification.hints_;
-    argument >> notification.expireTimeout_;
-    argument.endStructure();
-    return argument;
+    timestamp_ = QDateTime::currentDateTimeUtc();
 }
 
 NotificationList::NotificationList()
@@ -276,25 +181,3 @@ QList<Notification *> NotificationList::notifications() const
     return notificationList;
 }
 
-QDBusArgument &operator<<(QDBusArgument &argument, const NotificationList &notificationList)
-{
-    argument.beginArray(qMetaTypeId<Notification>());
-    foreach (Notification *notification, notificationList.notificationList) {
-        argument << *notification;
-    }
-    argument.endArray();
-    return argument;
-}
-
-const QDBusArgument &operator>>(const QDBusArgument &argument, NotificationList &notificationList)
-{
-    argument.beginArray();
-    notificationList.notificationList.clear();
-    while (!argument.atEnd()) {
-        Notification *notification = new Notification;
-        argument >> *notification;
-        notificationList.notificationList.append(notification);
-    }
-    argument.endArray();
-    return argument;
-}

@@ -13,6 +13,8 @@
 **
 ****************************************************************************/
 
+#include <QTimer>
+
 #include "notificationmanager.h"
 #include "notificationlistmodel.h"
 
@@ -75,5 +77,5 @@ void NotificationListModel::removeNotification(uint id)
 
 bool NotificationListModel::notificationShouldBeShown(Notification *notification)
 {
-    return !notification->hints().value(NotificationManager::HINT_HIDDEN).toBool() && !(notification->body().isEmpty() && notification->summary().isEmpty()) && notification->hints().value(NotificationManager::HINT_URGENCY).toInt() < 2;
+    return !(notification->body().isEmpty() && notification->title().isEmpty()) && notification->priority() >= 0;
 }
