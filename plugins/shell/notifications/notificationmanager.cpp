@@ -15,6 +15,13 @@
 
 #include <QCoreApplication>
 #include <QDebug>
+#include <QSqlDatabase>
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QSqlRecord>
+#include <QSqlTableModel>
+#include <QDir>
+#include <sys/statfs.h>
 #include "notificationmanager.h"
 
 // Define this if you'd like to see debug messages from the notification manager
@@ -23,6 +30,12 @@
 #else
 #define NOTIFICATIONS_DEBUG(things)
 #endif
+
+//! Path of the privileged storage directory relative to the home directory
+static const char *PRIVILEGED_DATA_PATH= "/.local/share/system/privileged";
+
+//! Minimum amount of disk space needed for the notification database in kilobytes
+static const uint MINIMUM_FREE_SPACE_NEEDED_IN_KB = 1024;
 
 NotificationManager *NotificationManager::instance_ = 0;
 
@@ -36,13 +49,25 @@ NotificationManager *NotificationManager::instance()
 
 NotificationManager::NotificationManager(QObject *parent) :
     QObject(parent),
-    previousNotificationID(0)
+    previousNotificationID(0),
+    database(new QSqlDatabase),
+    committed(true)
 {
     qDebug() << __PRETTY_FUNCTION__;
+
+    // Commit the modifications to the database 10 seconds after the last modification so that writing to disk doesn't affect user experience
+    databaseCommitTimer.setInterval(10000);
+    databaseCommitTimer.setSingleShot(true);
+    connect(&databaseCommitTimer, SIGNAL(timeout()), this, SLOT(commit()));
+
+    restoreNotifications();
 }
 
 NotificationManager::~NotificationManager()
 {
+    database->commit();
+    delete database;
+
     foreach(uint id, notifications.keys()) {
         removeNotification(id);
     }
@@ -89,7 +114,13 @@ uint NotificationManager::Notify(const QString &ownerId, uint replacesId, const 
             notificationToReplace->setPriority(priority);
             notificationToReplace->setExpireTimeout(expireTimeout);
             notificationToReplace->resetTimeStamp();
+
+            // Delete the existing notification from the database
+            execSQL(QString("DELETE FROM notifications WHERE id=?"), QVariantList() << id);
         }
+
+        // Add the notification to the database
+        execSQL("INSERT INTO notifications VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", QVariantList() << id << ownerId << launchId << launchParam << title << body << iconUrl << priority << expireTimeout);
 
         NOTIFICATIONS_DEBUG("NOTIFY:" << ownerId << iconUrl << title << body << expireTimeout << "->" << id);
         emit notificationModified(id);
@@ -106,15 +137,14 @@ void NotificationManager::CloseNotification(uint id, NotificationClosedReason cl
     if (notifications.contains(id)) {
         emit notificationClosed(id, closeReason);
 
+        // Remove the notification from database
+        execSQL(QString("DELETE FROM notifications WHERE id=?"), QVariantList() << id);
+
         NOTIFICATIONS_DEBUG("REMOVE:" << id);
         emit notificationRemoved(id);
 
         // Mark the notification to be destroyed
         removedNotifications.insert(notifications.take(id));
-
-        // Delete it right away ?
-        qDeleteAll(removedNotifications);
-        removedNotifications.clear();
     }
 }
 
@@ -146,6 +176,188 @@ uint NotificationManager::nextAvailableNotificationID()
     }
 
     return previousNotificationID;
+}
+
+void NotificationManager::restoreNotifications()
+{
+    if (connectToDatabase()) {
+        if (checkTableValidity()) {
+            fetchData();
+        } else {
+            database->close();
+        }
+    }
+}
+
+bool NotificationManager::connectToDatabase()
+{
+    QString databasePath = QDir::homePath() + QString(PRIVILEGED_DATA_PATH) + QDir::separator() + "Notifications";
+    if (!QDir::root().exists(databasePath)) {
+        QDir::root().mkpath(databasePath);
+    }
+    QString databaseName = databasePath + "/notifications.db";
+
+    *database = QSqlDatabase::addDatabase("QSQLITE", metaObject()->className());
+    database->setDatabaseName(databaseName);
+    bool success = checkForDiskSpace(databasePath, MINIMUM_FREE_SPACE_NEEDED_IN_KB);
+    if (success) {
+        success = database->open();
+        if (!success) {
+            NOTIFICATIONS_DEBUG(database->lastError().driverText() << databaseName << database->lastError().databaseText());
+
+            // If opening the database fails, try to recreate the database
+            removeDatabaseFile(databaseName);
+            success = database->open();
+            NOTIFICATIONS_DEBUG("Unable to open database file. Recreating. Success: " << success);
+        }
+    } else {
+        NOTIFICATIONS_DEBUG("Not enough free disk space available. Unable to open database.");
+    }
+
+    if (success) {
+        // Set up the database mode to write-ahead locking to improve performance
+        QSqlQuery(*database).exec("PRAGMA journal_mode=WAL");
+    }
+
+    return success;
+}
+
+bool NotificationManager::checkForDiskSpace(const QString &path, unsigned long freeSpaceNeeded)
+{
+    struct statfs st;
+    bool spaceAvailable = false;
+    if (statfs(path.toUtf8().data(), &st) != -1) {
+        unsigned long freeSpaceInKb = (st.f_bsize * st.f_bavail) / 1024;
+        if (freeSpaceInKb > freeSpaceNeeded) {
+            spaceAvailable = true;
+        }
+    }
+    return spaceAvailable;
+}
+
+void NotificationManager::removeDatabaseFile(const QString &path)
+{
+    // Remove also -shm and -wal files created when journal-mode=WAL is being used
+    QDir::root().remove(path + "-shm");
+    QDir::root().remove(path + "-wal");
+    QDir::root().remove(path);
+}
+
+bool NotificationManager::checkTableValidity()
+{
+    bool result = true;
+    bool recreateNotificationsTable = false;
+
+    {
+        // Check that the notifications table schema is as expected
+        QSqlTableModel notificationsTableModel(0, *database);
+        notificationsTableModel.setTable("notifications");
+        recreateNotificationsTable = (notificationsTableModel.fieldIndex("id") == -1 ||
+                                      notificationsTableModel.fieldIndex("ownerId") == -1 ||
+                                      notificationsTableModel.fieldIndex("launchId") == -1 ||
+                                      notificationsTableModel.fieldIndex("launchParam") == -1 ||
+                                      notificationsTableModel.fieldIndex("title") == -1 ||
+                                      notificationsTableModel.fieldIndex("body") == -1 ||
+                                      notificationsTableModel.fieldIndex("iconUrl") == -1 ||
+                                      notificationsTableModel.fieldIndex("priority") == -1 ||
+                                      notificationsTableModel.fieldIndex("expire_timeout") == -1);
+    }
+
+    if (recreateNotificationsTable) {
+        result &= recreateTable("notifications", "id INTEGER PRIMARY KEY, ownerId TEXT, launchId TEXT, launchParam TEXT, title TEXT, body TEXT, iconUrl TEXT, priority INTEGER, expire_timeout INTEGER");
+    }
+
+    return result;
+}
+
+bool NotificationManager::recreateTable(const QString &tableName, const QString &definition)
+{
+    bool result = false;
+
+    if (database->isOpen()) {
+        QSqlQuery(*database).exec("DROP TABLE " + tableName);
+        result = QSqlQuery(*database).exec("CREATE TABLE " + tableName + " (" + definition + ")");
+    }
+
+    return result;
+}
+
+void NotificationManager::fetchData()
+{
+    // Create the notifications
+    QSqlQuery notificationsQuery("SELECT * FROM notifications", *database);
+    QSqlRecord notificationsRecord = notificationsQuery.record();
+    int notificationsTableIdFieldIndex = notificationsRecord.indexOf("id");
+    int notificationsTableOwnerIdFieldIndex = notificationsRecord.indexOf("ownerId");
+    int notificationsTableLaunchIdFieldIndex = notificationsRecord.indexOf("launchId");
+    int notificationsTableLaunchParamFieldIndex = notificationsRecord.indexOf("launchParam");
+    int notificationsTableTitleFieldIndex = notificationsRecord.indexOf("title");
+    int notificationsTableBodyFieldIndex = notificationsRecord.indexOf("body");
+    int notificationsTableIconUrlFieldIndex = notificationsRecord.indexOf("iconUrl");
+    int notificationsTablePriorityFieldIndex = notificationsRecord.indexOf("priority");
+    int notificationsTableExpireTimeoutFieldIndex = notificationsRecord.indexOf("expire_timeout");
+    while (notificationsQuery.next()) {
+        uint id = notificationsQuery.value(notificationsTableIdFieldIndex).toUInt();
+        QString ownerId = notificationsQuery.value(notificationsTableOwnerIdFieldIndex).toString();
+        QString launchId = notificationsQuery.value(notificationsTableLaunchIdFieldIndex).toString();
+        QString launchParam = notificationsQuery.value(notificationsTableLaunchParamFieldIndex).toString();
+        QString title = notificationsQuery.value(notificationsTableTitleFieldIndex).toString();
+        QString body = notificationsQuery.value(notificationsTableBodyFieldIndex).toString();
+        QUrl iconUrl = notificationsQuery.value(notificationsTableIconUrlFieldIndex).toUrl();
+        int priority = notificationsQuery.value(notificationsTablePriorityFieldIndex).toInt();
+        int expireTimeout = notificationsQuery.value(notificationsTableExpireTimeoutFieldIndex).toInt();
+        Notification *notification = new Notification(ownerId, id, launchId, launchParam, title, body, iconUrl, priority, expireTimeout, this);
+        connect(notification, SIGNAL(launchInvoked()), this, SLOT(launchNotification()), Qt::QueuedConnection);
+        connect(notification, SIGNAL(removeRequested()), this, SLOT(removeNotification()), Qt::QueuedConnection);
+        notifications.insert(id, notification);
+
+        NOTIFICATIONS_DEBUG("RESTORED:" << ownerId << launchId << launchParam << title << body << iconUrl << priority << expireTimeout << "->" << id);
+        emit notificationModified(id);
+
+        if (id > previousNotificationID) {
+            // Use the highest notification ID found as the previous notification ID
+            previousNotificationID = id;
+        }
+    }
+}
+
+void NotificationManager::commit()
+{
+    // Any aditional rules about when database commits are allowed can be added here
+    if (!committed) {
+        database->commit();
+        committed = true;
+    }
+
+    qDeleteAll(removedNotifications);
+    removedNotifications.clear();
+}
+
+void NotificationManager::execSQL(const QString &command, const QVariantList &args)
+{
+    if (!database->isOpen()) {
+        return;
+    }
+
+    if (committed) {
+        committed = false;
+        database->transaction();
+    }
+
+    QSqlQuery query(*database);
+    query.prepare(command);
+
+    foreach(const QVariant &arg, args) {
+        query.addBindValue(arg);
+    }
+
+    query.exec();
+
+    if (query.lastError().isValid()) {
+        NOTIFICATIONS_DEBUG(command << args << query.lastError());
+    }
+
+    databaseCommitTimer.start();
 }
 
 void NotificationManager::launchNotification()
