@@ -23,11 +23,11 @@ Notification* NotificationManagerWrapper::getNotificationById(uint id)
     return NotificationManager::instance()->notification(id);
 }
 
-uint NotificationManagerWrapper::notify(const QString &appName, uint replacesId, const QString &appIcon,
-                                                    const QString &summary, const QString &body, const QStringList &actions,
-                                                    const QVariantHash &hints, int expireTimeout)
+uint NotificationManagerWrapper::notify(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam,
+                                                    const QString &title, const QString &body, const QUrl &iconUrl,
+                                                    int priority, int expireTimeout)
 {
-    return NotificationManager::instance()->Notify(appName, replacesId, appIcon, summary, body, actions, hints, expireTimeout);
+    return NotificationManager::instance()->Notify(ownerId, replacesId, launchId, launchParam, title, body, iconUrl, priority, expireTimeout);
 }
 
 void NotificationManagerWrapper::closeById(uint id, NotificationManager::NotificationClosedReason reason)
@@ -35,10 +35,10 @@ void NotificationManagerWrapper::closeById(uint id, NotificationManager::Notific
     return NotificationManager::instance()->CloseNotification(id, reason);
 }
 
-void NotificationManagerWrapper::closeAllByAppName(const QString &appName)
+void NotificationManagerWrapper::closeAllByOwner(const QString &ownerId)
 {
     NotificationManager *manager = NotificationManager::instance();
-    NotificationList notificationList = manager->GetNotifications(appName);
+    NotificationList notificationList = manager->GetNotifications(ownerId);
     Q_FOREACH(Notification *notification, notificationList.notifications()) {
         uint id = manager->GetIdForNotification(notification);
         // zero is an invalid notification id so ignore it

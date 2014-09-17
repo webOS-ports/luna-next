@@ -15,6 +15,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QUrl>
 
 #include "notificationmanager.h"
 
@@ -26,9 +27,11 @@ public:
     NotificationManagerWrapper();
 
     Q_INVOKABLE Notification* getNotificationById(uint id);
-    Q_INVOKABLE uint notify(const QString &appName, uint replacesId, const QString &appIcon, const QString &summary, const QString &body, const QStringList &actions, const QVariantHash &hints, int expireTimeout);
+    Q_INVOKABLE uint notify(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam,
+                            const QString &title, const QString &body, const QUrl &iconUrl,
+                            int priority, int expireTimeout);
     Q_INVOKABLE void closeById(uint id, NotificationManager::NotificationClosedReason reason = NotificationManager::CloseNotificationCalled);
-    Q_INVOKABLE void closeAllByAppName(const QString& appName);
+    Q_INVOKABLE void closeAllByOwner(const QString& ownerId);
 };
 
 #endif // NOTIFICATIONMANAGERWRAPPER_H

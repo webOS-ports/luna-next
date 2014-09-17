@@ -19,8 +19,7 @@
 #include <QStringList>
 #include <QDateTime>
 #include <QVariantHash>
-
-class QDBusArgument;
+#include <QUrl>
 
 /*!
  * An object for storing information about a single notification.
@@ -28,39 +27,33 @@ class QDBusArgument;
 class Notification : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString appName READ appName)
+    Q_PROPERTY(QString ownerId READ ownerId)
     Q_PROPERTY(uint replacesId READ replacesId)
-    Q_PROPERTY(QString appIcon READ appIcon)
-    Q_PROPERTY(QString summary READ summary NOTIFY summaryChanged)
+    Q_PROPERTY(QString launchId READ launchId)
+    Q_PROPERTY(QString launchParam READ launchParam)
+    Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(QString body READ body NOTIFY bodyChanged)
-    Q_PROPERTY(QStringList actions READ actions)
-    Q_PROPERTY(int expireTimeout READ expireTimeout)
-    Q_PROPERTY(QString icon READ icon NOTIFY iconChanged)
-    Q_PROPERTY(QDateTime timestamp READ timestamp NOTIFY timestampChanged)
-    Q_PROPERTY(QString previewIcon READ previewIcon NOTIFY previewIconChanged)
-    Q_PROPERTY(QString previewSummary READ previewSummary NOTIFY previewSummaryChanged)
-    Q_PROPERTY(QString previewBody READ previewBody NOTIFY previewBodyChanged)
-    Q_PROPERTY(int urgency READ urgency NOTIFY urgencyChanged)
-    Q_PROPERTY(int itemCount READ itemCount NOTIFY itemCountChanged)
+    Q_PROPERTY(QUrl iconUrl READ iconUrl NOTIFY iconUrlChanged)
     Q_PROPERTY(int priority READ priority NOTIFY priorityChanged)
-    Q_PROPERTY(QString category READ category NOTIFY categoryChanged)
-    Q_PROPERTY(bool userRemovable READ isUserRemovable NOTIFY userRemovableChanged)
+    Q_PROPERTY(int expireTimeout READ expireTimeout)
+    Q_PROPERTY(QDateTime timestamp READ timestamp)
 
 public:
     /*!
      * Creates an object for storing information about a single notification.
      *
-     * \param appName name of the application sending the notification
+     * \param ownerId name of the or application/service sending the notification
      * \param replacesID the ID of the notification
-     * \param appIcon icon ID of the application sending the notification
-     * \param summary summary text for the notification
-     * \param body body text for the notification
-     * \param actions actions for the notification as a list of identifier/string pairs
-     * \param hints hints for the notification
+     * \param launchId can default to ownerId, but allowed to be freely set in general for services and apps
+     * \param launchParam parameters supplied to app when (re-)launched because user clicked on the notification
+     * \param title title text for the notification, no markup
+     * \param body body text for the notification, should use some markup
+     * \param iconUrl icon url for the notification, only local urls (file://) are allowed
+     * \param priority priority of the notification
      * \param expireTimeout expiration timeout for the notification
      * \param parent the parent QObject
      */
-    Notification(const QString &appName, uint replacesId, const QString &appIcon, const QString &summary, const QString &body, const QStringList &actions, const QVariantHash &hints, int expireTimeout, QObject *parent = 0);
+    Notification(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam, const QString &title, const QString &body, const QUrl &iconUrl, int priority, int expireTimeout, QObject *parent = 0);
 
     /*!
      * Creates a new uninitialized representation of a notification.
@@ -69,26 +62,32 @@ public:
      */
     Notification(QObject *parent = 0);
 
-    //! Returns the name of the application sending the notification
-    QString appName() const;
+    //! Returns the name of the application/service sending the notification
+    QString ownerId() const;
 
     //! Sets the name of the application sending the notification
-    void setAppName(const QString &appName);
+    void setOwnerId(const QString &ownerId);
 
     //! Returns the ID of the notification
     uint replacesId() const;
 
-    //! Returns the icon ID of the application sending the notification
-    QString appIcon() const;
+    //! Returns the name of the application/service associated to an action on the notification
+    QString launchId() const;
 
-    //! Sets the icon ID of the application sending the notification
-    void setAppIcon(const QString &appIcon);
+    //! Sets the name of the application/service associated to an action on the notification
+    void setLaunchId(const QString &launchId);
 
-    //! Returns the summary text for the notification
-    QString summary() const;
+    //! Returns the parameters that are associated to the action on the notification
+    QString launchParam() const;
 
-    //! Sets the summary text for the notification
-    void setSummary(const QString &summary);
+    //! Sets the parameters that are associated to the action on the notification
+    void setLaunchParam(const QString &launchParam);
+
+    //! Returns the title text for the notification
+    QString title() const;
+
+    //! Sets the title text for the notification
+    void setTitle(const QString &title);
 
     //! Returns the body text for the notification
     QString body() const;
@@ -96,17 +95,17 @@ public:
     //! Sets the body text for the notification
     void setBody(const QString &body);
 
-    //! Returns the actions for the notification as a list of identifier/string pairs
-    QStringList actions() const;
+    //! Returns the icon url for the notification
+    QUrl iconUrl() const;
 
-    //! Sets the actions for the notification as a list of identifier/string pairs
-    void setActions(const QStringList &actions);
+    //! Sets the icon url for the notification
+    void setIconUrl(const QUrl &iconUrl);
 
-    //! Returns the hints for the notification
-    QVariantHash hints() const;
+    //! Returns the priority of the notification
+    int priority() const;
 
-    //! Sets the hints for the notification
-    void setHints(const QVariantHash &hints);
+    //! Sets the priority of the notification
+    void setPriority(int priority);
 
     //! Returns the expiration timeout for the notification
     int expireTimeout() const;
@@ -114,35 +113,14 @@ public:
     //! Sets the expiration timeout for the notification
     void setExpireTimeout(int expireTimeout);
 
-    //! Returns the icon ID for the notification
-    QString icon() const;
-
     //! Returns the timestamp for the notification
     QDateTime timestamp() const;
 
-    //! Returns the icon ID for the preview of the notification
-    QString previewIcon() const;
-
-    //! Returns the summary text for the preview of the notification
-    QString previewSummary() const;
-
-    //! Returns the body text for the preview of the notification
-    QString previewBody() const;
-
-    //! Returns the urgency of the notification
-    int urgency() const;
+    //! Reset the timestamp of the notification
+    void resetTimeStamp();
 
     //! Returns the item count of the notification
     int itemCount() const;
-
-    //! Returns the priority of the notification
-    int priority() const;
-
-    //! Returns the category of the notification
-    QString category() const;
-
-    //! Returns the user removability of the notification
-    bool isUserRemovable() const;
 
     //! \internal
     /*!
@@ -154,81 +132,56 @@ public:
      */
     explicit Notification(const Notification &notification);
 
-    friend QDBusArgument &operator<<(QDBusArgument &, const Notification &);
-    friend const QDBusArgument &operator>>(const QDBusArgument &, Notification &);
-    //! \internal_end
-
 signals:
     /*!
-     * Sent when an action defined for the notification is invoked.
-     *
-     * \param action the action that was invoked
+     * Sent when the notification is activated.
      */
-    void actionInvoked(QString action);
+    void launchInvoked();
 
     //! Sent when the removal of this notification was requested.
     void removeRequested();
 
     //! Sent when the summary has been modified
-    void summaryChanged();
+    void titleChanged();
 
     //! Sent when the body has been modified
     void bodyChanged();
 
-    //! Sent when the icon has been modified
-    void iconChanged();
-
-    //! Sent when the timestamp has changed
-    void timestampChanged();
-
-    //! Sent when the preview icon has been modified
-    void previewIconChanged();
-
-    //! Sent when the preview summary has been modified
-    void previewSummaryChanged();
-
-    //! Sent when the preview body has been modified
-    void previewBodyChanged();
-
-    //! Sent when the urgency has been modified
-    void urgencyChanged();
-
-    //! Sent when the item count has been modified
-    void itemCountChanged();
+    //! Sent when the icon url has been modified
+    void iconUrlChanged();
 
     //! Sent when the priority has been modified
     void priorityChanged();
 
-    //! Sent when the category has been modified
-    void categoryChanged();
-
-    //! Sent when the user removability has been modified
-    void userRemovableChanged();
-
 private:
-    //! Name of the application sending the notification
-    QString appName_;
+    //! Name of the application/service sending the notification
+    QString ownerId_;
 
     //! The ID of the notification
     uint replacesId_;
 
-    //! Icon ID of the application sending the notification
-    QString appIcon_;
+    //! name of the application/service associated to an action on the notification
+    QString launchId_;
 
-    //! Summary text for the notification
-    QString summary_;
+    //! parameters associated to an action on the notification
+    QString launchParam_;
 
-    //! Body text for the notification
+    //! Title text for the notification
+    QString title_;
+
+    //! Body text for the notification (may contain markup)
     QString body_;
 
-    //! Actions for the notification as a list of identifier/string pairs
-    QStringList actions_;
+    //! icon url for the notification
+    QUrl iconUrl_;
 
-    //! Hints for the notification
-    QVariantHash hints_;
+    //! Priority of the notification
+    int priority_;
 
     //! Expiration timeout for the notification
     int expireTimeout_;
+
+    QDateTime timestamp_;
 };
 
 Q_DECLARE_METATYPE(Notification)
@@ -240,8 +193,6 @@ public:
     NotificationList(const QList<Notification *> &notificationList);
     NotificationList(const NotificationList &notificationList);
     QList<Notification *> notifications() const;
-    friend QDBusArgument &operator<<(QDBusArgument &, const NotificationList &);
-    friend const QDBusArgument &operator>>(const QDBusArgument &, NotificationList &);
 
 private:
     QList<Notification *> notificationList;

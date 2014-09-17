@@ -22,7 +22,6 @@
 #include <QSet>
 #include <QList>
 
-class CategoryDefinitionStore;
 class QSqlDatabase;
 
 /*!
@@ -40,72 +39,6 @@ class NotificationManager : public QObject
     Q_OBJECT
 
 public:
-    //! Standard hint: The urgency level.
-    static const char *HINT_URGENCY;
-
-    //! Standard hint: The type of notification this is.
-    static const char *HINT_CATEGORY;
-
-    //! Standard hint: This specifies the name of the desktop filename representing the calling program. This should be the same as the prefix used for the application's .desktop file. An example would be "rhythmbox" from "rhythmbox.desktop". This can be used by the daemon to retrieve the correct icon for the application, for logging purposes, etc. Not supported by this implementation.
-    static const char *HINT_DESKTOP_ENTRY;
-
-    //! Standard hint: This is a raw data image format which describes the width, height, rowstride, has alpha, bits per sample, channels and image data respectively. We use this value if the icon field is left blank. Not supported by this implementation.
-    static const char *HINT_IMAGE_DATA;
-
-    //! Standard hint: The path to a sound file to play when the notification pops up. Not supported by this implementation.
-    static const char *HINT_SOUND_FILE;
-
-    //! Standard hint: Causes the server to suppress playing any sounds, if it has that ability. This is usually set when the client itself is going to play its own sound. Not supported by this implementation.
-    static const char *HINT_SUPPRESS_SOUND;
-
-    //! Standard hint: Specifies the X location on the screen that the notification should point to. The "y" hint must also be specified. Not supported by this implementation.
-    static const char *HINT_X;
-
-    //! Standard hint: Specifies the Y location on the screen that the notification should point to. The "x" hint must also be specified. Not supported by this implementation.
-    static const char *HINT_Y;
-
-    //! Nemo hint: Icon of the notification. Allows the icon to be set using a category definition file without specifying it in the Notify() call.
-    static const char *HINT_ICON;
-
-    //! Nemo hint: Item count represented by the notification.
-    static const char *HINT_ITEM_COUNT;
-
-    //! Nemo hint: Priority level of the notification.
-    static const char *HINT_PRIORITY;
-
-    //! Nemo hint: Timestamp of the notification.
-    static const char *HINT_TIMESTAMP;
-
-    //! Nemo hint: Icon of the preview of the notification.
-    static const char *HINT_PREVIEW_ICON;
-
-    //! Nemo hint: Body text of the preview of the notification.
-    static const char *HINT_PREVIEW_BODY;
-
-    //! Nemo hint: Summary text of the preview of the notification.
-    static const char *HINT_PREVIEW_SUMMARY;
-
-    //! Nemo hint: Remote action of the notification. Prefix only: the action identifier is to be appended.
-    static const char *HINT_REMOTE_ACTION_PREFIX;
-
-    //! Nemo hint: User removability of the notification.
-    static const char *HINT_USER_REMOVABLE;
-
-    //! Nemo hint: User closeability of the notification.
-    static const char *HINT_USER_CLOSEABLE;
-
-    //! Nemo hint: Feedback of the notification.
-    static const char *HINT_FEEDBACK;
-
-    //! Nemo hint: Whether the notification is hidden.
-    static const char *HINT_HIDDEN;
-
-    //! Nemo hint: Whether to turn the screen on when displaying preview
-    static const char *HINT_DISPLAY_ON;
-
-    //! Nemo hint: Whether to disable LED feedbacks when there is no body and summary
-    static const char *HINT_LED_DISABLED_WITHOUT_BODY_AND_SUMMARY;
-
     //! Notifation closing reasons used in the NotificationClosed signal
     enum NotificationClosedReason {
         //! The notification expired.
@@ -141,27 +74,22 @@ public:
     uint GetIdForNotification(Notification *notification) const;
 
     /*!
-     * Returns an array of strings. Each string describes an optional capability
-     * implemented by the server. Refer to the Desktop Notification Specifications for
-     * the defined capabilities.
-     *
-     * \return an array of strings, each string describing an optional capability implemented by the server
-     */
-    QStringList GetCapabilities();
-
-    /*!
      * Sends a notification to the notification server.
      *
-     * \param appName The optional name of the application sending the notification. Can be blank.
-     * \param replacesId The optional notification ID that this notification replaces. The server must atomically (ie with no flicker or other visual cues) replace the given notification with this one. This allows clients to effectively modify the notification while it's active. A value of value of 0 means that this notification won't replace any existing notifications.
-     * \param appIcon The optional program icon of the calling application. Can be an empty string, indicating no icon.
-     * \param summary The summary text briefly describing the notification.
-     * \param body The optional detailed body text. Can be empty.
-     * \param actions Actions are sent over as a list of pairs. Each even element in the list (starting at index 0) represents the identifier for the action. Each odd element in the list is the localized string that will be displayed to the user.
-     * \param hints Optional hints that can be passed to the server from the client program. Although clients and servers should never assume each other supports any specific hints, they can be used to pass along information, such as the process PID or window ID, that the server may be able to make use of. Can be empty.
-     * \param expireTimeout he timeout time in milliseconds since the display of the notification at which the notification should automatically close.  If -1, the notification's expiration time is dependent on the notification server's settings, and may vary for the type of notification. If 0, never expire.
+     * \param ownerId name of the or application/service sending the notification
+     * \param replacesID the ID of the notification
+     * \param launchId can default to ownerId, but allowed to be freely set in general for services and apps
+     * \param launchParam parameters supplied to app when (re-)launched because user clicked on the notification
+     * \param title title text for the notification, no markup
+     * \param body body text for the notification, should use some markup
+     * \param iconUrl icon url for the notification, only local urls (file://) are allowed
+     * \param priority priority of the notification
+     * \param expireTimeout expiration timeout for the notification
+     * \param parent the parent QObject
      */
-    uint Notify(const QString &appName, uint replacesId, const QString &appIcon, const QString &summary, const QString &body, const QStringList &actions, const QVariantHash &hints, int expireTimeout);
+    uint Notify(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam,
+                const QString &title, const QString &body, const QUrl &iconUrl,
+                int priority, int expireTimeout);
 
     /*!
      * Causes a notification to be forcefully closed and removed from the user's view.
@@ -174,23 +102,12 @@ public:
     void CloseNotification(uint id, NotificationClosedReason closeReason = CloseNotificationCalled);
 
     /*!
-     * This message returns the information on the server. Specifically, the server name, vendor,
-     * and version number.
-     *
-     * \param name The product name of the server.
-     * \param vendor The vendor name. For example, "KDE," "GNOME," "freedesktop.org," or "Microsoft."
-     * \param version The server's version number.
-     * \return an empty string
-     */
-    QString GetServerInformation(QString &name, QString &vendor, QString &version);
-
-    /*!
      * Returns the notifications sent by a specified application.
      *
      * \param appName the name of the application to get notifications for
      * \return a list of notifications for the application
      */
-    NotificationList GetNotifications(const QString &appName);
+    NotificationList GetNotifications(const QString &ownerId);
 
 signals:
     /*!
@@ -199,7 +116,7 @@ signals:
      * \param id The ID of the notification that was closed.
      * \param reason The reason the notification was closed. 1 - The notification expired. 2 - The notification was dismissed by the user. 3 - The notification was closed by a call to CloseNotification. 4 - Undefined/reserved reasons.
      */
-    void NotificationClosed(uint id, uint reason);
+    void notificationClosed(uint id, uint reason);
 
     /*!
      * This signal is emitted when one of the following occurs:
@@ -209,7 +126,7 @@ signals:
      * \param id The ID of the notification emitting the ActionInvoked signal.
      * \param actionKey The key of the action invoked. These match the keys sent over in the list of actions.
      */
-    void ActionInvoked(uint id, const QString &actionKey);
+    void launchInvoked(uint id);
 
     /*!
      * Emitted when a notification is modified (added or updated).
@@ -229,23 +146,9 @@ public slots:
     /*!
      * Removes all notifications which are user removable.
      */
-    void removeUserRemovableNotifications();
+    void removeNotifications(const QString &ownerId);
 
 private slots:
-    /*!
-     * Removes all notifications with the specified category.
-     *
-     * \param category the category of the notifications to remove
-     */
-    void removeNotificationsWithCategory(const QString &category);
-
-    /*!
-     * Update category data of all notifications with the
-     * specified category.
-     *
-     * \param category the category of the notifications to update
-     */
-    void updateNotificationsWithCategory(const QString &category);
 
     /*!
      * Commits the current database transaction, if any.
@@ -259,14 +162,14 @@ private slots:
      *
      * \param action the action to be invoked
      */
-    void invokeAction(const QString &action);
+    void launchNotification();
 
     /*!
      * Removes a notification if it is removable by the user.
      *
      * \param id the ID of the notification to be removed
      */
-    void removeNotificationIfUserRemovable(uint id = 0);
+    void removeNotification(uint id = 0);
 
 private:
     /*!
@@ -286,21 +189,6 @@ private:
      */
     uint nextAvailableNotificationID();
 
-    /*!
-     * Applies a category definition to a notification's hints by inserting
-     * all key-value pairs in the category definition to the hints.
-     *
-     * \param hints the notification hints to apply the category definition to
-     */
-    void applyCategoryDefinition(QVariantHash &hints);
-
-    /*!
-     * Adds a timestamp to a notification's hints if there is no timestamp
-     * defined.
-     *
-     * \param hints the notification hints to add the timestamp to
-     */
-    void addTimestamp(QVariantHash &hints);
 
     //! Restores the notifications from a database on the disk
     void restoreNotifications();
@@ -367,9 +255,6 @@ private:
 
     //! Previous notification ID used
     uint previousNotificationID;
-
-    //! The category definition store
-    CategoryDefinitionStore *categoryDefinitionStore;
 
     //! Database for the notifications
     QSqlDatabase *database;

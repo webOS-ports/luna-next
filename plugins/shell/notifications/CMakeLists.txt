@@ -11,13 +11,13 @@ set(SOURCES
     notificationmanagerwrapper.cpp
     notificationlistmodel.cpp)
 
-qt5_add_dbus_adaptor(SOURCES notificationmanager.xml notificationmanager.h NotificationManager
-                     notificationmanageradaptor NotificationManagerAdaptor)
+#qt5_add_dbus_adaptor(SOURCES notificationmanager.xml notificationmanager.h NotificationManager
+#                     notificationmanageradaptor NotificationManagerAdaptor)
 
 add_library(lunanext-shell-notifications-qml SHARED ${SOURCES})
 set_target_properties(lunanext-shell-notifications-qml
     PROPERTIES COMPILE_FLAGS "${COMPILE_FLAGS} -DQT_DISABLE_DEPRECATED_BEFORE=0x000000")
-qt5_use_modules(lunanext-shell-notifications-qml Qml Quick DBus Sql)
+qt5_use_modules(lunanext-shell-notifications-qml Qml Quick Sql)
 target_link_libraries(lunanext-shell-notifications-qml ${LUNA_SYSMGR_COMMON_LIBRARIES})
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/qmldir"
