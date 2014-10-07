@@ -30,8 +30,8 @@ public:
 
     static FontUtils* instance()
     {
-        static FontUtils instance;
-        return &instance;
+        static FontUtils* instance = new FontUtils;
+        return instance;
     }
 
     explicit FontUtils(QObject *parent = 0) : QObject(parent) {}

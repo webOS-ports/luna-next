@@ -31,8 +31,8 @@ class Units : public QObject
 public:
     static Units* instance()
     {
-        static Units instance;
-        return &instance;
+        static Units* instance = new Units;
+        return instance;
     }
 
     Q_INVOKABLE float length(int lengthAt132DPI);
