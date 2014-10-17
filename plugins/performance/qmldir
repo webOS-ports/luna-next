@@ -1,0 +1,5 @@
+module LunaNext.Performance
+plugin lunanext-performance-qml
+
+PerformanceOverlay 0.1 PerformanceOverlay.qml
+internal BarGraph BarGraph.qml
