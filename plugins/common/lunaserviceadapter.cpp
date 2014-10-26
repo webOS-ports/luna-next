@@ -215,7 +215,9 @@ LunaServiceAdapter::LunaServiceAdapter(QObject *parent) :
     mName(""),
     mUsePrivateBus(false),
     mServiceHandle(0),
-    mInitialized(false)
+    mInitialized(false),
+    mService(""),
+    mMethod("")
 {
 }
 
@@ -286,6 +288,16 @@ bool LunaServiceAdapter::usePrivateBus() const
     return mUsePrivateBus;
 }
 
+QString LunaServiceAdapter::service() const
+{
+    return mService;
+}
+
+QString LunaServiceAdapter::method() const
+{
+    return mMethod;
+}
+
 void LunaServiceAdapter::setName(const QString& name)
 {
     if (mInitialized) {
@@ -304,6 +316,38 @@ void LunaServiceAdapter::setUsePrivateBus(bool usePrivateBus)
     }
 
     mUsePrivateBus = usePrivateBus;
+}
+
+void LunaServiceAdapter::setService(const QString& service)
+{
+    if (!service.startsWith("palm://") || !service.startsWith("luna://"))
+        qWarning("%s: Invalid service name %s set", __FUNCTION__, service.toUtf8().constData());
+    mService = service;
+    updateCallUri();
+}
+
+void LunaServiceAdapter::setMethod(const QString& method)
+{
+    mMethod = method;
+    updateCallUri();
+}
+
+void LunaServiceAdapter::setResponseCallback(QJSValue callback)
+{
+    mResponseCallback = callback;
+}
+
+void LunaServiceAdapter::setErrorCallback(QJSValue callback)
+{
+    mErrorCallback = callback;
+}
+
+void LunaServiceAdapter::updateCallUri()
+{
+    mCallUri = mService;
+    if (!mCallUri.endsWith("/"))
+        mCallUri += "/";
+    mCallUri += mMethod;
 }
 
 LunaServiceAdapter::RegisteredMethod::RegisteredMethod(const QString &name, QJSValue callback)
@@ -445,9 +489,29 @@ QObject* LunaServiceAdapter::call(const QString& uri, const QString& arguments, 
     return createAndExecuteCall(uri, arguments, callback, errorCallback, 1);
 }
 
+QObject* LunaServiceAdapter::call(const QString& arguments)
+{
+    return createAndExecuteCall(mCallUri, arguments, mResponseCallback, mErrorCallback, 1);
+}
+
+QObject* LunaServiceAdapter::call(const QString& arguments, QJSValue callback, QJSValue errorCallback)
+{
+    return createAndExecuteCall(mCallUri, arguments, callback, errorCallback, 1);
+}
+
 QObject* LunaServiceAdapter::subscribe(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback)
 {
     return createAndExecuteCall(uri, arguments, callback, errorCallback, -1);
+}
+
+QObject* LunaServiceAdapter::subscribe(const QString& arguments)
+{
+    return createAndExecuteCall(mCallUri, arguments, mResponseCallback, mErrorCallback, -1);
+}
+
+QObject* LunaServiceAdapter::subscribe(const QString& arguments, QJSValue callback, QJSValue errorCallback)
+{
+    return createAndExecuteCall(mCallUri, arguments, callback, errorCallback, -1);
 }
 
 bool LunaServiceAdapter::addSubscription(const QString& key, QJSValue message)
