@@ -79,6 +79,10 @@ class LunaServiceAdapter : public QObject,
     Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(QString name READ name WRITE setName)
     Q_PROPERTY(bool usePrivateBus READ usePrivateBus WRITE setUsePrivateBus)
+    Q_PROPERTY(QString service READ service WRITE setService)
+    Q_PROPERTY(QString method READ method WRITE setMethod)
+    Q_PROPERTY(QJSValue onResponse WRITE setResponseCallback)
+    Q_PROPERTY(QJSValue onError WRITE setErrorCallback)
 
 public:
     LunaServiceAdapter(QObject *parent = 0);
@@ -89,12 +93,22 @@ public:
 
     QString name() const;
     bool usePrivateBus() const;
+    QString service() const;
+    QString method() const;
 
     void setName(const QString& name);
     void setUsePrivateBus(bool usePrivateBus);
+    void setService(const QString& service);
+    void setMethod(const QString& method);
+    void setResponseCallback(QJSValue callback);
+    void setErrorCallback(QJSValue callback);
 
     Q_INVOKABLE QObject* call(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback);
+    Q_INVOKABLE QObject* call(const QString& arguments);
+    Q_INVOKABLE QObject* call(const QString& arguments, QJSValue, QJSValue errorCallback);
     Q_INVOKABLE QObject* subscribe(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback);
+    Q_INVOKABLE QObject* subscribe(const QString& arguments);
+    Q_INVOKABLE QObject* subscribe(const QString& arguments, QJSValue callback, QJSValue errorCallback);
     Q_INVOKABLE bool registerMethod(const QString& category, const QString& name, QJSValue callback);
     Q_INVOKABLE bool addSubscription(const QString& key, QJSValue message);
     Q_INVOKABLE bool replyToSubscribers(const QString& key, const QString& payload);
@@ -107,10 +121,16 @@ private:
     bool mUsePrivateBus;
     LSHandle *mServiceHandle;
     bool mInitialized;
+    QString mService;
+    QString mMethod;
+    QJSValue mResponseCallback;
+    QJSValue mErrorCallback;
+    QString mCallUri;
 
     LunaServiceCall* createAndExecuteCall(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback, int responseLimit);
 
     QString buildMethodPath(const QString& category, const QString& method);
+    void updateCallUri();
 
     static bool serviceMethodCallback(LSHandle *handle, LSMessage *message, void *data);
     bool handleServiceMethodCallback(LSHandle *handle, LSMessage *message);
