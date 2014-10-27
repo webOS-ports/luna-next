@@ -54,6 +54,7 @@ class LunaServiceCall : public QObject
 
 public:
     explicit LunaServiceCall(QObject *parent = 0);
+    virtual ~LunaServiceCall();
 
     void setup(LSHandle *serviceHandle, QJSValue callback, QJSValue errorCallback, int responseLimit = -1);
     bool execute(const QString& uri, const QString& arguments);
@@ -113,6 +114,8 @@ public:
     Q_INVOKABLE bool addSubscription(const QString& key, QJSValue message);
     Q_INVOKABLE bool replyToSubscribers(const QString& key, const QString& payload);
 
+    void removePendingCall(LunaServiceCall *call);
+
 signals:
     void initialized();
 
@@ -126,6 +129,7 @@ private:
     QJSValue mResponseCallback;
     QJSValue mErrorCallback;
     QString mCallUri;
+    QList<LunaServiceCall*> mPendingCalls;
 
     LunaServiceCall* createAndExecuteCall(const QString& uri, const QString& arguments, QJSValue callback, QJSValue errorCallback, int responseLimit);
 

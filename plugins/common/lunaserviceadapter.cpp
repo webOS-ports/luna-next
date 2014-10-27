@@ -103,6 +103,12 @@ LunaServiceCall::LunaServiceCall(QObject *parent) :
 {
 }
 
+LunaServiceCall::~LunaServiceCall()
+{
+    if (mToken != LSMESSAGE_TOKEN_INVALID)
+        cancel();
+}
+
 void LunaServiceCall::setup(LSHandle *serviceHandle, QJSValue callback, QJSValue errorCallback, int responseLimit)
 {
     mServiceHandle = serviceHandle;
@@ -194,8 +200,8 @@ void LunaServiceCall::cancel()
 
     mToken = LSMESSAGE_TOKEN_INVALID;
 
-    // Schedule ourself for deletion as we're not needed anymore
-    deleteLater();
+    LunaServiceAdapter *adapter = static_cast<LunaServiceAdapter*>(parent());
+    adapter->removePendingCall(this);
 }
 
 GMainLoop* LunaServiceAdapter::mainLoop()
@@ -223,6 +229,11 @@ LunaServiceAdapter::LunaServiceAdapter(QObject *parent) :
 
 LunaServiceAdapter::~LunaServiceAdapter()
 {
+    Q_FOREACH (LunaServiceCall *call, mPendingCalls) {
+        mPendingCalls.removeOne(call);
+        delete call;
+    }
+
     QString serviceHandleName = mName + (mUsePrivateBus ? "-priv" : "-pub");
     LunaServiceHandle *handle = serviceHandles.value(serviceHandleName);
 
@@ -320,7 +331,7 @@ void LunaServiceAdapter::setUsePrivateBus(bool usePrivateBus)
 
 void LunaServiceAdapter::setService(const QString& service)
 {
-    if (!service.startsWith("palm://") || !service.startsWith("luna://"))
+    if (!service.startsWith("palm://") && !service.startsWith("luna://"))
         qWarning("%s: Invalid service name %s set", __FUNCTION__, service.toUtf8().constData());
     mService = service;
     updateCallUri();
@@ -476,11 +487,25 @@ bool LunaServiceAdapter::handleServiceMethodCallback(LSHandle *handle, LSMessage
     return true;
 }
 
+void LunaServiceAdapter::removePendingCall(LunaServiceCall *call)
+{
+    if (!mPendingCalls.contains(call))
+        return;
+
+    mPendingCalls.removeOne(call);
+
+    delete call;
+}
+
 LunaServiceCall* LunaServiceAdapter::createAndExecuteCall(const QString& uri, const QString& arguments, QJSValue callback,  QJSValue errorCallback, int responseLimit)
 {
     LunaServiceCall *call = new LunaServiceCall(this);
+
     call->setup(mServiceHandle, callback, errorCallback, responseLimit);
     call->execute(uri, arguments);
+
+    mPendingCalls.append(call);
+
     return call;
 }
 
