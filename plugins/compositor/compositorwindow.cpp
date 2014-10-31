@@ -164,11 +164,11 @@ void CompositorWindow::postEvent(EventType::Event event)
     if (key > 0) {
         QWaylandInputDevice *inputDevice = surface()->compositor()->defaultInputDevice();
 
-        QKeyEvent *event = new QKeyEvent(QEvent::KeyPress, key, Qt::NoModifier);
-        inputDevice->sendFullKeyEvent(surface(), event);
+        QKeyEvent *keyEvent = new QKeyEvent(QEvent::KeyPress, key, Qt::NoModifier);
+        inputDevice->sendFullKeyEvent(surface(), keyEvent);
 
-        event = new QKeyEvent(QEvent::KeyRelease, key, Qt::NoModifier);
-        inputDevice->sendFullKeyEvent(surface(), event);
+        keyEvent = new QKeyEvent(QEvent::KeyRelease, key, Qt::NoModifier);
+        inputDevice->sendFullKeyEvent(surface(), keyEvent);
     }
 }
 
