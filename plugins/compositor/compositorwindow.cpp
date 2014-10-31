@@ -158,9 +158,9 @@ bool CompositorWindow::event(QEvent *event)
     return handled;
 }
 
-void CompositorWindow::postEvent(EventType::Event event)
+void CompositorWindow::postEvent(int event)
 {
-    int key = EventType::toKey(event);
+    int key = EventType::toKey(static_cast<EventType::Event>(event));
     if (key > 0) {
         QWaylandInputDevice *inputDevice = surface()->compositor()->defaultInputDevice();
 

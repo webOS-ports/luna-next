@@ -54,7 +54,7 @@ public:
 
     bool checkIsAllowedToStay();
 
-    Q_INVOKABLE void postEvent(EventType::Event event);
+    Q_INVOKABLE void postEvent(int event);
     Q_INVOKABLE void changeSize(const QSize& size);
 
 signals:
