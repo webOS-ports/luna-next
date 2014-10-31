@@ -18,9 +18,9 @@
 #ifndef LUNA_COMPOSITOR_H_
 #define LUNA_COMPOSITOR_H_
 
-#include "qwaylandcompositor.h"
-#include "qwaylandsurface.h"
-#include "qwaylandsurfaceitem.h"
+#include <QWaylandQuickCompositor>
+#include <QWaylandSurface>
+#include <QWaylandSurfaceItem>
 
 #include <QQmlContext>
 #include <QQuickItem>
@@ -35,7 +35,7 @@ namespace luna
 
 class WindowModel;
 
-class Compositor : public QQuickView, public QWaylandCompositor,
+class Compositor : public QQuickView, public QWaylandQuickCompositor,
                    public QQmlParserStatus
 {
     Q_OBJECT
@@ -60,6 +60,9 @@ public:
 
     CompositorWindow* windowForId(int id);
 
+    void surfaceCreated(QWaylandSurface *surface) Q_DECL_OVERRIDE;
+    QWaylandSurfaceItem* createView(QWaylandSurface *surface) Q_DECL_OVERRIDE;
+
 signals:
     void windowAdded(QVariant window);
     void windowRemoved(QVariant window);
@@ -82,14 +85,10 @@ private slots:
     void surfaceSizeChanged();
     void surfaceRaised();
     void surfaceLowered();
-    void surfaceShellSurfaceReady();
-    void windowIsReady();
+    void surfaceDying();
 
 protected:
     void resizeEvent(QResizeEvent *event);
-    void surfaceCreated(QWaylandSurface *surface);
-
-    virtual void surfaceAboutToBeDestroyed(QWaylandSurface *surface);
 
 private:
     friend class WindowModel;
