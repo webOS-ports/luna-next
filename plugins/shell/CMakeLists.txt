@@ -1,4 +1,6 @@
 include_directories(
+    ${Qt5Quick_INCLUDE_DIRS}
+    ${Qt5Quick_PRIVATE_INCLUDE_DIRS}
     ${GLIB2_INCLUDE_DIRS}
     ${LUNA_SYSMGR_COMMON_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -9,7 +11,9 @@ set(SOURCES
     reticleitem.cpp
     fpscounter.cpp
     reticlehandler.cpp
-    devicekeyhandler.cpp)
+    devicekeyhandler.cpp
+    quickutils.cpp
+    inversemouseareatype.cpp)
 
 add_library(lunanext-shell-qml SHARED ${SOURCES})
 qt5_use_modules(lunanext-shell-qml Qml Quick)

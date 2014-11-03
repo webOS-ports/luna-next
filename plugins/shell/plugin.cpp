@@ -22,6 +22,7 @@
 #include "fpscounter.h"
 #include "devicekeyhandler.h"
 #include "reticlehandler.h"
+#include "inversemouseareatype.h"
 
 LunaNextShellPlugin::LunaNextShellPlugin(QObject *parent) :
     QQmlExtensionPlugin(parent)
@@ -35,6 +36,7 @@ void LunaNextShellPlugin::registerTypes(const char *uri)
     qmlRegisterType<luna::FpsCounter>(uri, 0, 1, "FpsCounter");
     qmlRegisterType<luna::DeviceKeyHandler>(uri, 0, 1, "DeviceKeyHandler");
     qmlRegisterType<luna::ReticleHandler>(uri, 0, 1, "ReticleHandler");
+    qmlRegisterType<InverseMouseAreaType>(uri, 0, 1, "InverseMouseArea");
 }
 
 void LunaNextShellPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
