@@ -18,8 +18,8 @@
 #ifndef LUNA_COMPOSITORWINDOW_H_
 #define LUNA_COMPOSITORWINDOW_H_
 
-#include "qwaylandsurface.h"
-#include "qwaylandsurfaceitem.h"
+#include <QWaylandQuickSurface>
+#include <QWaylandSurfaceItem>
 
 #include "eventtype.h"
 
@@ -37,7 +37,7 @@ class CompositorWindow : public QWaylandSurfaceItem
     Q_PROPERTY(bool ready READ ready NOTIFY readyChanged)
 
 public:
-    CompositorWindow(unsigned int winId, QWaylandSurface *surface, QQuickItem *parent = 0);
+    CompositorWindow(unsigned int winId, QWaylandQuickSurface *surface, QQuickItem *parent = 0);
     virtual ~CompositorWindow();
 
     unsigned int winId() const;

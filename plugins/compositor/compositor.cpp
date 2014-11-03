@@ -25,15 +25,26 @@
 namespace luna
 {
 
+static CompositorWindow *surfaceWindow(QWaylandSurface *surface)
+{
+    return surface->views().isEmpty() ? 0 : static_cast<CompositorWindow*>(surface->views().first());
+}
+
 Compositor* Compositor::mInstance = 0;
 
 Compositor::Compositor()
-    : QWaylandCompositor(this),
+    : QWaylandQuickCompositor(this),
       mFullscreenSurface(0),
       mNextWindowId(1)
 {
+    setColor(Qt::black);
+    setRetainedSelectionEnabled(true);
+    addDefaultShell();
+
     if (mInstance)
         qFatal("Compositor: Only one compositor instance per process is supported");
+
+    qDebug() << __PRETTY_FUNCTION__;
 
     mInstance = this;
 
@@ -80,8 +91,10 @@ void Compositor::setFullscreenSurface(QWaylandSurface *surface)
     qDebug() << Q_FUNC_INFO << surface;
 
     // Prevent flicker when returning to composited mode
-    if (!surface && mFullscreenSurface && mFullscreenSurface->surfaceItem())
-        mFullscreenSurface->surfaceItem()->update();
+    if (!surface && mFullscreenSurface) {
+        foreach (QWaylandSurfaceView *view, mFullscreenSurface->views())
+            static_cast<QWaylandSurfaceItem *>(view)->update();
+    }
 
     mFullscreenSurface = surface;
 
@@ -110,52 +123,36 @@ CompositorWindow* Compositor::createWindowForSurface(QWaylandSurface *surface)
 {
     unsigned int windowId = mNextWindowId++;
 
-    CompositorWindow *window = new CompositorWindow(windowId, surface, contentItem());
+    qDebug() << Q_FUNC_INFO << "windowId" << windowId << surface;
+
+    CompositorWindow *window = new CompositorWindow(windowId, static_cast<QWaylandQuickSurface*>(surface), contentItem());
     window->setSize(surface->size());
-    window->setPosition(surface->pos());
+    // window->setPosition(surface->pos());
     window->setFlag(QQuickItem::ItemIsFocusScope, true);
-    window->setUseTextureAlpha(true);
+    // window->setUseTextureAlpha(true);
+    QObject::connect(surface, &QWaylandSurface::surfaceDestroyed, this, &Compositor::surfaceDying);
 
     mWindows.insert(windowId, window);
 
     return window;
 }
 
-void Compositor::surfaceShellSurfaceReady()
+QWaylandSurfaceItem* Compositor::createView(QWaylandSurface *surface)
 {
-    QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(sender());
+    qDebug() << __PRETTY_FUNCTION__ << "surface" << surface;
 
-    qDebug() << __PRETTY_FUNCTION__ << surface;
-
-    bool isSurfaceNew = (qobject_cast<CompositorWindow*>(surface->surfaceItem()) == 0);
-    if (!isSurfaceNew)
-        return;
-
-    CompositorWindow *window = createWindowForSurface(surface);
-
-    connect(window, SIGNAL(readyChanged()), this, SLOT(windowIsReady()));
-}
-
-void Compositor::windowIsReady()
-{
-    CompositorWindow *window = static_cast<CompositorWindow*>(sender());
-
-    qDebug() << __PRETTY_FUNCTION__ << "appId" << window->appId() << "windowType" << window->windowType();
-
-    if (window->appId() == "com.palm.launcher") {
-        emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
-        WindowModel::addWindowForEachModel(mWindowModels, window);
-    }
+    return createWindowForSurface(surface);
 }
 
 void Compositor::surfaceMapped()
 {
+    qDebug() << __PRETTY_FUNCTION__;
+
     QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(sender());
 
-    if (!surface->hasShellSurface())
-        return;
-
-    CompositorWindow *window = qobject_cast<CompositorWindow*>(surface->surfaceItem());
+    CompositorWindow *window = surfaceWindow(surface);
+    if (!window)
+        window = createWindowForSurface(surface);
 
     window->setTouchEventsEnabled(true);
 
@@ -172,11 +169,13 @@ void Compositor::surfaceMapped()
 
 void Compositor::surfaceUnmapped()
 {
+    qDebug() << __PRETTY_FUNCTION__;
+
     QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(sender());
     if (surface == mFullscreenSurface)
         setFullscreenSurface(0);
 
-    CompositorWindow *window = qobject_cast<CompositorWindow*>(surface->surfaceItem());
+    CompositorWindow *window = surfaceWindow(surface);
     qWarning() << Q_FUNC_INFO << window;
 
     emit windowHidden(QVariant::fromValue(static_cast<QQuickItem*>(window)));
@@ -184,13 +183,12 @@ void Compositor::surfaceUnmapped()
     WindowModel::removeWindowForEachModel(mWindowModels, window);
 }
 
-void Compositor::surfaceAboutToBeDestroyed(QWaylandSurface *surface)
+void Compositor::surfaceDying()
 {
+    QWaylandSurface *surface = static_cast<QWaylandSurface *>(sender());
     qDebug() << Q_FUNC_INFO << surface;
 
-    CompositorWindow *window = static_cast<CompositorWindow*>(surface->surfaceItem());
-
-    surface->setSurfaceItem(0);
+    CompositorWindow *window = surfaceWindow(surface);
 
     if (surface == mFullscreenSurface)
         setFullscreenSurface(0);
@@ -223,9 +221,9 @@ void Compositor::resizeEvent(QResizeEvent *event)
 
 void Compositor::surfaceCreated(QWaylandSurface *surface)
 {
-    qDebug() << __PRETTY_FUNCTION__ << surface << "hasShellSurface" << surface->hasShellSurface();
+    qDebug() << __PRETTY_FUNCTION__ << "surface" << surface;
 
-    connect(surface, SIGNAL(shellSurfaceReady()), this, SLOT(surfaceShellSurfaceReady()));
+    Q_UNUSED(surface);
     connect(surface, SIGNAL(mapped()), this, SLOT(surfaceMapped()));
     connect(surface, SIGNAL(unmapped()), this, SLOT(surfaceUnmapped()));
     connect(surface, SIGNAL(raiseRequested()), this, SLOT(surfaceRaised()));
@@ -241,7 +239,7 @@ void Compositor::surfaceCreated(QWaylandSurface *surface)
 void Compositor::surfaceRaised()
 {
     QWaylandSurface *surface = qobject_cast<QWaylandSurface*>(sender());
-    CompositorWindow *window = static_cast<CompositorWindow*>(surface->surfaceItem());
+    CompositorWindow *window = surfaceWindow(surface);
 
     qWarning() << Q_FUNC_INFO << "the window " << window << "is going to be raised";
 
@@ -252,7 +250,7 @@ void Compositor::surfaceRaised()
 void Compositor::surfaceLowered()
 {
     QWaylandSurface *surface = qobject_cast<QWaylandSurface*>(sender());
-    CompositorWindow *window = static_cast<CompositorWindow*>(surface->surfaceItem());
+    CompositorWindow *window = surfaceWindow(surface);
 
     qWarning() << Q_FUNC_INFO << "the window " << window << "is going to be lowered";
 
@@ -264,7 +262,7 @@ void Compositor::surfaceSizeChanged()
 {
     QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(sender());
 
-    CompositorWindow *window = static_cast<CompositorWindow*>(surface->surfaceItem());
+    CompositorWindow *window = surfaceWindow(surface);
     if (window)
         window->setSize(surface->size());
 }

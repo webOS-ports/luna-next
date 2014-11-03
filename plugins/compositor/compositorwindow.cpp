@@ -25,7 +25,7 @@
 namespace luna
 {
 
-CompositorWindow::CompositorWindow(unsigned int winId, QWaylandSurface *surface, QQuickItem *parent)
+CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *surface, QQuickItem *parent)
     : QWaylandSurfaceItem(surface, parent),
       mId(winId),
       mWindowType(WindowType::Card),
@@ -34,17 +34,14 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandSurface *surface,
       mReady(false)
 {
     QVariantMap properties = surface->windowProperties();
-
-    if (properties.contains("type"))
-        mWindowType = WindowType::fromString(properties.value("type").toString());
-
-    if (properties.contains("appId")) {
-        mAppId = properties.value("appId").toString();
-        if (mAppId == "com.palm.launcher")
-            mWindowType = WindowType::Launcher;
+    QMapIterator<QString,QVariant> iter(properties);
+    while (iter.hasNext()) {
+        iter.next();
+        onWindowPropertyChanged(iter.key(), iter.value());
     }
 
     connect(surface, SIGNAL(windowPropertyChanged(const QString&,const QVariant&)), this, SLOT(onWindowPropertyChanged(const QString&, const QVariant&)));
+    connect(this, &QWaylandSurfaceItem::surfaceDestroyed, this, &QObject::deleteLater);
 
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
 }
