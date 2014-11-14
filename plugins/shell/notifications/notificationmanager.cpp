@@ -32,7 +32,7 @@
 #endif
 
 //! Path of the privileged storage directory relative to the home directory
-static const char *PRIVILEGED_DATA_PATH= "/.local/share/system/privileged";
+static const char *PRIVILEGED_DATA_PATH= "/var/luna/data/";
 
 //! Minimum amount of disk space needed for the notification database in kilobytes
 static const uint MINIMUM_FREE_SPACE_NEEDED_IN_KB = 1024;
@@ -191,7 +191,7 @@ void NotificationManager::restoreNotifications()
 
 bool NotificationManager::connectToDatabase()
 {
-    QString databasePath = QDir::homePath() + QString(PRIVILEGED_DATA_PATH) + QDir::separator() + "Notifications";
+    QString databasePath = QString(PRIVILEGED_DATA_PATH);
     if (!QDir::root().exists(databasePath)) {
         QDir::root().mkpath(databasePath);
     }
