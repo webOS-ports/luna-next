@@ -32,19 +32,32 @@ ScreenShooter::ScreenShooter(QQuickItem *parent) :
 {
 }
 
-QString ScreenShooter::capture() const
+QVariantMap ScreenShooter::capture(QString path) const
 {
     QQuickWindow *parentWindow = window();
     QImage image = parentWindow->grabWindow();
+    QString outputPath = QLatin1String("/media/internal/screencaptures/");
 
-    QString outputPath = QLatin1String("/media/internal/screencaptures");
-    outputPath += "/" + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + ".png";
+    if (!path.isEmpty()) {
+        if (path.startsWith("/"))
+            outputPath = path;
+        else
+            outputPath += path;
+    }
+    else {
+        outputPath += QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + ".png";
+    }
 
     qDebug() << "Saving screenshot at" << outputPath;
 
-    image.save(outputPath);
+    bool saved = image.save(outputPath);
+    if (!saved)
+        qDebug() << "Failed to save screenshot";
 
-    return outputPath;
+    QVariantMap reply;
+    reply.insert("returnValue", saved?"true":"false");
+    reply.insert("path", outputPath);
+    return reply;
 }
 
 } // namespace luna
