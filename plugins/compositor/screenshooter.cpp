@@ -32,7 +32,7 @@ ScreenShooter::ScreenShooter(QQuickItem *parent) :
 {
 }
 
-QVariantMap ScreenShooter::capture(QString path) const
+QString ScreenShooter::capture(QString path) const
 {
     QQuickWindow *parentWindow = window();
     QImage image = parentWindow->grabWindow();
@@ -51,13 +51,12 @@ QVariantMap ScreenShooter::capture(QString path) const
     qDebug() << "Saving screenshot at" << outputPath;
 
     bool saved = image.save(outputPath);
-    if (!saved)
+    if (!saved) {
         qDebug() << "Failed to save screenshot";
+        outputPath = "";
+    }
 
-    QVariantMap reply;
-    reply.insert("returnValue", saved?"true":"false");
-    reply.insert("path", outputPath);
-    return reply;
+    return outputPath;
 }
 
 } // namespace luna
