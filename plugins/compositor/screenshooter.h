@@ -31,7 +31,7 @@ public:
     explicit ScreenShooter(QQuickItem *parent = 0);
 
 public slots:
-    QString capture() const;
+    QString capture(QString path) const;
 };
 
 } // namespace luna
