@@ -154,7 +154,11 @@ void Compositor::surfaceMapped()
     if (!window)
         window = createWindowForSurface(surface);
 
+    window->setParentItem(contentItem());
+    window->setSize(surface->size());
+
     window->setTouchEventsEnabled(true);
+
 
     qDebug() << __PRETTY_FUNCTION__ << window << "appId" << window->appId() << "windowType" << window->windowType();
 

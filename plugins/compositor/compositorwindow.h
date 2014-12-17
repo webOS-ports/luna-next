@@ -30,6 +30,7 @@ class CompositorWindow : public QWaylandSurfaceItem
 {
     Q_OBJECT
     Q_PROPERTY(int winId READ winId CONSTANT)
+    Q_PROPERTY(int parentWinId READ parentWinId WRITE setParentWinId NOTIFY parentWinIdChanged)
     Q_PROPERTY(int windowType READ windowType CONSTANT)
     Q_PROPERTY(QString appId READ appId CONSTANT)
     Q_PROPERTY(quint64 processId READ processId CONSTANT)
@@ -41,6 +42,7 @@ public:
     virtual ~CompositorWindow();
 
     unsigned int winId() const;
+    unsigned int parentWinId() const;
     unsigned int windowType() const;
     QString appId() const;
     quint64 processId() const;
@@ -48,6 +50,8 @@ public:
 
     QVariant userData() const;
     void setUserData(QVariant);
+
+    void setParentWinId(unsigned int id);
 
     void setClosed(bool closed);
     void tryRemove();
@@ -60,6 +64,7 @@ public:
 signals:
     void userDataChanged();
     void readyChanged();
+    void parentWinIdChanged();
 
 public slots:
     void onWindowPropertyChanged(const QString&, const QVariant&);
@@ -69,6 +74,7 @@ protected:
 
 private:
     unsigned int mId;
+    unsigned int mParentWinId;
     unsigned int mWindowType;
     bool mClosed;
     bool mRemovePosted;
