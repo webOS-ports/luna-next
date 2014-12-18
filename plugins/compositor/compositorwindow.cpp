@@ -28,6 +28,7 @@ namespace luna
 CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *surface, QQuickItem *parent)
     : QWaylandSurfaceItem(surface, parent),
       mId(winId),
+      mParentWinId(0),
       mWindowType(WindowType::Card),
       mClosed(false),
       mRemovePosted(false),
@@ -70,8 +71,11 @@ void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVaria
         if (mAppId == "com.palm.launcher")
             mWindowType = WindowType::Launcher;
     }
-    else if (name == "type") {
+    else if (name == "type")
         mWindowType = WindowType::fromString(value.toString());
+    else if (name == "parentWindowId") {
+        mParentWinId = value.toInt();
+        parentWinIdChanged();
     }
 
     checkStatus();
@@ -80,6 +84,11 @@ void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVaria
 unsigned int CompositorWindow::winId() const
 {
     return mId;
+}
+
+unsigned int CompositorWindow::parentWinId() const
+{
+    return mParentWinId;
 }
 
 unsigned int CompositorWindow::windowType() const
@@ -172,6 +181,14 @@ void CompositorWindow::postEvent(int event)
 void CompositorWindow::changeSize(const QSize& size)
 {
     surface()->requestSize(size);
+}
+
+void CompositorWindow::setParentWinId(unsigned int id)
+{
+    mParentWinId = id;
+    if (surface())
+        surface()->setWindowProperty("parentWindowId", id);
+    parentWinIdChanged();
 }
 
 } // namespace luna

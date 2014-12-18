@@ -24,12 +24,7 @@
 #include <sys/statfs.h>
 #include "notificationmanager.h"
 
-// Define this if you'd like to see debug messages from the notification manager
-#ifdef DEBUG_NOTIFICATIONS
 #define NOTIFICATIONS_DEBUG(things) qDebug() << Q_FUNC_INFO << things
-#else
-#define NOTIFICATIONS_DEBUG(things)
-#endif
 
 //! Path of the privileged storage directory relative to the home directory
 static const char *PRIVILEGED_DATA_PATH= "/var/luna/data/";
