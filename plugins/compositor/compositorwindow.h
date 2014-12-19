@@ -68,6 +68,7 @@ signals:
 
 public slots:
     void onWindowPropertyChanged(const QString&, const QVariant&);
+    void sendWindowIdToClient();
 
 protected:
     virtual bool event(QEvent *event);

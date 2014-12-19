@@ -18,6 +18,7 @@
 #include <QCoreApplication>
 #include <QWaylandCompositor>
 #include <QWaylandInputDevice>
+#include <QTimer>
 
 #include "compositorwindow.h"
 #include "windowtype.h"
@@ -44,12 +45,19 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *sur
     connect(surface, SIGNAL(windowPropertyChanged(const QString&,const QVariant&)), this, SLOT(onWindowPropertyChanged(const QString&, const QVariant&)));
     connect(this, &QWaylandSurfaceItem::surfaceDestroyed, this, &QObject::deleteLater);
 
+    QTimer::singleShot(0, this, SLOT(sendWindowIdToClient()));
+
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
 }
 
 CompositorWindow::~CompositorWindow()
 {
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
+}
+
+void CompositorWindow::sendWindowIdToClient()
+{
+    surface()->setWindowProperty("windowId", QVariant(mId));
 }
 
 void CompositorWindow::checkStatus()
