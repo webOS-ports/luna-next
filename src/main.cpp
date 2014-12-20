@@ -55,19 +55,19 @@ void messageHandler(QtMsgType type, const QMessageLogContext &context, const QSt
     {
     case QtDebugMsg:
         if (verbose)
-            fprintf(stdout, "DEBUG: %s: %s\n", timeStr.toUtf8().constData(), msg.toUtf8().constData());
+            fprintf(stderr, "DEBUG: %s: %s\n", timeStr.toUtf8().constData(), msg.toUtf8().constData());
         break;
     case QtWarningMsg:
-        fprintf(stdout, "WARNING: %s: %s\n", timeStr.toUtf8().constData(), msg.toUtf8().constData());
+        fprintf(stderr, "WARNING: %s: %s\n", timeStr.toUtf8().constData(), msg.toUtf8().constData());
         break;
     case QtCriticalMsg:
-        fprintf(stdout, "CRITICAL: %s: %s\n", timeStr.toUtf8().constData(), msg.toUtf8().constData());
+        fprintf(stderr, "CRITICAL: %s: %s\n", timeStr.toUtf8().constData(), msg.toUtf8().constData());
         break;
     case QtFatalMsg:
-        fprintf(stdout, "FATAL: %s: %s\n", timeStr.toUtf8().constData(), msg.toUtf8().constData());
+        fprintf(stderr, "FATAL: %s: %s\n", timeStr.toUtf8().constData(), msg.toUtf8().constData());
         break;
     default:
-        fprintf(stdout, "INFO: %s: %s\n", timeStr.toUtf8().constData(), msg.toUtf8().constData());
+        fprintf(stderr, "INFO: %s: %s\n", timeStr.toUtf8().constData(), msg.toUtf8().constData());
         break;
     }
 }
