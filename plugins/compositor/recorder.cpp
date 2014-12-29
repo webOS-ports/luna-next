@@ -131,6 +131,7 @@ void RecorderManager::recorder_manager_create_recorder(Resource *resource, uint3
     Q_UNUSED(output)
 
     new Recorder(this, resource->client(), id, Compositor::instance());
+    Compositor::instance()->setRecording(true);
 }
 
 
@@ -147,6 +148,7 @@ Recorder::Recorder(RecorderManager *manager, wl_client *client, quint32 id, QQui
 Recorder::~Recorder()
 {
     m_manager->remove(m_window, this);
+    Compositor::instance()->setRecording(false);
 }
 
 void Recorder::recorder_destroy_resource(Resource *resource)

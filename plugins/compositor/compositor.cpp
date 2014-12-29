@@ -295,5 +295,17 @@ void Compositor::surfaceDamaged(const QRect&)
 #endif
 }
 
+void Compositor::setRecording(bool value)
+{
+    unsigned int before = recording();
+
+    if (value && mRecorderCounter > 0)
+        mRecorderCounter--;
+    else
+        mRecorderCounter++;
+
+    if (before != recording())
+        recordingChanged();
+}
 
 } // namespace luna
