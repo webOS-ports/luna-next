@@ -59,7 +59,9 @@ pkg_check_modules(LUNA_SYSMGR_IPC_MESSAGES LunaSysMgrIpcMessages REQUIRED)
 pkg_check_modules(LS2 luna-service2 REQUIRED)
 pkg_check_modules(LUNA_PREFS luna-prefs REQUIRED)
 
+include(FindWaylandScanner)
 include(FindQtWaylandScanner)
 
 add_subdirectory(src)
 add_subdirectory(plugins)
+add_subdirectory(tools)
