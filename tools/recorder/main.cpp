@@ -13,12 +13,15 @@
 **
 ****************************************************************************/
 
+#include <stdlib.h>
 #include <QGuiApplication>
 
 #include "recorder.h"
 
 int main(int argc, char *argv[])
 {
+    setenv("XDG_RUNTIME_DIR", "/tmp/luna-session", 0);
+
     QGuiApplication app(argc, argv);
 
     Recorder recorder;
