@@ -34,6 +34,7 @@ namespace luna
 {
 
 class WindowModel;
+class RecorderManager;
 
 class Compositor : public QQuickView, public QWaylandQuickCompositor,
                    public QQmlParserStatus
@@ -97,10 +98,13 @@ private:
     unsigned int mNextWindowId;
     QHash<unsigned int, CompositorWindow*> mWindows;
     QList<WindowModel*> mWindowModels;
+    RecorderManager *mRecorder;
 
     static Compositor *mInstance;
 
+private:
     CompositorWindow* createWindowForSurface(QWaylandSurface *surface);
+    void readContent();
 };
 
 } // namespace luna

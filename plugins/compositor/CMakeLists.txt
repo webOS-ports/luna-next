@@ -12,12 +12,18 @@ set(SOURCES
     plugin.cpp
     compositor.cpp
     compositorwindow.cpp
+    recorder.cpp
     windowmodel.cpp
     windowstate.cpp
     windowtype.cpp
     screenshooter.cpp
     eventtype.cpp
     displaycontroller.cpp)
+
+ecm_add_qtwayland_server_protocol(SOURCES
+    PROTOCOL ${CMAKE_SOURCE_DIR}/protocol/recorder.xml
+    BASENAME luna-recorder
+    PREFIX luna_)
 
 add_library(lunanext-compositor-qml SHARED ${SOURCES})
 qt5_use_modules(lunanext-compositor-qml Qml Quick Compositor)
