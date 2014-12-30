@@ -39,6 +39,10 @@ int main(int argc, char *argv[])
                                "Output filename", "file");
     parser.addOption(fileOpt);
 
+    QCommandLineOption numberOfFramesOpt(QStringList() << "n" << "number-of-frames",
+                                         "Number of frames to record", "number-of-frames");
+    parser.addOption(numberOfFramesOpt);
+
     parser.process(app);
 
     if (!parser.isSet(fileOpt)) {
@@ -53,6 +57,10 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    Recorder recorder(&file);
+    unsigned int numberOfFrames = 0;
+    if (parser.isSet(numberOfFramesOpt))
+        numberOfFrames = parser.value(numberOfFramesOpt).toInt();
+
+    Recorder recorder(&file, numberOfFrames);
     return app.exec();
 }

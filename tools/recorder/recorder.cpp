@@ -104,8 +104,10 @@ public:
 class BuffersHandler : public QObject
 {
 public:
-    BuffersHandler(QIODevice *output) :
-        output(output)
+    BuffersHandler(QIODevice *output, unsigned int numberOfFrames) :
+        output(output),
+        countingFrames(numberOfFrames > 0),
+        remainingFrames(numberOfFrames)
     {
     }
 
@@ -122,6 +124,9 @@ public:
 
             output->write((const char*) img.bits(), img.byteCount());
 
+            if (countingFrames && --remainingFrames == 0)
+                QCoreApplication::exit(0);
+
             return true;
         }
         return QObject::event(e);
@@ -131,6 +136,8 @@ public:
 
 private:
     QIODevice *output;
+    bool countingFrames;
+    unsigned int remainingFrames;
 };
 
 static void callback(void *data, wl_callback *cb, uint32_t time)
@@ -140,7 +147,7 @@ static void callback(void *data, wl_callback *cb, uint32_t time)
     QMetaObject::invokeMethod(static_cast<Recorder *>(data), "start");
 }
 
-Recorder::Recorder(QIODevice *output)
+Recorder::Recorder(QIODevice *output, unsigned int numberOfFrames)
         : QObject()
         , m_manager(Q_NULLPTR)
         , m_starving(false)
@@ -162,7 +169,7 @@ Recorder::Recorder(QIODevice *output)
     wl_callback_add_listener(cb, &callbackListener, this);
 
     m_buffersThread = new QThread;
-    m_buffersHandler = new BuffersHandler(output);
+    m_buffersHandler = new BuffersHandler(output, numberOfFrames);
     m_buffersHandler->rec = this;
     m_buffersHandler->moveToThread(m_buffersThread);
     m_buffersThread->start();

@@ -35,7 +35,7 @@ class Recorder : public QObject
 {
     Q_OBJECT
 public:
-    Recorder(QIODevice *output);
+    Recorder(QIODevice *output, unsigned int numberOfFrames = 0);
     ~Recorder();
 
 private slots:
