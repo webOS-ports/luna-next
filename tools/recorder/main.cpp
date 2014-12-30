@@ -15,6 +15,10 @@
 
 #include <stdlib.h>
 #include <QGuiApplication>
+#include <QCommandLineParser>
+#include <QCommandLineOption>
+#include <QFile>
+#include <QDebug>
 
 #include "recorder.h"
 
@@ -23,7 +27,32 @@ int main(int argc, char *argv[])
     setenv("XDG_RUNTIME_DIR", "/tmp/luna-session", 0);
 
     QGuiApplication app(argc, argv);
+    QCoreApplication::setApplicationName("luna-recorder");
+    QCoreApplication::setApplicationVersion("0.2");
 
-    Recorder recorder;
+    QCommandLineParser parser;
+    parser.setApplicationDescription("Luna Screencast recorder");
+    parser.addHelpOption();
+    parser.addVersionOption();
+
+    QCommandLineOption fileOpt(QStringList() << "f" << "file",
+                               "Output filename", "file");
+    parser.addOption(fileOpt);
+
+    parser.process(app);
+
+    if (!parser.isSet(fileOpt)) {
+        qCritical() << "File name for output needs to be set";
+        exit(1);
+    }
+
+    const QString fileName = parser.value(fileOpt);
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly)) {
+        qCritical() << "Failed to open output file";
+        exit(1);
+    }
+
+    Recorder recorder(&file);
     return app.exec();
 }

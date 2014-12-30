@@ -27,6 +27,8 @@
 #include <QThread>
 #include <QMutexLocker>
 #include <QElapsedTimer>
+#include <QFile>
+#include <QDebug>
 
 #include "wayland-luna-recorder-client-protocol.h"
 #include "recorder.h"
@@ -102,6 +104,11 @@ public:
 class BuffersHandler : public QObject
 {
 public:
+    BuffersHandler(QIODevice *output) :
+        output(output)
+    {
+    }
+
     bool event(QEvent *e) Q_DECL_OVERRIDE
     {
         if (e->type() == FrameEventType) {
@@ -112,15 +119,18 @@ public:
             buf->busy = false;
             if (rec->m_starving)
                 rec->recordFrame();
-            QString filename = QString("frame%1.bmp").arg(id++, 3, 10, QChar('0'));
-            qDebug("saving %s.", qPrintable(filename));
-            img.save(filename);
+
+            output->write((const char*) img.bits(), img.byteCount());
+
             return true;
         }
         return QObject::event(e);
     }
 
     Recorder *rec;
+
+private:
+    QIODevice *output;
 };
 
 static void callback(void *data, wl_callback *cb, uint32_t time)
@@ -130,7 +140,7 @@ static void callback(void *data, wl_callback *cb, uint32_t time)
     QMetaObject::invokeMethod(static_cast<Recorder *>(data), "start");
 }
 
-Recorder::Recorder()
+Recorder::Recorder(QIODevice *output)
         : QObject()
         , m_manager(Q_NULLPTR)
         , m_starving(false)
@@ -152,7 +162,7 @@ Recorder::Recorder()
     wl_callback_add_listener(cb, &callbackListener, this);
 
     m_buffersThread = new QThread;
-    m_buffersHandler = new BuffersHandler;
+    m_buffersHandler = new BuffersHandler(output);
     m_buffersHandler->rec = this;
     m_buffersHandler->moveToThread(m_buffersThread);
     m_buffersThread->start();

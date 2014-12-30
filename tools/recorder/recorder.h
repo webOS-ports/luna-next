@@ -18,6 +18,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QIODevice>
 #include <wayland-client.h>
 
 class QScreen;
@@ -34,7 +35,7 @@ class Recorder : public QObject
 {
     Q_OBJECT
 public:
-    Recorder();
+    Recorder(QIODevice *output);
     ~Recorder();
 
 private slots:
