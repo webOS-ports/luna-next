@@ -39,10 +39,6 @@ Finally you can run luna-next with
 
 `build/luna-next -platform xcb`
 
-After the compositor is up you can launch a simple webapp client by
-
-`test_webapp -a /usr/palm/applications/org.webosports.app.firstuse/index.html`
-
 ## Contributing
 
 If you want to contribute you can just start with cloning the repository and make your

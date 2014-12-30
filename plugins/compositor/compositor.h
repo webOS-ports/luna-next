@@ -34,12 +34,14 @@ namespace luna
 {
 
 class WindowModel;
+class RecorderManager;
 
 class Compositor : public QQuickView, public QWaylandQuickCompositor,
                    public QQmlParserStatus
 {
     Q_OBJECT
     Q_PROPERTY(QWaylandSurface* fullscreenSurface READ fullscreenSurface WRITE setFullscreenSurface NOTIFY fullscreenSurfaceChanged)
+    Q_PROPERTY(bool recording READ recording NOTIFY recordingChanged)
 
 public:
     Compositor();
@@ -49,6 +51,9 @@ public:
 
     QWaylandSurface *fullscreenSurface() const { return mFullscreenSurface; }
     void setFullscreenSurface(QWaylandSurface *surface);
+
+    bool recording() const { return mRecorderCounter > 0; }
+    void setRecording(bool recording);
 
     Q_INVOKABLE void clearKeyboardFocus();
     Q_INVOKABLE void closeWindowWithId(int winId);
@@ -72,6 +77,7 @@ signals:
     void windowLowered(QVariant window);
     void fullscreenSurfaceChanged();
     void windowsChanged();
+    void recordingChanged();
 
 private slots:
     void surfaceMapped();
@@ -97,10 +103,14 @@ private:
     unsigned int mNextWindowId;
     QHash<unsigned int, CompositorWindow*> mWindows;
     QList<WindowModel*> mWindowModels;
+    RecorderManager *mRecorder;
+    unsigned int mRecorderCounter;
 
     static Compositor *mInstance;
 
+private:
     CompositorWindow* createWindowForSurface(QWaylandSurface *surface);
+    void readContent();
 };
 
 } // namespace luna

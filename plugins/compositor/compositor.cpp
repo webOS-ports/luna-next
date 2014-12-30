@@ -17,6 +17,7 @@
 
 #include "compositor.h"
 #include "windowmodel.h"
+#include "recorder.h"
 
 #include <QWaylandInputDevice>
 
@@ -49,6 +50,10 @@ Compositor::Compositor()
     mInstance = this;
 
     connect(this, SIGNAL(frameSwapped()), this, SLOT(frameSwappedSlot()));
+    connect(this, &QQuickWindow::afterRendering, this, &Compositor::readContent, Qt::DirectConnection);
+
+    mRecorder = new RecorderManager;
+    addGlobalInterface(mRecorder);
 }
 
 Compositor* Compositor::instance()
@@ -63,6 +68,11 @@ void Compositor::classBegin()
 void Compositor::componentComplete()
 {
     QWaylandCompositor::setOutputGeometry(QRect(0, 0, width(), height()));
+}
+
+void Compositor::readContent()
+{
+    mRecorder->recordFrame(this);
 }
 
 void Compositor::registerWindowModel(WindowModel *model)
@@ -285,5 +295,17 @@ void Compositor::surfaceDamaged(const QRect&)
 #endif
 }
 
+void Compositor::setRecording(bool value)
+{
+    unsigned int before = recording();
+
+    if (value && mRecorderCounter > 0)
+        mRecorderCounter--;
+    else
+        mRecorderCounter++;
+
+    if (before != recording())
+        recordingChanged();
+}
 
 } // namespace luna

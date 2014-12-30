@@ -7,7 +7,10 @@ set(CMAKE_AUTOMOC ON)
 
 include(webOS/webOS)
 webos_modules_init(1 0 0 QUALIFIER RC3)
-webos_component(0 1 0)
+webos_component(0 2 0)
+
+find_package(ECM REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden -Wall -std=c++0x")
 
@@ -56,5 +59,9 @@ pkg_check_modules(LUNA_SYSMGR_IPC_MESSAGES LunaSysMgrIpcMessages REQUIRED)
 pkg_check_modules(LS2 luna-service2 REQUIRED)
 pkg_check_modules(LUNA_PREFS luna-prefs REQUIRED)
 
+include(FindWaylandScanner)
+include(FindQtWaylandScanner)
+
 add_subdirectory(src)
 add_subdirectory(plugins)
+add_subdirectory(tools)
