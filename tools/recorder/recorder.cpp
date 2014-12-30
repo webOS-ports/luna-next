@@ -223,10 +223,25 @@ void Recorder::recordFrame()
     }
 }
 
+QString formatToString(int format)
+{
+    switch (format) {
+        case WL_SHM_FORMAT_RGBA8888:
+            return QString("rgba8888");
+        default:
+            break;
+    }
+
+    return QString("unknown");
+}
+
 void Recorder::setup(void *data, luna_recorder *recorder, int width, int height, int stride, int format)
 {
     Recorder *rec = static_cast<Recorder *>(data);
     QMutexLocker lock(&rec->m_mutex);
+
+    qWarning("Recording with output size %dx%d format %s",
+             width, height, formatToString(format).toUtf8().constData());
 
     for (int i = 0; i < 6; ++i) {
         Buffer *buffer = Buffer::create(rec->m_shm, width, height, stride, format);
