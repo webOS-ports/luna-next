@@ -37,6 +37,7 @@ class CompositorWindow : public QWaylandSurfaceItem
     Q_PROPERTY(QVariant userData READ userData WRITE setUserData NOTIFY userDataChanged)
     Q_PROPERTY(bool ready READ ready NOTIFY readyChanged)
     Q_PROPERTY(bool mapped READ mapped NOTIFY mappedChanged)
+    Q_PROPERTY(QString appIcon READ appIcon CONSTANT)
 
 public:
     CompositorWindow(unsigned int winId, QWaylandQuickSurface *surface, QQuickItem *parent = 0);
@@ -49,6 +50,7 @@ public:
     quint64 processId() const;
     bool ready() const;
     bool mapped() const;
+    QString appIcon() const;
 
     QVariant userData() const;
     void setUserData(QVariant);
@@ -89,6 +91,7 @@ private:
     QString mAppId;
     QVariant mUserData;
     bool mReady;
+    QString mAppIcon;
 
     void checkStatus();
 };

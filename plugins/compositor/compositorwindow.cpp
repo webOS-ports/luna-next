@@ -103,6 +103,8 @@ void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVaria
         if (mAppId == "com.palm.launcher")
             mWindowType = WindowType::Launcher;
     }
+    else if (name == "appIcon")
+        mAppIcon = value.toString();
     else if (name == "type")
         mWindowType = WindowType::fromString(value.toString());
     else if (name == "parentWindowId") {
@@ -235,6 +237,11 @@ bool CompositorWindow::mapped() const
         return false;
 
     return surface()->isMapped();
+}
+
+QString CompositorWindow::appIcon() const
+{
+    return mAppIcon;
 }
 
 } // namespace luna
