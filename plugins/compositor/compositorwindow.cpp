@@ -42,7 +42,10 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *sur
         onWindowPropertyChanged(iter.key(), iter.value());
     }
 
-    connect(surface, SIGNAL(windowPropertyChanged(const QString&,const QVariant&)), this, SLOT(onWindowPropertyChanged(const QString&, const QVariant&)));
+    connect(surface, SIGNAL(windowPropertyChanged(const QString&,const QVariant&)),
+            this, SLOT(onWindowPropertyChanged(const QString&, const QVariant&)));
+    connect(surface, SIGNAL(mapped()), this, SLOT(onSurfaceMappedChanged()));
+    connect(surface, SIGNAL(unmapped()), this, SLOT(onSurfaceMappedChanged()));
     connect(this, &QWaylandSurfaceItem::surfaceDestroyed, this, &QObject::deleteLater);
 
     QTimer::singleShot(0, this, SLOT(sendWindowIdToClient()));
@@ -53,6 +56,11 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *sur
 CompositorWindow::~CompositorWindow()
 {
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
+}
+
+void CompositorWindow::forceVisible()
+{
+    surface()->sendOnScreenVisibilityChange(true);
 }
 
 void CompositorWindow::sendWindowIdToClient()
@@ -73,6 +81,8 @@ void CompositorWindow::checkStatus()
 
 void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVariant &value)
 {
+    qDebug() << Q_FUNC_INFO << name << value;
+
     if (name == "appId") {
         mAppId = value.toString();
 
@@ -87,6 +97,11 @@ void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVaria
     }
 
     checkStatus();
+}
+
+void CompositorWindow::onSurfaceMappedChanged()
+{
+    emit mappedChanged();
 }
 
 unsigned int CompositorWindow::winId() const
@@ -197,6 +212,14 @@ void CompositorWindow::setParentWinId(unsigned int id)
     if (surface())
         surface()->setWindowProperty("parentWindowId", id);
     parentWinIdChanged();
+}
+
+bool CompositorWindow::mapped() const
+{
+    if (!surface())
+        return false;
+
+    return surface()->isMapped();
 }
 
 } // namespace luna

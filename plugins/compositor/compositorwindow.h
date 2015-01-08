@@ -36,6 +36,7 @@ class CompositorWindow : public QWaylandSurfaceItem
     Q_PROPERTY(quint64 processId READ processId CONSTANT)
     Q_PROPERTY(QVariant userData READ userData WRITE setUserData NOTIFY userDataChanged)
     Q_PROPERTY(bool ready READ ready NOTIFY readyChanged)
+    Q_PROPERTY(bool mapped READ mapped NOTIFY mappedChanged)
 
 public:
     CompositorWindow(unsigned int winId, QWaylandQuickSurface *surface, QQuickItem *parent = 0);
@@ -47,6 +48,7 @@ public:
     QString appId() const;
     quint64 processId() const;
     bool ready() const;
+    bool mapped() const;
 
     QVariant userData() const;
     void setUserData(QVariant);
@@ -60,15 +62,18 @@ public:
 
     Q_INVOKABLE void postEvent(int event);
     Q_INVOKABLE void changeSize(const QSize& size);
+    Q_INVOKABLE void forceVisible();
 
 signals:
     void userDataChanged();
     void readyChanged();
     void parentWinIdChanged();
+    void mappedChanged();
 
-public slots:
+private slots:
     void onWindowPropertyChanged(const QString&, const QVariant&);
     void sendWindowIdToClient();
+    void onSurfaceMappedChanged();
 
 protected:
     virtual bool event(QEvent *event);
