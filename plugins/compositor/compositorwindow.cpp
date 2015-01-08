@@ -30,6 +30,7 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *sur
     : QWaylandSurfaceItem(surface, parent),
       mId(winId),
       mParentWinId(0),
+      mParentWinIdSet(false),
       mWindowType(WindowType::Card),
       mClosed(false),
       mRemovePosted(false),
@@ -49,6 +50,7 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *sur
     connect(this, &QWaylandSurfaceItem::surfaceDestroyed, this, &QObject::deleteLater);
 
     QTimer::singleShot(0, this, SLOT(sendWindowIdToClient()));
+    QTimer::singleShot(0, this, SLOT(onReadyTimeout()));
 
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
 }
@@ -73,10 +75,22 @@ void CompositorWindow::checkStatus()
     if (mReady)
         return;
 
-    if (mAppId.length() > 0) {
+    if (mAppId.length() > 0 &&
+        mParentWinIdSet) {
         mReady = true;
         emit readyChanged();
     }
+}
+
+void CompositorWindow::onReadyTimeout()
+{
+    if (mReady)
+        return;
+
+    mReady = true;
+    mParentWinIdSet = true;
+
+    emit readyChanged();
 }
 
 void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVariant &value)
@@ -93,6 +107,7 @@ void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVaria
         mWindowType = WindowType::fromString(value.toString());
     else if (name == "parentWindowId") {
         mParentWinId = value.toInt();
+        mParentWinIdSet = true;
         parentWinIdChanged();
     }
 

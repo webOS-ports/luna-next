@@ -74,6 +74,7 @@ private slots:
     void onWindowPropertyChanged(const QString&, const QVariant&);
     void sendWindowIdToClient();
     void onSurfaceMappedChanged();
+    void onReadyTimeout();
 
 protected:
     virtual bool event(QEvent *event);
@@ -81,6 +82,7 @@ protected:
 private:
     unsigned int mId;
     unsigned int mParentWinId;
+    bool mParentWinIdSet;
     unsigned int mWindowType;
     bool mClosed;
     bool mRemovePosted;
