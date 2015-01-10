@@ -142,9 +142,26 @@ CompositorWindow* Compositor::createWindowForSurface(QWaylandSurface *surface)
     // window->setUseTextureAlpha(true);
     QObject::connect(surface, &QWaylandSurface::surfaceDestroyed, this, &Compositor::surfaceDying);
 
+    window->setParentItem(contentItem());
+    window->setSize(surface->size());
+    window->setTouchEventsEnabled(true);
+
     mWindows.insert(windowId, window);
 
+    connect(window, SIGNAL(readyChanged()), this, SLOT(windowIsReady()));
+
     return window;
+}
+
+void Compositor::windowIsReady()
+{
+    CompositorWindow *window = static_cast<CompositorWindow*>(sender());
+
+    if (!WindowModel::isWindowAlreadyAdded(mWindowModels, window)) {
+        qDebug() << Q_FUNC_INFO << "Adding window" << window << "to our models";
+        emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+        WindowModel::addWindowForEachModel(mWindowModels, window);
+    }
 }
 
 QWaylandSurfaceItem* Compositor::createView(QWaylandSurface *surface)
@@ -164,21 +181,9 @@ void Compositor::surfaceMapped()
     if (!window)
         window = createWindowForSurface(surface);
 
-    window->setParentItem(contentItem());
-    window->setSize(surface->size());
-
-    window->setTouchEventsEnabled(true);
-
-
     qDebug() << __PRETTY_FUNCTION__ << window << "appId" << window->appId() << "windowType" << window->windowType();
 
-    if (WindowModel::isWindowAlreadyAdded(mWindowModels, window)) {
-        emit windowShown(QVariant::fromValue(static_cast<QQuickItem*>(window)));
-    }
-    else {
-        emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
-        WindowModel::addWindowForEachModel(mWindowModels, window);
-    }
+    emit windowShown(QVariant::fromValue(static_cast<QQuickItem*>(window)));
 }
 
 void Compositor::surfaceUnmapped()
@@ -193,8 +198,6 @@ void Compositor::surfaceUnmapped()
     qWarning() << Q_FUNC_INFO << window;
 
     emit windowHidden(QVariant::fromValue(static_cast<QQuickItem*>(window)));
-
-    WindowModel::removeWindowForEachModel(mWindowModels, window);
 }
 
 void Compositor::surfaceDying()

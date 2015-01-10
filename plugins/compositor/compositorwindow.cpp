@@ -30,6 +30,7 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *sur
     : QWaylandSurfaceItem(surface, parent),
       mId(winId),
       mParentWinId(0),
+      mParentWinIdSet(false),
       mWindowType(WindowType::Card),
       mClosed(false),
       mRemovePosted(false),
@@ -42,10 +43,14 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *sur
         onWindowPropertyChanged(iter.key(), iter.value());
     }
 
-    connect(surface, SIGNAL(windowPropertyChanged(const QString&,const QVariant&)), this, SLOT(onWindowPropertyChanged(const QString&, const QVariant&)));
+    connect(surface, SIGNAL(windowPropertyChanged(const QString&,const QVariant&)),
+            this, SLOT(onWindowPropertyChanged(const QString&, const QVariant&)));
+    connect(surface, SIGNAL(mapped()), this, SLOT(onSurfaceMappedChanged()));
+    connect(surface, SIGNAL(unmapped()), this, SLOT(onSurfaceMappedChanged()));
     connect(this, &QWaylandSurfaceItem::surfaceDestroyed, this, &QObject::deleteLater);
 
     QTimer::singleShot(0, this, SLOT(sendWindowIdToClient()));
+    QTimer::singleShot(0, this, SLOT(onReadyTimeout()));
 
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
 }
@@ -53,6 +58,11 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *sur
 CompositorWindow::~CompositorWindow()
 {
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
+}
+
+void CompositorWindow::forceVisible()
+{
+    surface()->sendOnScreenVisibilityChange(true);
 }
 
 void CompositorWindow::sendWindowIdToClient()
@@ -65,28 +75,50 @@ void CompositorWindow::checkStatus()
     if (mReady)
         return;
 
-    if (mAppId.length() > 0) {
+    if (mAppId.length() > 0 &&
+        mParentWinIdSet) {
         mReady = true;
         emit readyChanged();
     }
 }
 
+void CompositorWindow::onReadyTimeout()
+{
+    if (mReady)
+        return;
+
+    mReady = true;
+    mParentWinIdSet = true;
+
+    emit readyChanged();
+}
+
 void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVariant &value)
 {
+    qDebug() << Q_FUNC_INFO << name << value;
+
     if (name == "appId") {
         mAppId = value.toString();
 
         if (mAppId == "com.palm.launcher")
             mWindowType = WindowType::Launcher;
     }
+    else if (name == "appIcon")
+        mAppIcon = value.toString();
     else if (name == "type")
         mWindowType = WindowType::fromString(value.toString());
     else if (name == "parentWindowId") {
         mParentWinId = value.toInt();
+        mParentWinIdSet = true;
         parentWinIdChanged();
     }
 
     checkStatus();
+}
+
+void CompositorWindow::onSurfaceMappedChanged()
+{
+    emit mappedChanged();
 }
 
 unsigned int CompositorWindow::winId() const
@@ -197,6 +229,19 @@ void CompositorWindow::setParentWinId(unsigned int id)
     if (surface())
         surface()->setWindowProperty("parentWindowId", id);
     parentWinIdChanged();
+}
+
+bool CompositorWindow::mapped() const
+{
+    if (!surface())
+        return false;
+
+    return surface()->isMapped();
+}
+
+QString CompositorWindow::appIcon() const
+{
+    return mAppIcon;
 }
 
 } // namespace luna

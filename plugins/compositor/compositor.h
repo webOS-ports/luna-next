@@ -92,6 +92,7 @@ private slots:
     void surfaceRaised();
     void surfaceLowered();
     void surfaceDying();
+    void windowIsReady();
 
 protected:
     void resizeEvent(QResizeEvent *event);
