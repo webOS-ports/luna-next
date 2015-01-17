@@ -50,7 +50,7 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *sur
     connect(this, &QWaylandSurfaceItem::surfaceDestroyed, this, &QObject::deleteLater);
 
     QTimer::singleShot(0, this, SLOT(sendWindowIdToClient()));
-    QTimer::singleShot(0, this, SLOT(onReadyTimeout()));
+    QTimer::singleShot(100, this, SLOT(onReadyTimeout()));
 
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
 }
