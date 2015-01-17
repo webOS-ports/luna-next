@@ -67,7 +67,7 @@ void CompositorWindow::forceVisible()
 
 void CompositorWindow::sendWindowIdToClient()
 {
-    surface()->setWindowProperty("windowId", QVariant(mId));
+    surface()->setWindowProperty("_LUNE_WINDOW_ID", QVariant(mId));
 }
 
 void CompositorWindow::checkStatus()
@@ -75,8 +75,7 @@ void CompositorWindow::checkStatus()
     if (mReady)
         return;
 
-    if (mAppId.length() > 0 &&
-        mParentWinIdSet) {
+    if (mAppId.length() > 0 && mParentWinIdSet) {
         mReady = true;
         emit readyChanged();
     }
@@ -97,17 +96,13 @@ void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVaria
 {
     qDebug() << Q_FUNC_INFO << name << value;
 
-    if (name == "appId") {
+    if (name == "_LUNE_APP_ID")
         mAppId = value.toString();
-
-        if (mAppId == "com.palm.launcher")
-            mWindowType = WindowType::Launcher;
-    }
-    else if (name == "appIcon")
+    else if (name == "_LUNE_APP_ICON")
         mAppIcon = value.toString();
-    else if (name == "type")
+    else if (name == "_LUNE_WINDOW_TYPE")
         mWindowType = WindowType::fromString(value.toString());
-    else if (name == "parentWindowId") {
+    else if (name == "_LUNE_WINDOW_PARENT_ID") {
         mParentWinId = value.toInt();
         mParentWinIdSet = true;
         parentWinIdChanged();
