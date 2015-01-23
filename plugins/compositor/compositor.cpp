@@ -116,13 +116,28 @@ void Compositor::clearKeyboardFocus()
     defaultInputDevice()->setKeyboardFocus(0);
 }
 
+bool Compositor::hasProcessMultipleWindows(quint64 processId)
+{
+    unsigned int count = 0;
+
+    QList<CompositorWindow*> windows = mWindows.values();
+    for (int n = 0; n < windows.size(); n++) {
+        CompositorWindow *window = windows[n];
+        if (window->processId() == processId)
+            count++;
+    }
+
+    return count > 1;
+}
+
 void Compositor::closeWindowWithId(int winId)
 {
     qDebug() << Q_FUNC_INFO << "winId" << winId;
 
     CompositorWindow *window = mWindows.value(winId, 0);
     if (window) {
-        if (window->surface() && window->checkIsAllowedToStay())
+        if (window->surface() &&
+            (window->checkIsAllowedToStay() || hasProcessMultipleWindows(window->processId()) || window->keepAlive()))
             window->surface()->destroySurface();
         else if (window->surface())
             destroyClientForSurface(window->surface());

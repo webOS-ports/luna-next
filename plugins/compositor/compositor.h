@@ -112,6 +112,7 @@ private:
 private:
     CompositorWindow* createWindowForSurface(QWaylandSurface *surface);
     void readContent();
+    bool hasProcessMultipleWindows(quint64 processId);
 };
 
 } // namespace luna
