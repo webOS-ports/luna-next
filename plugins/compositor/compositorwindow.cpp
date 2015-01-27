@@ -34,7 +34,8 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *sur
       mWindowType(WindowType::Card),
       mClosed(false),
       mRemovePosted(false),
-      mReady(false)
+      mReady(false),
+      mKeepAlive(false)
 {
     QVariantMap properties = surface->windowProperties();
     QMapIterator<QString,QVariant> iter(properties);
@@ -100,6 +101,8 @@ void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVaria
         mAppId = value.toString();
     else if (name == "_LUNE_APP_ICON")
         mAppIcon = value.toString();
+    else if (name == "_LUNE_APP_KEEP_ALIVE")
+        mKeepAlive = value.toBool();
     else if (name == "_LUNE_WINDOW_TYPE")
         mWindowType = WindowType::fromString(value.toString());
     else if (name == "_LUNE_WINDOW_PARENT_ID") {
@@ -113,6 +116,9 @@ void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVaria
 
 void CompositorWindow::onSurfaceMappedChanged()
 {
+    if (surface())
+        qDebug() << Q_FUNC_INFO << "id" << mId << "mapped" << surface()->isMapped();
+
     emit mappedChanged();
 }
 
@@ -146,6 +152,11 @@ quint64 CompositorWindow::processId() const
 QVariant CompositorWindow::userData() const
 {
     return mUserData;
+}
+
+bool CompositorWindow::keepAlive() const
+{
+    return mKeepAlive;
 }
 
 void CompositorWindow::setUserData(QVariant data)

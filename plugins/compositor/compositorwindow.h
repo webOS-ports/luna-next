@@ -55,6 +55,8 @@ public:
     QVariant userData() const;
     void setUserData(QVariant);
 
+    bool keepAlive() const;
+
     void setParentWinId(unsigned int id);
 
     void setClosed(bool closed);
@@ -92,6 +94,7 @@ private:
     QVariant mUserData;
     bool mReady;
     QString mAppIcon;
+    bool mKeepAlive;
 
     void checkStatus();
 };
