@@ -38,6 +38,7 @@ class CompositorWindow : public QWaylandSurfaceItem
     Q_PROPERTY(bool ready READ ready NOTIFY readyChanged)
     Q_PROPERTY(bool mapped READ mapped NOTIFY mappedChanged)
     Q_PROPERTY(QString appIcon READ appIcon CONSTANT)
+    Q_PROPERTY(bool loadingAnimationDisabled READ loadingAnimationDisabled NOTIFY loadingAnimationDisabledChanged)
 
 public:
     CompositorWindow(unsigned int winId, QWaylandQuickSurface *surface, QQuickItem *parent = 0);
@@ -51,6 +52,7 @@ public:
     bool ready() const;
     bool mapped() const;
     QString appIcon() const;
+    bool loadingAnimationDisabled() const;
 
     QVariant userData() const;
     void setUserData(QVariant);
@@ -73,6 +75,7 @@ signals:
     void readyChanged();
     void parentWinIdChanged();
     void mappedChanged();
+    void loadingAnimationDisabledChanged();
 
 private slots:
     void onWindowPropertyChanged(const QString&, const QVariant&);
@@ -95,6 +98,7 @@ private:
     bool mReady;
     QString mAppIcon;
     bool mKeepAlive;
+    bool mLoadingAnimationDisabled;
 
     void checkStatus();
 };
