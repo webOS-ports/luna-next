@@ -12,6 +12,7 @@ set(SOURCES
     fpscounter.cpp
     reticlehandler.cpp
     devicekeyhandler.cpp
+    volumekeys.cpp
     quickutils.cpp
     inversemouseareatype.cpp)
 
