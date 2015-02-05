@@ -23,6 +23,7 @@
 #include "devicekeyhandler.h"
 #include "reticlehandler.h"
 #include "inversemouseareatype.h"
+#include "volumekeys.h"
 
 LunaNextShellPlugin::LunaNextShellPlugin(QObject *parent) :
     QQmlExtensionPlugin(parent)
@@ -37,6 +38,7 @@ void LunaNextShellPlugin::registerTypes(const char *uri)
     qmlRegisterType<luna::DeviceKeyHandler>(uri, 0, 1, "DeviceKeyHandler");
     qmlRegisterType<luna::ReticleHandler>(uri, 0, 1, "ReticleHandler");
     qmlRegisterType<InverseMouseAreaType>(uri, 0, 1, "InverseMouseArea");
+    qmlRegisterType<VolumeKeys>(uri, 0, 1, "VolumeKeys");
 }
 
 void LunaNextShellPlugin::initializeEngine(QQmlEngine *engine, const char *uri)

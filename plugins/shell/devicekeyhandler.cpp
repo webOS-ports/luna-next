@@ -36,12 +36,6 @@ bool DeviceKeyHandler::eventFilter(QObject *, QEvent *event)
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
 
         switch (keyEvent->key()) {
-        case  Qt::Key_VolumeUp:
-            emit volumeUpPressed();
-            break;
-        case Qt::Key_VolumeDown:
-            emit volumeDownPressed();
-            break;
         case Qt::Key_Home:
             emit homePressed();
             break;
@@ -56,10 +50,12 @@ bool DeviceKeyHandler::eventFilter(QObject *, QEvent *event)
             break;
         case Qt::Key_End:
             emit endPressed();
+            break;
         default:
             break;
         }
     }
+
     return false;
 }
 

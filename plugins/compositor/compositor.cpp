@@ -135,12 +135,17 @@ void Compositor::closeWindowWithId(int winId)
     qDebug() << Q_FUNC_INFO << "winId" << winId;
 
     CompositorWindow *window = mWindows.value(winId, 0);
-    if (window) {
-        if (window->surface() &&
-            (window->checkIsAllowedToStay() || hasProcessMultipleWindows(window->processId()) || window->keepAlive()))
+    if (window && window->surface()) {
+        if (window->checkIsAllowedToStay() ||
+            hasProcessMultipleWindows(window->processId()) ||
+            window->keepAlive()) {
+            qDebug() << Q_FUNC_INFO << "Destroying surface and keeping client alive";
             window->surface()->destroySurface();
-        else if (window->surface())
+        }
+        else {
+            qDebug() << Q_FUNC_INFO << "Closing client and destroying surface";
             destroyClientForSurface(window->surface());
+        }
     }
 }
 

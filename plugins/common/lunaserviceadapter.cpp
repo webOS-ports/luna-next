@@ -21,6 +21,7 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <QTimer>
+#include <QCoreApplication>
 
 #include "lunaserviceadapter.h"
 
@@ -250,6 +251,9 @@ void LunaServiceAdapter::classBegin()
 void LunaServiceAdapter::componentComplete()
 {
     LSError error;
+
+    if (mName.length() == 0)
+        mName = QCoreApplication::applicationName();
 
     // check wether we have the handle for the same service already cached
     QString serviceHandleName = mName + (mUsePrivateBus ? "-priv" : "-pub");

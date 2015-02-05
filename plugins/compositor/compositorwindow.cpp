@@ -35,7 +35,8 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *sur
       mClosed(false),
       mRemovePosted(false),
       mReady(false),
-      mKeepAlive(false)
+      mKeepAlive(false),
+      mLoadingAnimationDisabled(false)
 {
     QVariantMap properties = surface->windowProperties();
     QMapIterator<QString,QVariant> iter(properties);
@@ -110,6 +111,10 @@ void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVaria
         mParentWinIdSet = true;
         parentWinIdChanged();
     }
+    else if (name == "_LUNE_WINDOW_LOADING_ANIMATION_DISABLED") {
+        mLoadingAnimationDisabled = value.toBool();
+        loadingAnimationDisabledChanged();
+    }
 
     checkStatus();
 }
@@ -179,10 +184,8 @@ bool CompositorWindow::checkIsAllowedToStay()
 
     // FIXME this should be moved to a configuration file so we don't have to touch the
     // source code for changing the list of allowed processes
-    return (procExeEntry.symLinkTarget() == "/usr/sbin/webapp-launcher" ||
-            procExeEntry.symLinkTarget() == "/usr/sbin/LunaWebAppManager" ||
-            procExeEntry.symLinkTarget() == "/usr/bin/maliit-server" ||
-            procExeEntry.symLinkTarget() == "/usr/palm/applications/org.webosports.app.phone/org.webosports.app.phone");
+    return (procExeEntry.symLinkTarget() == "/usr/sbin/LunaWebAppManager" ||
+            procExeEntry.symLinkTarget() == "/usr/bin/maliit-server");
 }
 
 void CompositorWindow::setClosed(bool closed)
@@ -248,6 +251,11 @@ bool CompositorWindow::mapped() const
 QString CompositorWindow::appIcon() const
 {
     return mAppIcon;
+}
+
+bool CompositorWindow::loadingAnimationDisabled() const
+{
+    return mLoadingAnimationDisabled;
 }
 
 } // namespace luna
