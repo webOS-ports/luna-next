@@ -19,7 +19,6 @@
 
 #include "plugin.h"
 #include "settingsadapter.h"
-#include "lunaserviceadapter.h"
 #include "units.h"
 #include "fontutils.h"
 
@@ -47,7 +46,6 @@ void LunaNextCommonPlugin::registerTypes(const char *uri)
 {
     Q_ASSERT(uri == QLatin1String("LunaNext.Common"));
     qmlRegisterSingletonType<luna::SettingsAdapter>(uri, 0, 1, "Settings", settings_callback);
-    qmlRegisterType<luna::LunaServiceAdapter>(uri, 0, 1, "LunaService");
     qmlRegisterSingletonType<luna::Units>(uri, 0, 1, "Units", units_callback);
     qmlRegisterSingletonType<luna::FontUtils>(uri, 0, 1, "FontUtils", fontutils_callback);
 }

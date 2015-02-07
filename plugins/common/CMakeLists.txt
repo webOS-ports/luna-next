@@ -2,14 +2,12 @@ include_directories(
     ${GLIB2_INCLUDE_DIRS}
     ${LUNA_SYSMGR_COMMON_INCLUDE_DIRS}
     ${LUNA_SYSMGR_IPC_MESSAGES_INCLUDE_DIRS}
-    ${LS2_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR})
 
 set(SOURCES
     plugin.cpp
     settingsadapter.cpp
-    lunaserviceadapter.cpp
     settingsadapter.cpp
     fontutils.cpp
     units.cpp)
