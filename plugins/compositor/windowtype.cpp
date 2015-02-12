@@ -32,6 +32,8 @@ unsigned int WindowType::fromString(const QString& str)
         return WindowType::PopupAlert;
     else if (str == "overlay")
         return WindowType::Overlay;
+    else if (str == "pin")
+        return WindowType::Pin;
 
     return WindowType::Card;
 }

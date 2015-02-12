@@ -37,6 +37,7 @@ public:
 		PopupAlert,
 		BannerAlert,
 		Overlay,
+		Pin,
 	};
 
 	static unsigned int fromString(const QString& str);
