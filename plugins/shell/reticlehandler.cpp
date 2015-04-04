@@ -18,6 +18,7 @@
 
 #include <QGuiApplication>
 #include <QTouchEvent>
+#include <QScreen>
 
 #include "reticlehandler.h"
 
@@ -51,8 +52,11 @@ bool ReticleHandler::eventFilter(QObject *, QEvent *event)
 				QPointF fpoint = touchPoint.pos();
 				int x = static_cast<int>(fpoint.x());
 				int y = static_cast<int>(fpoint.y());
-				QPoint point(x,y);
-				emit reticleEvent(point);
+
+				QScreen *primaryScreen = QGuiApplication::primaryScreen();
+				QTransform lOrientationTranform = primaryScreen->transformBetween(primaryScreen->orientation(), primaryScreen->primaryOrientation(), primaryScreen->geometry()).inverted();
+
+				emit reticleEvent(lOrientationTranform.map(QPoint(x,y)));
 			};
 			show = false;
 		}
