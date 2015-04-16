@@ -8,7 +8,7 @@ include_directories(
 set(SOURCES
     plugin.cpp
     settingsadapter.cpp
-    settingsadapter.cpp
+    ledsadapter.cpp
     fontutils.cpp
     units.cpp)
 
