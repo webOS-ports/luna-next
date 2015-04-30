@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Canonical Ltd.
+ * Copyright 2015 Herman van Hazendonk (github.com@herrie.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -85,18 +86,44 @@ qreal FontUtils::sizeToPixels(const QString &size)
  */
 qreal FontUtils::modularScale(const QString &size)
 {
-    if (size == "xx-small") {
-        return 0.606;
-    } else if (size == "x-small") {
-        return 0.707;
-    } else if (size == "small") {
-        return 0.857;
-    } else if (size == "medium") {
+    if (size == "xx-small" || size == "8pt") {
+        return 0.5714;
+    } else if (size == "x-small" || size == "10pt") {
+        return 0.7143;
+    } else if (size == "small" || size == "12pt") {
+        return 0.8571;
+    } else if (size == "13pt") {
+        return 0.9286;
+    } else if (size == "medium" || size == "14pt") {
         return 1.0;
-    } else if (size == "large") {
-        return 1.414;
-    } else if (size == "x-large") {
-        return 2.328;
+    } else if (size == "15pt") {
+        return 1.0714;
+    } else if (size == "16pt") {
+        return 1.1429;
+    } else if (size == "17pt") {
+        return 1.2143;
+    } else if (size == "18pt") {
+        return 1.2857;
+    } else if (size == "large" || size == "20pt") {
+        return 1.4286;
+    } else if (size == "22pt") {
+        return 1.5714;
+    } else if (size == "24pt") {
+        return 1.7143;
+    } else if (size == "26pt") {
+        return 1.8571;
+    } else if (size == "28pt") {
+        return 2.0;
+    } else if (size == "30pt") {
+        return 2.1429;
+    } else if (size == "x-large" || size == "32pt") {
+        return 2.2857;
+    } else if (size == "36pt") {
+        return 2.5714;
+    } else if (size == "48pt") {
+        return 3.4286;
+    } else if (size == "72pt") {
+        return 5.1429;
     }
     return 0.0;
 }
