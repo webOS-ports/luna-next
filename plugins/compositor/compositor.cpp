@@ -36,7 +36,8 @@ Compositor* Compositor::mInstance = 0;
 Compositor::Compositor()
     : QWaylandQuickCompositor(this),
       mFullscreenSurface(0),
-      mNextWindowId(1)
+      mNextWindowId(1),
+      mRecorderCounter(0)
 {
     setColor(Qt::black);
     setRetainedSelectionEnabled(true);
@@ -322,7 +323,7 @@ void Compositor::setRecording(bool value)
 {
     unsigned int before = recording();
 
-    if (value && mRecorderCounter > 0)
+    if (!value && mRecorderCounter > 0)
         mRecorderCounter--;
     else
         mRecorderCounter++;
