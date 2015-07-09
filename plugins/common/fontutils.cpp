@@ -86,10 +86,18 @@ qreal FontUtils::sizeToPixels(const QString &size)
  */
 qreal FontUtils::modularScale(const QString &size)
 {
-    if (size == "xx-small" || size == "8pt") {
+    if (size == "6pt") {
+        return 0.4286;
+    } else if( size == "7pt") {
+        return 0.50;
+    } else if (size == "xx-small" || size == "8pt") {
         return 0.5714;
+    } else if (size == "9pt") {
+        return 0.6429;
     } else if (size == "x-small" || size == "10pt") {
         return 0.7143;
+    } else if (size == "11pt") {
+        return 0.7857;
     } else if (size == "small" || size == "12pt") {
         return 0.8571;
     } else if (size == "13pt") {
