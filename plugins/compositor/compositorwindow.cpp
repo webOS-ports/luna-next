@@ -52,7 +52,7 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *sur
     connect(this, &QWaylandSurfaceItem::surfaceDestroyed, this, &QObject::deleteLater);
 
     QTimer::singleShot(0, this, SLOT(sendWindowIdToClient()));
-    QTimer::singleShot(100, this, SLOT(onReadyTimeout()));
+    QTimer::singleShot(2000, this, SLOT(onReadyTimeout()));
 
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
 }
@@ -256,6 +256,11 @@ QString CompositorWindow::appIcon() const
 bool CompositorWindow::loadingAnimationDisabled() const
 {
     return mLoadingAnimationDisabled;
+}
+
+QVariantMap CompositorWindow::windowPropertyMap() const
+{
+    return surface()->windowProperties();
 }
 
 } // namespace luna

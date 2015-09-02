@@ -39,6 +39,7 @@ class CompositorWindow : public QWaylandSurfaceItem
     Q_PROPERTY(bool mapped READ mapped NOTIFY mappedChanged)
     Q_PROPERTY(QString appIcon READ appIcon CONSTANT)
     Q_PROPERTY(bool loadingAnimationDisabled READ loadingAnimationDisabled NOTIFY loadingAnimationDisabledChanged)
+    Q_PROPERTY(QVariantMap windowProperties READ windowPropertyMap CONSTANT)
 
 public:
     CompositorWindow(unsigned int winId, QWaylandQuickSurface *surface, QQuickItem *parent = 0);
@@ -69,6 +70,8 @@ public:
     Q_INVOKABLE void postEvent(int event);
     Q_INVOKABLE void changeSize(const QSize& size);
     Q_INVOKABLE void forceVisible();
+
+    QVariantMap windowPropertyMap() const;
 
 signals:
     void userDataChanged();
