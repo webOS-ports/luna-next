@@ -18,6 +18,7 @@
 #include <QCoreApplication>
 #include <QWaylandCompositor>
 #include <QWaylandInputDevice>
+#include <QWaylandClient>
 #include <QTimer>
 
 #include "compositorwindow.h"
@@ -150,7 +151,7 @@ QString CompositorWindow::appId() const
 quint64 CompositorWindow::processId() const
 {
     if (surface())
-        return surface()->processId();
+        return surface()->client()->processId();
     return 0;
 }
 
@@ -178,7 +179,7 @@ bool CompositorWindow::checkIsAllowedToStay()
     if (!surface())
         return false;
 
-    QFile procExeEntry(QString("/proc/%0/exe").arg(surface()->processId()));
+    QFile procExeEntry(QString("/proc/%0/exe").arg(surface()->client()->processId()));
     if (!procExeEntry.exists())
         return false;
 

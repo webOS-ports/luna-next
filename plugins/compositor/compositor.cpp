@@ -34,8 +34,7 @@ static CompositorWindow *surfaceWindow(QWaylandSurface *surface)
 Compositor* Compositor::mInstance = 0;
 
 Compositor::Compositor()
-    : QWaylandQuickCompositor(this),
-      mFullscreenSurface(0),
+    : mFullscreenSurface(0),
       mNextWindowId(1),
       mRecorderCounter(0)
 {
