@@ -178,10 +178,15 @@ void Compositor::windowIsReady()
 {
     CompositorWindow *window = static_cast<CompositorWindow*>(sender());
 
-    if (!WindowModel::isWindowAlreadyAdded(mWindowModels, window)) {
-        qDebug() << Q_FUNC_INFO << "Adding window" << window << "to our models";
-        emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
-        WindowModel::addWindowForEachModel(mWindowModels, window);
+    // Windows created by QtWebProcess are not meant to be shown to the user
+    // They are mainly temporary windows used for offscreen drawing.
+    // Therefore, as long as they are hidden, don't create a card for them.
+    if (window->surface()->className() != "QtWebProcess") {
+        if (!WindowModel::isWindowAlreadyAdded(mWindowModels, window)) {
+            qDebug() << Q_FUNC_INFO << "Adding window" << window << "to our models";
+            emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+            WindowModel::addWindowForEachModel(mWindowModels, window);
+        }
     }
 }
 
@@ -204,6 +209,12 @@ void Compositor::surfaceMapped()
 
     qDebug() << __PRETTY_FUNCTION__ << window << "appId" << window->appId() << "windowType" << window->windowType();
 
+    // If it was a window created by QtWebProcess, it may be not already in our WindowModel list
+    if (!WindowModel::isWindowAlreadyAdded(mWindowModels, window)) {
+        qDebug() << Q_FUNC_INFO << "Adding window" << window << "to our models";
+        emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+        WindowModel::addWindowForEachModel(mWindowModels, window);
+    }
     emit windowShown(QVariant::fromValue(static_cast<QQuickItem*>(window)));
 }
 
@@ -232,10 +243,12 @@ void Compositor::surfaceDying()
         setFullscreenSurface(0);
 
     if (window) {
-        WindowModel::removeWindowForEachModel(mWindowModels, window);
+        if (WindowModel::isWindowAlreadyAdded(mWindowModels, window)) {
+            WindowModel::removeWindowForEachModel(mWindowModels, window);
+            emit windowRemoved(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+        }
 
         mWindows.remove(window->winId());
-        emit windowRemoved(QVariant::fromValue(static_cast<QQuickItem*>(window)));
 
         window->setClosed(true);
         window->tryRemove();
