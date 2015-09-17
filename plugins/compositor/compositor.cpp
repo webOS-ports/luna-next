@@ -41,6 +41,7 @@ Compositor::Compositor()
     setColor(Qt::black);
     setRetainedSelectionEnabled(true);
     addDefaultShell();
+    createOutput(this, "", "");
 
     if (mInstance)
         qFatal("Compositor: Only one compositor instance per process is supported");
