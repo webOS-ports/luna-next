@@ -181,7 +181,7 @@ void Compositor::windowIsReady()
     // Windows created by QtWebProcess are not meant to be shown to the user
     // They are mainly temporary windows used for offscreen drawing.
     // Therefore, as long as they are hidden, don't create a card for them.
-    if (window->surface()->className() != "QtWebProcess") {
+    if (window->surface()->className() != "QtWebProcess" && window->surface()->className() != "QtWebEngineProcess") {
         if (!WindowModel::isWindowAlreadyAdded(mWindowModels, window)) {
             qDebug() << Q_FUNC_INFO << "Adding window" << window << "to our models";
             emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
