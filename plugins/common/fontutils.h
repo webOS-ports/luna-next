@@ -28,12 +28,6 @@ class FontUtils : public QObject
     Q_OBJECT
 public:
 
-    static FontUtils* instance()
-    {
-        static FontUtils* instance = new FontUtils;
-        return instance;
-    }
-
     explicit FontUtils(QObject *parent = 0) : QObject(parent) {}
 
     Q_INVOKABLE qreal sizeToPixels(const QString &size);

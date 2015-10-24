@@ -25,6 +25,8 @@
 namespace luna
 {
 
+float Units::mGridUnit = DEFAULT_GRID_UNIT_PX;
+
 static float getEnvFloat(const char* name, float defaultValue)
 {
     QByteArray stringValue = qgetenv(name);
@@ -35,6 +37,7 @@ static float getEnvFloat(const char* name, float defaultValue)
 
 Units::Units()
 {
+    // This will eventually rewrite the static value, but within the same process we should always get the same value
     mGridUnit = getEnvFloat(ENV_GRID_UNIT_PX, Settings::LunaSettings()->gridUnit);
 }
 
@@ -55,6 +58,11 @@ void Units::setGridUnit(float gridUnit)
 }
 
 float Units::dp(float value)
+{
+    return _dp(value);
+}
+
+float Units::_dp(float value)
 {
     const float ratio = mGridUnit / DEFAULT_GRID_UNIT_PX;
     if (value <= 2.0)
