@@ -29,11 +29,7 @@ class Units : public QObject
     Q_PROPERTY(float gridUnit READ gridUnit WRITE setGridUnit NOTIFY gridUnitChanged)
 
 public:
-    static Units* instance()
-    {
-        static Units* instance = new Units;
-        return instance;
-    }
+    explicit Units();
 
     Q_INVOKABLE float length(int lengthAt132DPI);
 
@@ -48,9 +44,10 @@ Q_SIGNALS:
     void gridUnitChanged();
 
 private:
-    explicit Units();
+    static float mGridUnit;
 
-    float mGridUnit;
+    static float _dp(float value);
+    friend class FontUtils;
 };
 
 }

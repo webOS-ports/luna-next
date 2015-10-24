@@ -68,7 +68,7 @@ namespace luna
  */
 qreal FontUtils::sizeToPixels(const QString &size)
 {
-    return modularScale(size) * Units::instance()->dp(14);
+    return modularScale(size) * Units::_dp(14);
 }
 
 /*!

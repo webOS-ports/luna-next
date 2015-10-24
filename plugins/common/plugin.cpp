@@ -30,12 +30,12 @@ static QObject *settings_callback(QQmlEngine *e, QJSEngine *)
 
 static QObject *units_callback(QQmlEngine *e, QJSEngine *)
 {
-    return luna::Units::instance();
+    return new luna::Units();
 }
 
 static QObject *fontutils_callback(QQmlEngine *e, QJSEngine *)
 {
-    return luna::FontUtils::instance();
+    return new luna::FontUtils;
 }
 
 static QObject *leds_callback(QQmlEngine *e, QJSEngine *)
