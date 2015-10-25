@@ -27,7 +27,7 @@ int EventType::toKey(EventType::Event event)
 	/* See include/public/messages/SysMgrDeviceKeydefs.h of lun-sysmgr-ipc-messages */
 	switch (event) {
 		case CoreNaviBack:
-			key = 0x1B;
+			key = Qt::Key_Escape; // will be translated into 0x1B by QtWebEngine (see windowsKeyCodeForKeyEvent in web_event_factory.cpp)
 			break;
 		case CoreNaviNext:
 			key = 0xE0E3;
