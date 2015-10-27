@@ -31,6 +31,11 @@ bool SettingsAdapter::tabletUi() const
     return Settings::LunaSettings()->tabletUi;
 }
 
+bool SettingsAdapter::showNotificationsAtTop() const
+{
+    return Settings::LunaSettings()->showNotificationsAtTop;
+}
+
 qreal SettingsAdapter::dpi() const
 {
     return Settings::LunaSettings()->dpi;
@@ -90,5 +95,26 @@ QString SettingsAdapter::lunaSystemResourcesPath() const
 {
     return QString::fromStdString(Settings::LunaSettings()->lunaSystemResourcesPath);
 }
+
+bool SettingsAdapter::hasVolumeButton() const
+{
+    return Settings::LunaSettings()->hasVolumeButton;
+}
+
+bool SettingsAdapter::hasPowerButton() const
+{
+    return Settings::LunaSettings()->hasPowerButton;
+}
+
+bool SettingsAdapter::hasHomeButton() const
+{
+    return Settings::LunaSettings()->hasHomeButton;
+}
+
+bool SettingsAdapter::hasBrightnessControl() const
+{
+    return Settings::LunaSettings()->hasBrightnessControl;
+}
+
 
 } // namespace luna
