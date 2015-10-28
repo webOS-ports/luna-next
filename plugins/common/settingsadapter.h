@@ -45,7 +45,6 @@ class SettingsAdapter : public QObject
     Q_PROPERTY(bool hasHomeButton READ hasHomeButton CONSTANT)
     Q_PROPERTY(bool hasBrightnessControl READ hasBrightnessControl CONSTANT)
 
-{
 public:
     SettingsAdapter();
 
