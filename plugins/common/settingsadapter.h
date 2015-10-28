@@ -27,6 +27,7 @@ class SettingsAdapter : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool tabletUi READ tabletUi CONSTANT)
+    Q_PROPERTY(bool showNotificationsAtTop READ showNotificationsAtTop CONSTANT)
     Q_PROPERTY(qreal dpi READ dpi CONSTANT)
     Q_PROPERTY(qreal compatDpi READ compatDpi CONSTANT)
     Q_PROPERTY(int displayWidth READ displayWidth CONSTANT)
@@ -39,11 +40,17 @@ class SettingsAdapter : public QObject
     Q_PROPERTY(int positiveSpaceBottomPadding READ positiveSpaceBottomPadding CONSTANT)
     Q_PROPERTY(QString fontStatusBar READ fontStatusBar CONSTANT)
     Q_PROPERTY(QString lunaSystemResourcesPath READ lunaSystemResourcesPath CONSTANT)
+    Q_PROPERTY(bool hasVolumeButton READ hasVolumeButton CONSTANT)
+    Q_PROPERTY(bool hasPowerButton READ hasPowerButton CONSTANT)
+    Q_PROPERTY(bool hasHomeButton READ hasHomeButton CONSTANT)
+    Q_PROPERTY(bool hasBrightnessControl READ hasBrightnessControl CONSTANT)
 
+{
 public:
     SettingsAdapter();
 
     bool tabletUi() const;
+    bool showNotificationsAtTop () const;
     qreal dpi() const;
     qreal compatDpi() const;
     int displayWidth() const;
@@ -56,6 +63,11 @@ public:
     int positiveSpaceBottomPadding() const;
     QString fontStatusBar() const;
     QString lunaSystemResourcesPath() const;
+    bool hasVolumeButton () const; 
+    bool hasPowerButton () const; 
+    bool hasHomeButton () const; 
+    bool hasBrightnessControl () const; 
+
 };
 
 } // namespace luna
