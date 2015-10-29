@@ -155,6 +155,11 @@ quint64 CompositorWindow::processId() const
     return 0;
 }
 
+bool CompositorWindow::ready() const
+{
+    return mReady;
+}
+
 QVariant CompositorWindow::userData() const
 {
     return mUserData;
