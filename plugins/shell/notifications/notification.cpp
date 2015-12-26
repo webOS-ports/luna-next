@@ -168,7 +168,7 @@ int Notification::duration() const
     return duration_;
 }
 
-void Notification::setDuration(int &duration)
+void Notification::setDuration(int duration)
 {
     if (duration_ != duration) {
         duration_ = duration;
@@ -181,7 +181,7 @@ bool Notification::doNotSuppress() const
     return doNotSuppress_;
 }
 
-void Notification::setDoNotSuppress(bool &doNotSuppress)
+void Notification::setDoNotSuppress(bool doNotSuppress)
 {
     if (doNotSuppress_ != doNotSuppress) {
         doNotSuppress_ = doNotSuppress;

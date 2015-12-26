@@ -314,7 +314,7 @@ void NotificationManager::fetchData()
         QString soundClass = notificationsQuery.value(notificationsTableSoundClassFieldIndex).toString();
         QUrl soundFile = notificationsQuery.value(notificationsTableSoundFileFieldIndex).toUrl();
         int duration = notificationsQuery.value(notificationsTableDurationFieldIndex).toInt();
-        bool doNotSuppress = notificationsQuery.value(notificationsTableDoNotSuppressFieldIndex);
+        bool doNotSuppress = notificationsQuery.value(notificationsTableDoNotSuppressFieldIndex).toBool();
         int priority = notificationsQuery.value(notificationsTablePriorityFieldIndex).toInt();
         int expireTimeout = notificationsQuery.value(notificationsTableExpireTimeoutFieldIndex).toInt();
         Notification *notification = new Notification(ownerId, id, launchId, launchParam, title, body, iconUrl, soundClass, soundFile, duration, doNotSuppress, priority, expireTimeout, this);
