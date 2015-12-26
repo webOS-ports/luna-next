@@ -34,7 +34,11 @@ class Notification : public QObject
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(QString body READ body NOTIFY bodyChanged)
     Q_PROPERTY(QUrl iconUrl READ iconUrl NOTIFY iconUrlChanged)
-    Q_PROPERTY(int priority READ priority NOTIFY priorityChanged)
+	Q_PROPERTY(QString soundClass READ soundClass NOTIFY soundClassChanged)
+	Q_PROPERTY(QUrl soundFile READ soundFile NOTIFY soundFileChanged)
+	Q_PROPERTY(int duration READ duration NOTIFY durationChanged)
+	Q_PROPERTY(bool doNotSuppress READ doNotSuppress NOTIFY doNotSuppressChanged)
+	Q_PROPERTY(int priority READ priority NOTIFY priorityChanged)
     Q_PROPERTY(int expireTimeout READ expireTimeout)
     Q_PROPERTY(QDateTime timestamp READ timestamp)
 
@@ -49,11 +53,15 @@ public:
      * \param title title text for the notification, no markup
      * \param body body text for the notification, should use some markup
      * \param iconUrl icon url for the notification, only local urls (file://) are allowed
+     * \param soundClass sound class for the notification
+	 * \param soundFile sound file url for the notification, only local urls (file://) are allowed
+     * \param duration duration for the notification sound in seconds
+     * \param doNotSuppress to determine if banner can be suppressed or not	 
      * \param priority priority of the notification
      * \param expireTimeout expiration timeout for the notification
      * \param parent the parent QObject
      */
-    Notification(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam, const QString &title, const QString &body, const QUrl &iconUrl, int priority, int expireTimeout, QObject *parent = 0);
+    Notification(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam, const QString &title, const QString &body, const QUrl &iconUrl, const QString &soundClass, const QUrl &soundFile, int &duration, bool &doNotSuppress, int priority, int expireTimeout, QObject *parent = 0);
 
     /*!
      * Creates a new uninitialized representation of a notification.
@@ -101,6 +109,30 @@ public:
     //! Sets the icon url for the notification
     void setIconUrl(const QUrl &iconUrl);
 
+    //! Returns the sound class for the notification
+    QString soundClass() const;
+
+    //! Sets the sound Class for the notification
+    void setSoundClass(const QString &soundClass);
+
+    //! Returns the sound file for the notification
+    QUrl soundFile() const;
+
+    //! Sets the sound file for the notification
+    void setSoundFile(const QUrl &soundFile);
+
+    //! Returns the duration for the notification sound
+    int duration() const;
+
+    //! Sets the duration for the notification sound
+    void setDuration(int &duration);
+
+    //! Returns the doNotSuppress for the notification
+    bool doNotSuppress() const;
+
+    //! Sets the doNotSuppress for the notification
+    void setDoNotSuppress(bool &doNotSuppress);
+	
     //! Returns the priority of the notification
     int priority() const;
 
@@ -150,6 +182,18 @@ signals:
     //! Sent when the icon url has been modified
     void iconUrlChanged();
 
+    //! Sent when the sound class has been modified
+    void soundClassChanged();
+
+    //! Sent when the sound file has been modified
+    void soundFileChanged();
+
+    //! Sent when the duration has been modified
+    void durationChanged();
+
+    //! Sent when doNotSuppress has been modified
+    void doNotSuppressChanged();
+	
     //! Sent when the priority has been modified
     void priorityChanged();
 
@@ -174,6 +218,18 @@ private:
 
     //! icon url for the notification
     QUrl iconUrl_;
+	
+	//! sound class for the notification
+    QString soundClass_;
+
+	//! sound file for the notification
+    QUrl soundFile_;
+
+	//! sound duration for the notification
+    int duration_;
+
+    //! determine if allow suppression for the notification
+    bool doNotSuppress_;
 
     //! Priority of the notification
     int priority_;

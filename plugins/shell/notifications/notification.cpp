@@ -18,7 +18,7 @@
 #include "notificationmanager.h"
 #include "notification.h"
 
-Notification::Notification(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam, const QString &title, const QString &body, const QUrl &iconUrl, int priority, int expireTimeout, QObject *parent) :
+Notification::Notification(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam, const QString &title, const QString &body, const QUrl &iconUrl, const QString &soundClass, const QUrl &soundFile, int &duration, bool &doNotSuppress, int priority, int expireTimeout, QObject *parent) :
     QObject(parent),
     ownerId_(ownerId),
     replacesId_(replacesId),
@@ -27,6 +27,10 @@ Notification::Notification(const QString &ownerId, uint replacesId, const QStrin
     title_(title),
     body_(body),
     iconUrl_(iconUrl),
+	soundClass_(soundClass),
+	soundFile_(soundFile),
+	duration_(duration),
+	doNotSuppress_(doNotSuppress),
     priority_(priority),
     expireTimeout_(expireTimeout),
     timestamp_(QDateTime::currentDateTimeUtc())
@@ -49,6 +53,10 @@ Notification::Notification(const Notification &notification) :
     title_(notification.title_),
     body_(notification.body_),
     iconUrl_(notification.iconUrl_),
+	soundClass_(notification.soundClass_),
+	soundFile_(notification.soundFile_),
+	duration_(notification.duration_),
+	doNotSuppress_(notification.doNotSuppress_),
     priority_(notification.priority_),
     expireTimeout_(notification.expireTimeout_),
     timestamp_(notification.timestamp_)
@@ -126,6 +134,58 @@ void Notification::setIconUrl(const QUrl &iconUrl)
     if (iconUrl_ != iconUrl) {
         iconUrl_ = iconUrl;
         emit iconUrlChanged();
+    }
+}
+
+QString Notification::soundClass() const
+{
+    return soundClass_;
+}
+
+void Notification::setSoundClass(const QString &soundClass)
+{
+    if (soundClass_ != soundClass) {
+        soundClass_ = soundClass;
+        emit soundClassChanged();
+    }
+}
+
+QUrl Notification::soundFile() const
+{
+    return soundFile_;
+}
+
+void Notification::setSoundFile(const QUrl &soundFile)
+{
+    if (soundFile_ != soundFile) {
+        soundFile_ = soundFile;
+        emit soundFileChanged();
+    }
+}
+
+int Notification::duration() const
+{
+    return duration_;
+}
+
+void Notification::setDuration(int &duration)
+{
+    if (duration_ != duration) {
+        duration_ = duration;
+        emit durationChanged();
+    }
+}
+
+bool Notification::doNotSuppress() const
+{
+    return doNotSuppress_;
+}
+
+void Notification::setDoNotSuppress(bool &doNotSuppress)
+{
+    if (doNotSuppress_ != doNotSuppress) {
+        doNotSuppress_ = doNotSuppress;
+        emit doNotSuppressChanged();
     }
 }
 

@@ -84,8 +84,8 @@ uint NotificationManager::GetIdForNotification(Notification *notification) const
 }
 
 uint NotificationManager::Notify(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam,
-                                 const QString &title, const QString &body, const QUrl &iconUrl,
-                                 int priority, int expireTimeout)
+                                 const QString &title, const QString &body, const QUrl &iconUrl, const QString &soundClass,
+                                 const QUrl &soundFile, int duration, bool doNotSuppress, int priority, int expireTimeout)
 {
     uint id = replacesId != 0 ? replacesId : nextAvailableNotificationID();
 
@@ -94,7 +94,7 @@ uint NotificationManager::Notify(const QString &ownerId, uint replacesId, const 
     if (replacesId == 0 || (notificationToReplace && notificationToReplace->ownerId() == ownerId)) {
         if (replacesId == 0) {
             // Create a new notification
-            Notification *notification = new Notification(ownerId, id, launchId, launchParam, title, body, iconUrl, priority, expireTimeout, this);
+            Notification *notification = new Notification(ownerId, id, launchId, launchParam, title, body, iconUrl, soundClass, soundFile, duration, doNotSuppress, priority, expireTimeout, this);
             connect(notification, SIGNAL(launchInvoked()), this, SLOT(launchNotification()), Qt::QueuedConnection);
             connect(notification, SIGNAL(removeRequested()), this, SLOT(removeNotification()), Qt::QueuedConnection);
             notifications.insert(id, notification);
@@ -106,6 +106,10 @@ uint NotificationManager::Notify(const QString &ownerId, uint replacesId, const 
             notificationToReplace->setTitle(title);
             notificationToReplace->setBody(body);
             notificationToReplace->setIconUrl(iconUrl);
+			notificationToReplace->setSoundClass(soundClass);
+			notificationToReplace->setSoundFile(soundFile);
+			notificationToReplace->setDuration(duration);
+			notificationToReplace->setDoNotSuppress(doNotSuppress);
             notificationToReplace->setPriority(priority);
             notificationToReplace->setExpireTimeout(expireTimeout);
             notificationToReplace->resetTimeStamp();
@@ -115,9 +119,9 @@ uint NotificationManager::Notify(const QString &ownerId, uint replacesId, const 
         }
 
         // Add the notification to the database
-        execSQL("INSERT INTO notifications VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", QVariantList() << id << ownerId << launchId << launchParam << title << body << iconUrl << priority << expireTimeout);
+        execSQL("INSERT INTO notifications VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", QVariantList() << id << ownerId << launchId << launchParam << title << body << iconUrl << soundClass << soundFile << duration << doNotSuppress << priority << expireTimeout);
 
-        NOTIFICATIONS_DEBUG("NOTIFY:" << ownerId << iconUrl << title << body << expireTimeout << "->" << id);
+        NOTIFICATIONS_DEBUG("NOTIFY:" << ownerId << iconUrl << soundClass << soundFile << duration << doNotSuppress << title << body << expireTimeout << "->" << id);
         emit notificationModified(id);
     } else {
         // Return the ID 0 when trying to update a notification which doesn't exist
@@ -254,12 +258,16 @@ bool NotificationManager::checkTableValidity()
                                       notificationsTableModel.fieldIndex("title") == -1 ||
                                       notificationsTableModel.fieldIndex("body") == -1 ||
                                       notificationsTableModel.fieldIndex("iconUrl") == -1 ||
+									  notificationsTableModel.fieldIndex("soundClass") == -1 ||
+									  notificationsTableModel.fieldIndex("soundFile") == -1 ||
+									  notificationsTableModel.fieldIndex("duration") == -1 ||
+									  notificationsTableModel.fieldIndex("doNotSuppress") == -1 ||
                                       notificationsTableModel.fieldIndex("priority") == -1 ||
                                       notificationsTableModel.fieldIndex("expire_timeout") == -1);
     }
 
     if (recreateNotificationsTable) {
-        result &= recreateTable("notifications", "id INTEGER PRIMARY KEY, ownerId TEXT, launchId TEXT, launchParam TEXT, title TEXT, body TEXT, iconUrl TEXT, priority INTEGER, expire_timeout INTEGER");
+        result &= recreateTable("notifications", "id INTEGER PRIMARY KEY, ownerId TEXT, launchId TEXT, launchParam TEXT, title TEXT, body TEXT, iconUrl TEXT, soundClass TEXT, soundFile TEXT, duration INTEGER, doNotSuppress INTEGER, priority INTEGER, expire_timeout INTEGER");
     }
 
     return result;
@@ -289,6 +297,10 @@ void NotificationManager::fetchData()
     int notificationsTableTitleFieldIndex = notificationsRecord.indexOf("title");
     int notificationsTableBodyFieldIndex = notificationsRecord.indexOf("body");
     int notificationsTableIconUrlFieldIndex = notificationsRecord.indexOf("iconUrl");
+	int notificationsTableSoundClassFieldIndex = notificationsRecord.indexOf("soundClass");
+	int notificationsTableSoundFileFieldIndex = notificationsRecord.indexOf("soundFile");
+	int notificationsTableDurationFieldIndex = notificationsRecord.indexOf("duration");
+	int notificationsTableDoNotSuppressFieldIndex = notificationsRecord.indexOf("doNotSuppress");
     int notificationsTablePriorityFieldIndex = notificationsRecord.indexOf("priority");
     int notificationsTableExpireTimeoutFieldIndex = notificationsRecord.indexOf("expire_timeout");
     while (notificationsQuery.next()) {
@@ -299,14 +311,18 @@ void NotificationManager::fetchData()
         QString title = notificationsQuery.value(notificationsTableTitleFieldIndex).toString();
         QString body = notificationsQuery.value(notificationsTableBodyFieldIndex).toString();
         QUrl iconUrl = notificationsQuery.value(notificationsTableIconUrlFieldIndex).toUrl();
+		QString soundClass = notificationsQuery.value(notificationsTableSoundClassFieldIndex).toString();
+		QUrl soundFile = notificationsQuery.value(notificationsTableSoundFileFieldIndex).toUrl();
+		int duration = notificationsQuery.value(notificationsTableDurationFieldIndex).toInt();
+		int doNotSuppress = notificationsQuery.value(notificationsTableDoNotSuppressFieldIndex).toInt();
         int priority = notificationsQuery.value(notificationsTablePriorityFieldIndex).toInt();
         int expireTimeout = notificationsQuery.value(notificationsTableExpireTimeoutFieldIndex).toInt();
-        Notification *notification = new Notification(ownerId, id, launchId, launchParam, title, body, iconUrl, priority, expireTimeout, this);
+        Notification *notification = new Notification(ownerId, id, launchId, launchParam, title, body, iconUrl, soundClass, soundFile, duration, doNotSuppress, priority, expireTimeout, this);
         connect(notification, SIGNAL(launchInvoked()), this, SLOT(launchNotification()), Qt::QueuedConnection);
         connect(notification, SIGNAL(removeRequested()), this, SLOT(removeNotification()), Qt::QueuedConnection);
         notifications.insert(id, notification);
 
-        NOTIFICATIONS_DEBUG("RESTORED:" << ownerId << launchId << launchParam << title << body << iconUrl << priority << expireTimeout << "->" << id);
+        NOTIFICATIONS_DEBUG("RESTORED:" << ownerId << launchId << launchParam << title << body << iconUrl << soundClass << soundFile << duration << doNotSuppress << priority << expireTimeout << "->" << id);
         emit notificationModified(id);
 
         if (id > previousNotificationID) {

@@ -24,10 +24,10 @@ Notification* NotificationManagerWrapper::getNotificationById(uint id)
 }
 
 uint NotificationManagerWrapper::notify(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam,
-                                                    const QString &title, const QString &body, const QUrl &iconUrl,
-                                                    int priority, int expireTimeout)
+                                        const QString &title, const QString &body, const QUrl &iconUrl, const QString &soundClass,
+                                        const QUrl &soundFile, int duration, bool doNotSuppress, int priority, int expireTimeout)
 {
-    return NotificationManager::instance()->Notify(ownerId, replacesId, launchId, launchParam, title, body, iconUrl, priority, expireTimeout);
+    return NotificationManager::instance()->Notify(ownerId, replacesId, launchId, launchParam, title, body, iconUrl, soundClass, soundFile, duration, doNotSuppress, priority, expireTimeout);
 }
 
 void NotificationManagerWrapper::closeById(uint id, NotificationManager::NotificationClosedReason reason)
