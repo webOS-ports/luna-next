@@ -18,7 +18,7 @@
 #include "notificationmanager.h"
 #include "notification.h"
 
-Notification::Notification(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam, const QString &title, const QString &body, const QUrl &iconUrl, const QString &soundClass, const QUrl &soundFile, int &duration, bool &doNotSuppress, int priority, int expireTimeout, QObject *parent) :
+Notification::Notification(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam, const QString &title, const QString &body, const QUrl &iconUrl, const QString &soundClass, const QUrl &soundFile, int duration, bool doNotSuppress, int priority, int expireTimeout, QObject *parent) :
     QObject(parent),
     ownerId_(ownerId),
     replacesId_(replacesId),
@@ -27,10 +27,10 @@ Notification::Notification(const QString &ownerId, uint replacesId, const QStrin
     title_(title),
     body_(body),
     iconUrl_(iconUrl),
-	soundClass_(soundClass),
-	soundFile_(soundFile),
-	duration_(duration),
-	doNotSuppress_(doNotSuppress),
+    soundClass_(soundClass),
+    soundFile_(soundFile),
+    duration_(duration),
+    doNotSuppress_(doNotSuppress),
     priority_(priority),
     expireTimeout_(expireTimeout),
     timestamp_(QDateTime::currentDateTimeUtc())
@@ -53,10 +53,10 @@ Notification::Notification(const Notification &notification) :
     title_(notification.title_),
     body_(notification.body_),
     iconUrl_(notification.iconUrl_),
-	soundClass_(notification.soundClass_),
-	soundFile_(notification.soundFile_),
-	duration_(notification.duration_),
-	doNotSuppress_(notification.doNotSuppress_),
+    soundClass_(notification.soundClass_),
+    soundFile_(notification.soundFile_),
+    duration_(notification.duration_),
+    doNotSuppress_(notification.doNotSuppress_),
     priority_(notification.priority_),
     expireTimeout_(notification.expireTimeout_),
     timestamp_(notification.timestamp_)

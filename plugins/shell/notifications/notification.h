@@ -54,14 +54,14 @@ public:
      * \param body body text for the notification, should use some markup
      * \param iconUrl icon url for the notification, only local urls (file://) are allowed
      * \param soundClass sound class for the notification
-	 * \param soundFile sound file url for the notification, only local urls (file://) are allowed
+     * \param soundFile sound file url for the notification, only local urls (file://) are allowed
      * \param duration duration for the notification sound in seconds
      * \param doNotSuppress to determine if banner can be suppressed or not	 
      * \param priority priority of the notification
      * \param expireTimeout expiration timeout for the notification
      * \param parent the parent QObject
      */
-    Notification(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam, const QString &title, const QString &body, const QUrl &iconUrl, const QString &soundClass, const QUrl &soundFile, int &duration, bool &doNotSuppress, int priority, int expireTimeout, QObject *parent = 0);
+    Notification(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam, const QString &title, const QString &body, const QUrl &iconUrl, const QString &soundClass, const QUrl &soundFile, int duration, bool doNotSuppress, int priority, int expireTimeout, QObject *parent = 0);
 
     /*!
      * Creates a new uninitialized representation of a notification.
