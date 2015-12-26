@@ -11,8 +11,6 @@ This is the repository of a prototype for a next generation webOS UI. It's meant
 complete replacement for LunaSysMgr/WebAppMgr and is completely based on well known open
 source technologies like Qt 5 and Wayland.
 
-CAUTION: At the moment it's not meant to be usable in any kind!
-
 ## Dependencies
 
 In order to build and run luna-next you will need a complete
