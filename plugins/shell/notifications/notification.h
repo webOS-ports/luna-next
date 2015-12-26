@@ -125,13 +125,13 @@ public:
     int duration() const;
 
     //! Sets the duration for the notification sound
-    void setDuration(int &duration);
+    void setDuration(int duration);
 
     //! Returns the doNotSuppress for the notification
     bool doNotSuppress() const;
 
     //! Sets the doNotSuppress for the notification
-    void setDoNotSuppress(bool &doNotSuppress);
+    void setDoNotSuppress(bool doNotSuppress);
 	
     //! Returns the priority of the notification
     int priority() const;
