@@ -88,8 +88,8 @@ public:
      * \param parent the parent QObject
      */
     uint Notify(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam,
-                const QString &title, const QString &body, const QUrl &iconUrl,
-                int priority, int expireTimeout);
+                const QString &title, const QString &body, const QUrl &iconUrl, const QString &soundClass,
+                const QUrl &soundFile, int duration, bool doNotSuppress, int priority, int expireTimeout);
 
     /*!
      * Causes a notification to be forcefully closed and removed from the user's view.
