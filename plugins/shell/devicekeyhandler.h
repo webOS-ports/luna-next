@@ -35,10 +35,12 @@ signals:
     void volumeUpPressed();
     void volumeDownPressed();
     void homePressed();
-    void leftPressed();
-    void rightPressed();
     void escapePressed();
     void endPressed();
+    void f6Pressed();
+    void f7Pressed();
+    void f8Pressed();
+    void f9Pressed();
 };
 
 } // namespace luna
