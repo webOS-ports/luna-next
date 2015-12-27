@@ -50,13 +50,7 @@ bool ReticleHandler::eventFilter(QObject *, QEvent *event)
 				QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
 				const QTouchEvent::TouchPoint &touchPoint = touchEvent->touchPoints().first();
 				QPointF fpoint = touchPoint.pos();
-				int x = static_cast<int>(fpoint.x());
-				int y = static_cast<int>(fpoint.y());
-
-				QScreen *primaryScreen = QGuiApplication::primaryScreen();
-				QTransform lOrientationTranform = primaryScreen->transformBetween(primaryScreen->orientation(), primaryScreen->primaryOrientation(), primaryScreen->geometry()).inverted();
-
-				emit reticleEvent(lOrientationTranform.map(QPoint(x,y)));
+				emit reticleEvent(fpoint.toPoint());
 			};
 			show = false;
 		}

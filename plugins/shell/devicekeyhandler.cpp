@@ -32,18 +32,14 @@ DeviceKeyHandler::DeviceKeyHandler(QObject *parent) :
 
 bool DeviceKeyHandler::eventFilter(QObject *, QEvent *event)
 {
+    bool filtered = false;
     if (event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        filtered = true;
 
         switch (keyEvent->key()) {
         case Qt::Key_Home:
             emit homePressed();
-            break;
-        case Qt::Key_Left:
-            emit leftPressed();
-            break;
-        case Qt::Key_Right:
-            emit rightPressed();
             break;
         case Qt::Key_Escape:
             emit escapePressed();
@@ -51,12 +47,25 @@ bool DeviceKeyHandler::eventFilter(QObject *, QEvent *event)
         case Qt::Key_End:
             emit endPressed();
             break;
+        case Qt::Key_F6:
+            emit f6Pressed();
+            break;
+        case Qt::Key_F7:
+            emit f7Pressed();
+            break;
+        case Qt::Key_F8:
+            emit f8Pressed();
+            break;
+        case Qt::Key_F9:
+            emit f9Pressed();
+            break;
         default:
+            filtered = false;
             break;
         }
     }
 
-    return false;
+    return filtered;
 }
 
 } // namespace luna
