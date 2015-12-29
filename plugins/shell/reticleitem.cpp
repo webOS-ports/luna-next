@@ -31,6 +31,7 @@ namespace luna
 
 ReticleItem::ReticleItem(QQuickItem *parent)
     : QQuickPaintedItem(parent),
+      mInitialScale(1),
       mReady(false)
 {
 	setVisible(false);
@@ -79,7 +80,7 @@ void ReticleItem::startAt(const QPoint& pos)
 	setY(pos.y() - height() / 2);
 	setVisible(true);
 	setOpacity(1);
-	setScale(1);
+	setScale(mInitialScale);
 
 	QPropertyAnimation* opacityAnimation = new QPropertyAnimation(this, "opacity");
 	opacityAnimation->setDuration(AS(reticleDuration));
@@ -89,8 +90,8 @@ void ReticleItem::startAt(const QPoint& pos)
 
 	QPropertyAnimation* scaleAnimation = new QPropertyAnimation(this, "scale");
 	scaleAnimation->setDuration(AS(reticleDuration));
-	scaleAnimation->setStartValue(1.0);
-	scaleAnimation->setEndValue(1.5);
+	scaleAnimation->setStartValue(mInitialScale);
+	scaleAnimation->setEndValue(1.5*mInitialScale);
 	scaleAnimation->setEasingCurve(AS_CURVE(reticleCurve));
 
 	QParallelAnimationGroup* reticleAnimation = new QParallelAnimationGroup;
