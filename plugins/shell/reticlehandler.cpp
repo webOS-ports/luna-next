@@ -18,7 +18,7 @@
 
 #include <QGuiApplication>
 #include <QTouchEvent>
-#include <QScreen>
+#include <QLineF>
 
 #include "reticlehandler.h"
 
@@ -26,7 +26,8 @@ namespace luna
 {
 
 ReticleHandler::ReticleHandler(QQuickItem *parent) :
-	QQuickItem(parent)
+	QQuickItem(parent),
+	mFingerSize(0)
 {
 	qApp->installEventFilter(this);
 }
@@ -39,7 +40,13 @@ bool ReticleHandler::eventFilter(QObject *, QEvent *event)
 		show = true;
 		break;
 	case QEvent::TouchUpdate:
-		show = false;
+		{
+			QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+			const QTouchEvent::TouchPoint &touchPoint = touchEvent->touchPoints().first();
+
+			if (QLineF(touchPoint.pos(), touchPoint.startPos()).length() > mFingerSize)
+				show = false;
+		}
 		break;
 	case QEvent::TouchCancel:
 		show = false;

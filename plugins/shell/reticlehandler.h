@@ -27,6 +27,8 @@ namespace luna
 class ReticleHandler : public QQuickItem
 {
 	Q_OBJECT
+	Q_PROPERTY(qreal fingerSize MEMBER mFingerSize)
+
 public:
 	explicit ReticleHandler(QQuickItem *parent = 0);
 
@@ -34,6 +36,9 @@ public:
 
 signals:
 	void reticleEvent(QPoint pos);
+
+private:
+	qreal mFingerSize;
 };
 
 } // namespace luna
