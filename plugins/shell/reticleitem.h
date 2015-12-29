@@ -32,6 +32,7 @@ class ReticleItem : public QQuickPaintedItem
 {
 	Q_OBJECT
     Q_PROPERTY(QString imagePath WRITE setImagePath)
+    Q_PROPERTY(qreal initialScale MEMBER mInitialScale)
 
 public:
 	ReticleItem(QQuickItem *parent = 0);
@@ -54,6 +55,7 @@ private:
 	QPointer<QAnimationGroup> mAnimation;
 	QPixmap mPixmap;
     QString mImagePath;
+    qreal mInitialScale;
     bool mReady;
 };
 
