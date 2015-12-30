@@ -31,7 +31,7 @@ namespace luna
 class ReticleItem : public QQuickPaintedItem
 {
 	Q_OBJECT
-    Q_PROPERTY(QString imagePath WRITE setImagePath)
+    Q_PROPERTY(QUrl imagePath WRITE setImagePath)
     Q_PROPERTY(qreal initialScale MEMBER mInitialScale)
 
 public:
@@ -40,8 +40,8 @@ public:
 
     virtual void componentComplete();
 
-    QString imagePath() const;
-    void setImagePath(const QString& path);
+	QUrl imagePath() const;
+	void setImagePath(const QUrl& path);
 
 	virtual void paint(QPainter* painter);
 
@@ -54,7 +54,7 @@ private Q_SLOTS:
 private:
 	QPointer<QAnimationGroup> mAnimation;
 	QPixmap mPixmap;
-    QString mImagePath;
+    QUrl mImagePath;
     qreal mInitialScale;
     bool mReady;
 };

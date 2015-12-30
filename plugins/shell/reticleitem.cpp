@@ -47,10 +47,10 @@ void ReticleItem::componentComplete()
 {
     QQuickPaintedItem::componentComplete();
 
-    if (mImagePath.size() == 0)
+    if (!mImagePath.isValid())
         return;
 
-    mPixmap = QPixmap::fromImage(QImage(mImagePath));
+    mPixmap = QPixmap::fromImage(QImage(mImagePath.toLocalFile()));
 
     setWidth(mPixmap.width());
     setHeight(mPixmap.height());
@@ -58,12 +58,12 @@ void ReticleItem::componentComplete()
     mReady = true;
 }
 
-QString ReticleItem::imagePath() const
+QUrl ReticleItem::imagePath() const
 {
     return mImagePath;
 }
 
-void ReticleItem::setImagePath(const QString &path)
+void ReticleItem::setImagePath(const QUrl &path)
 {
     mImagePath = path;
 }
