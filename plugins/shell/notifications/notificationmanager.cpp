@@ -297,10 +297,10 @@ void NotificationManager::fetchData()
     int notificationsTableTitleFieldIndex = notificationsRecord.indexOf("title");
     int notificationsTableBodyFieldIndex = notificationsRecord.indexOf("body");
     int notificationsTableIconUrlFieldIndex = notificationsRecord.indexOf("iconUrl");
-	int notificationsTableSoundClassFieldIndex = notificationsRecord.indexOf("soundClass");
-	int notificationsTableSoundFileFieldIndex = notificationsRecord.indexOf("soundFile");
-	int notificationsTableDurationFieldIndex = notificationsRecord.indexOf("duration");
-	int notificationsTableDoNotSuppressFieldIndex = notificationsRecord.indexOf("doNotSuppress");
+    int notificationsTableSoundClassFieldIndex = notificationsRecord.indexOf("soundClass");
+    int notificationsTableSoundFileFieldIndex = notificationsRecord.indexOf("soundFile");
+    int notificationsTableDurationFieldIndex = notificationsRecord.indexOf("duration");
+    int notificationsTableDoNotSuppressFieldIndex = notificationsRecord.indexOf("doNotSuppress");
     int notificationsTablePriorityFieldIndex = notificationsRecord.indexOf("priority");
     int notificationsTableExpireTimeoutFieldIndex = notificationsRecord.indexOf("expire_timeout");
     while (notificationsQuery.next()) {
