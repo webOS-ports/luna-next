@@ -18,12 +18,12 @@
 #include "notificationmanager.h"
 #include "notification.h"
 
-Notification::Notification(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam, const QString &title, const QString &body, const QUrl &iconUrl, const QString &soundClass, const QUrl &soundFile, int duration, bool doNotSuppress, int priority, int expireTimeout, QObject *parent) :
+Notification::Notification(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParams, const QString &title, const QString &body, const QUrl &iconUrl, const QString &soundClass, const QUrl &soundFile, int duration, bool doNotSuppress, int priority, int expireTimeout, QObject *parent) :
     QObject(parent),
     ownerId_(ownerId),
     replacesId_(replacesId),
     launchId_(launchId),
-    launchParam_(launchParam),
+    launchParams_(launchParams),
     title_(title),
     body_(body),
     iconUrl_(iconUrl),
@@ -50,6 +50,7 @@ Notification::Notification(const Notification &notification) :
     ownerId_(notification.ownerId_),
     replacesId_(notification.replacesId_),
     launchId_(notification.launchId_),
+	launchParams_(notification.launchParams_),
     title_(notification.title_),
     body_(notification.body_),
     iconUrl_(notification.iconUrl_),
@@ -88,14 +89,14 @@ void Notification::setLaunchId(const QString &launchId)
     launchId_ = launchId;
 }
 
-QString Notification::launchParam() const
+QString Notification::launchParams() const
 {
-    return launchParam_;
+    return launchParams_;
 }
 
-void Notification::setLaunchParam(const QString &launchParam)
+void Notification::setLaunchParams(const QString &launchParams)
 {
-    launchParam_ = launchParam;
+    launchParams_ = launchParams;
 }
 
 QString Notification::title() const

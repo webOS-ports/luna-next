@@ -30,7 +30,7 @@ class Notification : public QObject
     Q_PROPERTY(QString ownerId READ ownerId)
     Q_PROPERTY(uint replacesId READ replacesId)
     Q_PROPERTY(QString launchId READ launchId)
-    Q_PROPERTY(QString launchParam READ launchParam)
+    Q_PROPERTY(QString launchParams READ launchParams)
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(QString body READ body NOTIFY bodyChanged)
     Q_PROPERTY(QUrl iconUrl READ iconUrl NOTIFY iconUrlChanged)
@@ -49,7 +49,7 @@ public:
      * \param ownerId name of the or application/service sending the notification
      * \param replacesID the ID of the notification
      * \param launchId can default to ownerId, but allowed to be freely set in general for services and apps
-     * \param launchParam parameters supplied to app when (re-)launched because user clicked on the notification
+     * \param launchParams parameters supplied to app when (re-)launched because user clicked on the notification
      * \param title title text for the notification, no markup
      * \param body body text for the notification, should use some markup
      * \param iconUrl icon url for the notification, only local urls (file://) are allowed
@@ -61,7 +61,7 @@ public:
      * \param expireTimeout expiration timeout for the notification
      * \param parent the parent QObject
      */
-    Notification(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam, const QString &title, const QString &body, const QUrl &iconUrl, const QString &soundClass, const QUrl &soundFile, int duration, bool doNotSuppress, int priority, int expireTimeout, QObject *parent = 0);
+    Notification(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParams, const QString &title, const QString &body, const QUrl &iconUrl, const QString &soundClass, const QUrl &soundFile, int duration, bool doNotSuppress, int priority, int expireTimeout, QObject *parent = 0);
 
     /*!
      * Creates a new uninitialized representation of a notification.
@@ -86,10 +86,10 @@ public:
     void setLaunchId(const QString &launchId);
 
     //! Returns the parameters that are associated to the action on the notification
-    QString launchParam() const;
+    QString launchParams() const;
 
     //! Sets the parameters that are associated to the action on the notification
-    void setLaunchParam(const QString &launchParam);
+    void setLaunchParams(const QString &launchParams);
 
     //! Returns the title text for the notification
     QString title() const;
@@ -208,7 +208,7 @@ private:
     QString launchId_;
 
     //! parameters associated to an action on the notification
-    QString launchParam_;
+    QString launchParams_;
 
     //! Title text for the notification
     QString title_;

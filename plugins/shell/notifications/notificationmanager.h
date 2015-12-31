@@ -79,7 +79,7 @@ public:
      * \param ownerId name of the or application/service sending the notification
      * \param replacesID the ID of the notification
      * \param launchId can default to ownerId, but allowed to be freely set in general for services and apps
-     * \param launchParam parameters supplied to app when (re-)launched because user clicked on the notification
+     * \param launchParams parameters supplied to app when (re-)launched because user clicked on the notification
      * \param title title text for the notification, no markup
      * \param body body text for the notification, should use some markup
      * \param iconUrl icon url for the notification, only local urls (file://) are allowed
@@ -87,7 +87,7 @@ public:
      * \param expireTimeout expiration timeout for the notification
      * \param parent the parent QObject
      */
-    uint Notify(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam,
+    uint Notify(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParams,
                 const QString &title, const QString &body, const QUrl &iconUrl, const QString &soundClass,
                 const QUrl &soundFile, int duration, bool doNotSuppress, int priority, int expireTimeout);
 
