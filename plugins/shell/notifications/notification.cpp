@@ -50,7 +50,7 @@ Notification::Notification(const Notification &notification) :
     ownerId_(notification.ownerId_),
     replacesId_(notification.replacesId_),
     launchId_(notification.launchId_),
-	launchParams_(notification.launchParams_),
+    launchParams_(notification.launchParams_),
     title_(notification.title_),
     body_(notification.body_),
     iconUrl_(notification.iconUrl_),
