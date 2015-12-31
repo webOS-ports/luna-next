@@ -102,7 +102,7 @@ uint NotificationManager::Notify(const QString &ownerId, uint replacesId, const 
         else {
             // Only replace an existing notification if it really exists and ownerId is the same
             notificationToReplace->setLaunchId(launchId);
-            notificationToReplace->setLaunchParam(launchParams);
+            notificationToReplace->setLaunchParams(launchParams);
             notificationToReplace->setTitle(title);
             notificationToReplace->setBody(body);
             notificationToReplace->setIconUrl(iconUrl);
