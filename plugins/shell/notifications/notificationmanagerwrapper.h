@@ -27,7 +27,7 @@ public:
     NotificationManagerWrapper();
 
     Q_INVOKABLE Notification* getNotificationById(uint id);
-    Q_INVOKABLE uint notify(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam,
+    Q_INVOKABLE uint notify(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParams,
                             const QString &title, const QString &body, const QUrl &iconUrl, const QString &soundClass, const QUrl &soundFile,
                             int duration, bool doNotSuppress, int priority, int expireTimeout);
     Q_INVOKABLE void closeById(uint id, NotificationManager::NotificationClosedReason reason = NotificationManager::CloseNotificationCalled);

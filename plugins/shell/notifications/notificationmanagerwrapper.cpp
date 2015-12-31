@@ -23,7 +23,7 @@ Notification* NotificationManagerWrapper::getNotificationById(uint id)
     return NotificationManager::instance()->notification(id);
 }
 
-uint NotificationManagerWrapper::notify(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParam,
+uint NotificationManagerWrapper::notify(const QString &ownerId, uint replacesId, const QString &launchId, const QString &launchParams,
                                         const QString &title, const QString &body, const QUrl &iconUrl, const QString &soundClass,
                                         const QUrl &soundFile, int duration, bool doNotSuppress, int priority, int expireTimeout)
 {
