@@ -34,8 +34,10 @@ class Notification : public QObject
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(QString body READ body NOTIFY bodyChanged)
     Q_PROPERTY(QUrl iconUrl READ iconUrl NOTIFY iconUrlChanged)
-	Q_PROPERTY(QString soundClass READ soundClass NOTIFY soundClassChanged)
+    Q_PROPERTY(QString iconPath READ iconPath NOTIFY iconUrlChanged)
+    Q_PROPERTY(QString soundClass READ soundClass NOTIFY soundClassChanged)
 	Q_PROPERTY(QUrl soundFile READ soundFile NOTIFY soundFileChanged)
+	Q_PROPERTY(QString soundFilePath READ soundFilePath NOTIFY soundFileChanged)
 	Q_PROPERTY(int duration READ duration NOTIFY durationChanged)
 	Q_PROPERTY(bool doNotSuppress READ doNotSuppress NOTIFY doNotSuppressChanged)
 	Q_PROPERTY(int priority READ priority NOTIFY priorityChanged)
@@ -109,6 +111,9 @@ public:
     //! Sets the icon url for the notification
     void setIconUrl(const QUrl &iconUrl);
 
+    //! Returns the icon path for the notification as a string
+    QString iconPath() const;
+
     //! Returns the sound class for the notification
     QString soundClass() const;
 
@@ -120,6 +125,9 @@ public:
 
     //! Sets the sound file for the notification
     void setSoundFile(const QUrl &soundFile);
+
+    //! Returns the sound file for the notification as a string
+    QString soundFilePath() const;
 
     //! Returns the duration for the notification sound
     int duration() const;

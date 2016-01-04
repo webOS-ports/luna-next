@@ -138,6 +138,11 @@ void Notification::setIconUrl(const QUrl &iconUrl)
     }
 }
 
+QString Notification::iconPath() const
+{
+    return iconUrl_.toString();
+}
+
 QString Notification::soundClass() const
 {
     return soundClass_;
@@ -162,6 +167,11 @@ void Notification::setSoundFile(const QUrl &soundFile)
         soundFile_ = soundFile;
         emit soundFileChanged();
     }
+}
+
+QString Notification::soundFilePath() const
+{
+    return soundFile_.toString();
 }
 
 int Notification::duration() const
