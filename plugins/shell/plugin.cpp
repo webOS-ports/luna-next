@@ -21,7 +21,7 @@
 #include "reticleitem.h"
 #include "fpscounter.h"
 #include "devicekeyhandler.h"
-#include "reticlehandler.h"
+#include "gesturehandler.h"
 #include "inversemouseareatype.h"
 #include "volumekeys.h"
 
@@ -36,7 +36,7 @@ void LunaNextShellPlugin::registerTypes(const char *uri)
     qmlRegisterType<luna::ReticleItem>(uri, 0, 1, "Reticle");
     qmlRegisterType<luna::FpsCounter>(uri, 0, 1, "FpsCounter");
     qmlRegisterType<luna::DeviceKeyHandler>(uri, 0, 1, "DeviceKeyHandler");
-    qmlRegisterType<luna::ReticleHandler>(uri, 0, 1, "ReticleHandler");
+    qmlRegisterType<luna::GestureHandler>(uri, 0, 1, "GestureHandler");
     qmlRegisterType<InverseMouseAreaType>(uri, 0, 1, "InverseMouseArea");
     qmlRegisterType<VolumeKeys>(uri, 0, 1, "VolumeKeys");
 }

@@ -10,7 +10,7 @@ set(SOURCES
     plugin.cpp
     reticleitem.cpp
     fpscounter.cpp
-    reticlehandler.cpp
+    gesturehandler.cpp
     devicekeyhandler.cpp
     volumekeys.cpp
     quickutils.cpp
