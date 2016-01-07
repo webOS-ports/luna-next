@@ -25,6 +25,9 @@
 namespace luna
 {
 
+// maximum tangent of angle between flick direction and perpendicular to screen edge
+#define FLICK_MAX_TAN 0.5
+
 GestureHandler::GestureHandler(QQuickItem *parent) :
 	QQuickItem(parent),
 	mFingerSize(0),
@@ -141,6 +144,29 @@ bool ScreenEdgeFlickGestureRecognizer::eventFilter(QObject *, QEvent *event)
 		}
 		break;
 	case QEvent::TouchUpdate:
+		{
+			if (mTimer.isActive()) {
+				QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+				const QTouchEvent::TouchPoint &touchPoint = touchEvent->touchPoints().first();
+				QPointF fpoint = touchPoint.screenPos();
+				int x = fpoint.x();
+				int y = fpoint.y();
+				int x0 = mStartPos.x();
+				int y0 = mStartPos.y();
+
+				if ((y0 < mFingerSize)||(y0 > parentItem()->height()-mFingerSize)) {
+					if (((qAbs(y-y0) <= mFingerSize)&&(qAbs(x-x0) > mFingerSize)) ||
+						((qAbs(y-y0) > mFingerSize)&&(qAbs(((double)(x-x0))/(y-y0)) > FLICK_MAX_TAN)))
+						mTimer.stop();
+				}
+				else
+				if ((x0 < mFingerSize)||(x0 > parentItem()->width()-mFingerSize)) {
+					if (((qAbs(x-x0) <= mFingerSize)&&(qAbs(y-y0) > mFingerSize)) ||
+						((qAbs(x-x0) > mFingerSize)&&(qAbs(((double)(y-y0))/(x-x0)) > FLICK_MAX_TAN)))
+						mTimer.stop();
+				}
+			}
+		}
 		break;
 	case QEvent::TouchCancel:
 		{
