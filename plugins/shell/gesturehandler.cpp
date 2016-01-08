@@ -149,20 +149,20 @@ bool ScreenEdgeFlickGestureRecognizer::eventFilter(QObject *, QEvent *event)
 				QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
 				const QTouchEvent::TouchPoint &touchPoint = touchEvent->touchPoints().first();
 				QPointF fpoint = touchPoint.screenPos();
-				int x = fpoint.x();
-				int y = fpoint.y();
 				int x0 = mStartPos.x();
 				int y0 = mStartPos.y();
+				double deltaX = qAbs(fpoint.x() - x0);
+				double deltaY = qAbs(fpoint.y() - y0);
 
-				if ((y0 < mFingerSize)||(y0 > parentItem()->height()-mFingerSize)) {
-					if (((qAbs(y-y0) <= mFingerSize)&&(qAbs(x-x0) > mFingerSize)) ||
-						((qAbs(y-y0) > mFingerSize)&&(qAbs(((double)(x-x0))/(y-y0)) > FLICK_MAX_TAN)))
+				if ((y0 < mFingerSize) || (y0 > parentItem()->height()-mFingerSize)) {
+					if (((deltaY <= mFingerSize) && (deltaX > mFingerSize)) ||
+						((deltaY > mFingerSize) && (deltaX/deltaY > FLICK_MAX_TAN)))
 						mTimer.stop();
 				}
 				else
-				if ((x0 < mFingerSize)||(x0 > parentItem()->width()-mFingerSize)) {
-					if (((qAbs(x-x0) <= mFingerSize)&&(qAbs(y-y0) > mFingerSize)) ||
-						((qAbs(x-x0) > mFingerSize)&&(qAbs(((double)(y-y0))/(x-x0)) > FLICK_MAX_TAN)))
+				if ((x0 < mFingerSize) || (x0 > parentItem()->width()-mFingerSize)) {
+					if (((deltaX <= mFingerSize) && (deltaY > mFingerSize)) ||
+						((deltaX > mFingerSize) && (deltaY/deltaX > FLICK_MAX_TAN)))
 						mTimer.stop();
 				}
 			}
