@@ -27,20 +27,20 @@
 class Notification : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString ownerId READ ownerId)
+    Q_PROPERTY(QString ownerId READ ownerId NOTIFY ownerIdChanged)
     Q_PROPERTY(uint replacesId READ replacesId)
-    Q_PROPERTY(QString launchId READ launchId)
+    Q_PROPERTY(QString launchId READ launchId NOTIFY launchIdChanged)
     Q_PROPERTY(QString launchParams READ launchParams)
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(QString body READ body NOTIFY bodyChanged)
     Q_PROPERTY(QUrl iconUrl READ iconUrl NOTIFY iconUrlChanged)
     Q_PROPERTY(QString iconPath READ iconPath NOTIFY iconUrlChanged)
     Q_PROPERTY(QString soundClass READ soundClass NOTIFY soundClassChanged)
-	Q_PROPERTY(QUrl soundFile READ soundFile NOTIFY soundFileChanged)
-	Q_PROPERTY(QString soundFilePath READ soundFilePath NOTIFY soundFileChanged)
-	Q_PROPERTY(int duration READ duration NOTIFY durationChanged)
-	Q_PROPERTY(bool doNotSuppress READ doNotSuppress NOTIFY doNotSuppressChanged)
-	Q_PROPERTY(int priority READ priority NOTIFY priorityChanged)
+    Q_PROPERTY(QUrl soundFile READ soundFile NOTIFY soundFileChanged)
+    Q_PROPERTY(QString soundFilePath READ soundFilePath NOTIFY soundFileChanged)
+    Q_PROPERTY(int duration READ duration NOTIFY durationChanged)
+    Q_PROPERTY(bool doNotSuppress READ doNotSuppress NOTIFY doNotSuppressChanged)
+    Q_PROPERTY(int priority READ priority NOTIFY priorityChanged)
     Q_PROPERTY(int expireTimeout READ expireTimeout)
     Q_PROPERTY(QDateTime timestamp READ timestamp)
 
@@ -180,6 +180,12 @@ signals:
 
     //! Sent when the removal of this notification was requested.
     void removeRequested();
+
+    //! Sent when the ownerId has been modified
+    void ownerIdChanged();
+
+    //! Sent when the launchId has been modified
+    void launchIdChanged();
 
     //! Sent when the summary has been modified
     void titleChanged();

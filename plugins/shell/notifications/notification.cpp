@@ -71,7 +71,10 @@ QString Notification::ownerId() const
 
 void Notification::setOwnerId(const QString &ownerId)
 {
-    ownerId_ = ownerId;
+    if (ownerId_ != ownerId) {
+        ownerId_ = ownerId;
+        emit ownerIdChanged();
+    }
 }
 
 uint Notification::replacesId() const
@@ -86,7 +89,10 @@ QString Notification::launchId() const
 
 void Notification::setLaunchId(const QString &launchId)
 {
-    launchId_ = launchId;
+    if (launchId_ != launchId) {
+        launchId_ = launchId;
+        emit launchIdChanged();
+    }
 }
 
 QString Notification::launchParams() const
