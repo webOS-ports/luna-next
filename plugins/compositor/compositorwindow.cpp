@@ -73,6 +73,11 @@ void CompositorWindow::sendWindowIdToClient()
     surface()->setWindowProperty("_LUNE_WINDOW_ID", QVariant(mId));
 }
 
+bool CompositorWindow::isPopup()
+{
+    return (surface()->windowType() == QWaylandSurface::Popup);
+}
+
 void CompositorWindow::checkStatus()
 {
     if (mReady)
