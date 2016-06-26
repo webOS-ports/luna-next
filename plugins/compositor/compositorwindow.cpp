@@ -46,6 +46,7 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *sur
         onWindowPropertyChanged(iter.key(), iter.value());
     }
 
+    connect(surface, &QWaylandSurface::windowTypeChanged, this, &CompositorWindow::onWindowTypeChanged);
     connect(surface, SIGNAL(windowPropertyChanged(const QString&,const QVariant&)),
             this, SLOT(onWindowPropertyChanged(const QString&, const QVariant&)));
     connect(surface, SIGNAL(mapped()), this, SLOT(onSurfaceMappedChanged()));
@@ -98,6 +99,16 @@ void CompositorWindow::onReadyTimeout()
     mParentWinIdSet = true;
 
     emit readyChanged();
+}
+
+void CompositorWindow::onWindowTypeChanged(QWaylandSurface::WindowType type)
+{
+    qDebug() << Q_FUNC_INFO << type;
+
+    // if it's not too late, adjust the LuneOS window type to overlay
+    if(isPopup() && !mReady) {
+        mWindowType = WindowType::Overlay;
+    }
 }
 
 void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVariant &value)

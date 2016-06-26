@@ -22,6 +22,7 @@
 #include <QWaylandSurfaceItem>
 
 #include "eventtype.h"
+#include "windowtype.h"
 
 namespace luna
 {
@@ -84,6 +85,7 @@ signals:
     void loadingAnimationDisabledChanged();
 
 private slots:
+    void onWindowTypeChanged(QWaylandSurface::WindowType);
     void onWindowPropertyChanged(const QString&, const QVariant&);
     void sendWindowIdToClient();
     void onSurfaceMappedChanged();

@@ -17,6 +17,7 @@
 
 #include "compositor.h"
 #include "windowmodel.h"
+#include "windowtype.h"
 #include "recorder.h"
 
 #include <QWaylandInputDevice>
