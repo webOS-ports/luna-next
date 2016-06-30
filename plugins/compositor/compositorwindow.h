@@ -22,6 +22,7 @@
 #include <QWaylandSurfaceItem>
 
 #include "eventtype.h"
+#include "windowtype.h"
 
 namespace luna
 {
@@ -40,6 +41,7 @@ class CompositorWindow : public QWaylandSurfaceItem
     Q_PROPERTY(QString appIcon READ appIcon CONSTANT)
     Q_PROPERTY(bool loadingAnimationDisabled READ loadingAnimationDisabled NOTIFY loadingAnimationDisabledChanged)
     Q_PROPERTY(QVariantMap windowProperties READ windowPropertyMap CONSTANT)
+    Q_PROPERTY(bool isPopup READ isPopup CONSTANT)
 
 public:
     CompositorWindow(unsigned int winId, QWaylandQuickSurface *surface, QQuickItem *parent = 0);
@@ -67,6 +69,8 @@ public:
 
     bool checkIsAllowedToStay();
 
+    bool isPopup();
+
     Q_INVOKABLE void postEvent(int event);
     Q_INVOKABLE void changeSize(const QSize& size);
     Q_INVOKABLE void forceVisible();
@@ -81,6 +85,7 @@ signals:
     void loadingAnimationDisabledChanged();
 
 private slots:
+    void onWindowTypeChanged(QWaylandSurface::WindowType);
     void onWindowPropertyChanged(const QString&, const QVariant&);
     void sendWindowIdToClient();
     void onSurfaceMappedChanged();
