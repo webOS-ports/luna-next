@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2013 Simon Busch <morphis@gravedo.de>
+ * Copyright (C) 2016 Herman van Hazendonk <github.com@herrie.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,5 +117,36 @@ bool SettingsAdapter::hasBrightnessControl() const
     return Settings::LunaSettings()->hasBrightnessControl;
 }
 
+/* Below is used for sounds */
+
+QString SettingsAdapter::lunaSystemSoundsPath() const
+{
+    return QString::fromStdString(Settings::LunaSettings()->lunaSystemSoundsPath);
+}
+
+QString SettingsAdapter::lunaDefaultAlertSound() const
+{
+    return QString::fromStdString(Settings::LunaSettings()->lunaDefaultAlertSound);
+}
+
+QString SettingsAdapter::lunaDefaultRingtoneSound() const
+{
+    return QString::fromStdString(Settings::LunaSettings()->lunaDefaultRingtoneSound);
+}
+
+QString SettingsAdapter::lunaSystemSoundAppClose() const
+{
+    return QString::fromStdString(Settings::LunaSettings()->lunaSystemSoundAppClose);
+}
+
+QString SettingsAdapter::lunaSystemSoundScreenCapture() const
+{
+    return QString::fromStdString(Settings::LunaSettings()->lunaSystemSoundScreenCapture);
+}
+
+int SettingsAdapter::notificationSoundDuration() const
+{
+    return Settings::LunaSettings()->notificationSoundDuration;
+}
 
 } // namespace luna

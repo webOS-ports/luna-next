@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2013 Simon Busch <morphis@gravedo.de>
+ * Copyright (C) 2016 Herman van Hazendonk <github.com@herrie.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +46,14 @@ class SettingsAdapter : public QObject
     Q_PROPERTY(bool hasHomeButton READ hasHomeButton CONSTANT)
     Q_PROPERTY(bool hasBrightnessControl READ hasBrightnessControl CONSTANT)
 
+    /* Below is used for sounds */
+    Q_PROPERTY(QString lunaSystemSoundsPath READ lunaSystemSoundsPath CONSTANT)
+    Q_PROPERTY(QString lunaDefaultAlertSound READ lunaDefaultAlertSound CONSTANT)
+    Q_PROPERTY(QString lunaDefaultRingtoneSound READ lunaDefaultRingtoneSound CONSTANT)
+    Q_PROPERTY(QString lunaSystemSoundAppClose READ lunaSystemSoundAppClose CONSTANT)
+    Q_PROPERTY(QString lunaSystemSoundScreenCapture READ lunaSystemSoundScreenCapture CONSTANT)
+    Q_PROPERTY(int notificationSoundDuration READ notificationSoundDuration CONSTANT)
+
 public:
     SettingsAdapter();
 
@@ -66,6 +75,12 @@ public:
     bool hasPowerButton () const; 
     bool hasHomeButton () const; 
     bool hasBrightnessControl () const; 
+    QString lunaSystemSoundsPath() const;
+    QString lunaDefaultAlertSound() const;
+    QString lunaDefaultRingtoneSound() const;
+    QString lunaSystemSoundAppClose() const;
+    QString lunaSystemSoundScreenCapture() const;
+    int notificationSoundDuration() const;
 
 };
 
