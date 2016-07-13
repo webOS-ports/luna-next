@@ -10,6 +10,7 @@ set(SOURCES
     settingsadapter.cpp
     ledsadapter.cpp
     fontutils.cpp
+    fileutils.cpp
     units.cpp)
 
 add_library(lunanext-common-qml SHARED ${SOURCES})
