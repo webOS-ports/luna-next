@@ -22,8 +22,12 @@
 namespace luna
 {
 
-bool FileUtils::exists(const QString &file)
+bool FileUtils::exists(const QString &resource)
 {
+    QString file(resource);
+    const QString urlPrefix("file://");
+    if (file.startsWith(urlPrefix))
+        file=file.mid(urlPrefix.size());
     return QFileInfo::exists(file);
 }
 

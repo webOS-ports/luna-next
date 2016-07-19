@@ -31,7 +31,7 @@ public:
 
     explicit FileUtils(QObject *parent = 0) : QObject(parent) {}
 
-    Q_INVOKABLE bool exists(const QString &file);
+    Q_INVOKABLE bool exists(const QString &resource);
 };
 
 } // namespace luna
