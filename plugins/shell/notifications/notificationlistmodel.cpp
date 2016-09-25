@@ -23,7 +23,6 @@ NotificationListModel::NotificationListModel(QObject *parent) :
 {
     connect(NotificationManager::instance(), SIGNAL(notificationModified(uint)), this, SLOT(updateNotification(uint)));
     connect(NotificationManager::instance(), SIGNAL(notificationRemoved(uint)), this, SLOT(removeNotification(uint)));
-    connect(this, SIGNAL(clearRequested()), NotificationManager::instance(), SLOT(removeUserRemovableNotifications()));
 
     QTimer::singleShot(0, this, SLOT(init()));
 }
