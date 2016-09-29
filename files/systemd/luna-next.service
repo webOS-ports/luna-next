@@ -2,7 +2,7 @@
 Description=The Luna Next UI
 Conflicts=getty@tty1.service
 Requires=ls-hubd_private.service ls-hubd_public.service
-After=ls-hubd_private.service ls-hubd_public.service LunaSysMgr.service LunaAppManager.service
+After=ls-hubd_private.service ls-hubd_public.service luna-sysmgr.service luna-appmanager.service
 
 [Service]
 Type=notify
