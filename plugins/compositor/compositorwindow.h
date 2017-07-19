@@ -18,8 +18,10 @@
 #ifndef LUNA_COMPOSITORWINDOW_H_
 #define LUNA_COMPOSITORWINDOW_H_
 
-#include <QWaylandQuickSurface>
-#include <QWaylandSurfaceItem>
+#include <QWaylandSurface>
+#include <QWaylandQuickItem>
+#include <QWaylandQuickShellSurfaceItem>
+#include <QWaylandShellSurface>
 
 #include "eventtype.h"
 #include "windowtype.h"
@@ -27,7 +29,7 @@
 namespace luna
 {
 
-class CompositorWindow : public QWaylandSurfaceItem
+class CompositorWindow : public QWaylandQuickShellSurfaceItem
 {
     Q_OBJECT
     Q_PROPERTY(int winId READ winId CONSTANT)
@@ -44,8 +46,10 @@ class CompositorWindow : public QWaylandSurfaceItem
     Q_PROPERTY(bool isPopup READ isPopup CONSTANT)
 
 public:
-    CompositorWindow(unsigned int winId, QWaylandQuickSurface *surface, QQuickItem *parent = 0);
+    CompositorWindow(unsigned int winId, QQuickItem *parent = 0);
     virtual ~CompositorWindow();
+
+    void initialize(QWaylandWlShellSurface *shellSurface);
 
     unsigned int winId() const;
     unsigned int parentWinId() const;
@@ -77,6 +81,11 @@ public:
 
     QVariantMap windowPropertyMap() const;
 
+public slots:
+    void sendWindowIdToClient();
+    void onWindowTypeChanged();
+    void onWindowPropertyChanged(const QString&, const QVariant&);
+
 signals:
     void userDataChanged();
     void readyChanged();
@@ -85,9 +94,6 @@ signals:
     void loadingAnimationDisabledChanged();
 
 private slots:
-    void onWindowTypeChanged(QWaylandSurface::WindowType);
-    void onWindowPropertyChanged(const QString&, const QVariant&);
-    void sendWindowIdToClient();
     void onSurfaceMappedChanged();
     void onReadyTimeout();
 
