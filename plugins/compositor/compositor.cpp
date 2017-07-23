@@ -20,16 +20,19 @@
 #include "windowtype.h"
 #include "recorder.h"
 
-#include <QWaylandInputDevice>
-
 #include <QtCore/QtGlobal>
+
+#include <QWaylandSeat>
+#include <QWaylandOutput>
+#include <QWaylandWlShell>
+#include <QWaylandWlShellSurface>
 
 namespace luna
 {
 
 static CompositorWindow *surfaceWindow(QWaylandSurface *surface)
 {
-    return surface->views().isEmpty() ? 0 : static_cast<CompositorWindow*>(surface->views().first());
+    return surface->primaryView() ? static_cast<CompositorWindow*>(surface->primaryView()->renderObject()) : 0;
 }
 
 Compositor* Compositor::mInstance = 0;
@@ -39,23 +42,18 @@ Compositor::Compositor()
       mNextWindowId(1),
       mRecorderCounter(0)
 {
-    setColor(Qt::black);
-    setRetainedSelectionEnabled(true);
-    addDefaultShell();
-    createOutput(this, "", "");
-
     if (mInstance)
         qFatal("Compositor: Only one compositor instance per process is supported");
 
     qDebug() << __PRETTY_FUNCTION__;
 
     mInstance = this;
+}
 
-    connect(this, SIGNAL(frameSwapped()), this, SLOT(frameSwappedSlot()));
-    connect(this, &QQuickWindow::afterRendering, this, &Compositor::readContent, Qt::DirectConnection);
-
-    mRecorder = new RecorderManager;
-    addGlobalInterface(mRecorder);
+Compositor::~Compositor()
+{
+    delete mSurfaceExtension; mSurfaceExtension = nullptr;
+    delete mRecorder; mRecorder = nullptr;
 }
 
 Compositor* Compositor::instance()
@@ -63,18 +61,30 @@ Compositor* Compositor::instance()
     return mInstance;
 }
 
-void Compositor::classBegin()
+void Compositor::create()
 {
-}
+    setRetainedSelectionEnabled(true);
 
-void Compositor::componentComplete()
-{
-    QWaylandCompositor::setOutputGeometry(QRect(0, 0, width(), height()));
+    QWaylandCompositor::create();
+
+    QWaylandWlShell *wlShell = new QWaylandWlShell(this);
+    connect(wlShell, &QWaylandWlShell::wlShellSurfaceCreated, this, &Compositor::onWlShellSurfaceCreated);
+
+    connect(this, &QWaylandCompositor::surfaceCreated, this, &Compositor::onSurfaceCreated);
+    connect(this, &QWaylandCompositor::surfaceAboutToBeDestroyed, this, &Compositor::onSurfaceAboutToBeDestroyed);
+
+    QQuickWindow *defaultOutputWindow = static_cast<QQuickWindow*>(defaultOutput()->window());
+    connect(defaultOutputWindow, &QQuickWindow::afterRendering, this, &Compositor::readContent, Qt::DirectConnection);
+
+    mSurfaceExtension = new QtWayland::SurfaceExtensionGlobal(this);
+    connect(mSurfaceExtension, &QtWayland::SurfaceExtensionGlobal::extendedSurfaceReady, this, &Compositor::onExtendedSurfaceReady);
+
+    mRecorder = new RecorderManager(this);
 }
 
 void Compositor::readContent()
 {
-    mRecorder->recordFrame(this);
+    mRecorder->recordFrame(defaultOutput()->window());
 }
 
 void Compositor::registerWindowModel(WindowModel *model)
@@ -104,8 +114,9 @@ void Compositor::setFullscreenSurface(QWaylandSurface *surface)
 
     // Prevent flicker when returning to composited mode
     if (!surface && mFullscreenSurface) {
-        foreach (QWaylandSurfaceView *view, mFullscreenSurface->views())
-            static_cast<QWaylandSurfaceItem *>(view)->update();
+        CompositorWindow *fullscreenWindow = surfaceWindow(mFullscreenSurface);
+        if(fullscreenWindow)
+            fullscreenWindow->update();
     }
 
     mFullscreenSurface = surface;
@@ -115,7 +126,7 @@ void Compositor::setFullscreenSurface(QWaylandSurface *surface)
 
 void Compositor::clearKeyboardFocus()
 {
-    defaultInputDevice()->setKeyboardFocus(0);
+    defaultSeat()->setKeyboardFocus(0);
 }
 
 bool Compositor::hasProcessMultipleWindows(quint64 processId)
@@ -142,7 +153,7 @@ void Compositor::closeWindowWithId(int winId)
             hasProcessMultipleWindows(window->processId()) ||
             window->keepAlive()) {
             qDebug() << Q_FUNC_INFO << "Destroying surface and keeping client alive";
-            window->surface()->destroySurface();
+            window->surface()->destroy();
         }
         else {
             qDebug() << Q_FUNC_INFO << "Closing client and destroying surface";
@@ -151,26 +162,30 @@ void Compositor::closeWindowWithId(int winId)
     }
 }
 
-CompositorWindow* Compositor::createWindowForSurface(QWaylandSurface *surface)
+CompositorWindow* Compositor::createWindowForSurfaceShell(QWaylandWlShellSurface *shellSurface)
 {
     unsigned int windowId = mNextWindowId++;
+    QWaylandSurface *surface = shellSurface->surface();
 
     qDebug() << Q_FUNC_INFO << "windowId" << windowId << surface;
 
-    CompositorWindow *window = new CompositorWindow(windowId, static_cast<QWaylandQuickSurface*>(surface), contentItem());
-    window->setSize(surface->size());
-    // window->setPosition(surface->pos());
+    QQuickWindow *defaultOutputWindow = static_cast<QQuickWindow*>(defaultOutput()->window());
+    CompositorWindow *window = new CompositorWindow(windowId, defaultOutputWindow->contentItem());
+
     window->setFlag(QQuickItem::ItemIsFocusScope, true);
     // window->setUseTextureAlpha(true);
-    QObject::connect(surface, &QWaylandSurface::surfaceDestroyed, this, &Compositor::surfaceDying);
 
-    window->setParentItem(contentItem());
+    window->initialize(shellSurface);
     window->setSize(surface->size());
     window->setTouchEventsEnabled(true);
 
+    window->setOutput(defaultOutput()); //useful ?
+
     mWindows.insert(windowId, window);
 
-    connect(window, SIGNAL(readyChanged()), this, SLOT(windowIsReady()));
+    connect(surface, &QWaylandSurface::surfaceDestroyed, this, &Compositor::onSurfaceAboutToBeDestroyed);
+    connect(shellSurface, &QWaylandWlShellSurface::windowTypeChanged, window, &CompositorWindow::onWindowTypeChanged);
+    connect(window, &CompositorWindow::readyChanged, this, &Compositor::windowIsReady);
 
     return window;
 }
@@ -178,11 +193,12 @@ CompositorWindow* Compositor::createWindowForSurface(QWaylandSurface *surface)
 void Compositor::windowIsReady()
 {
     CompositorWindow *window = static_cast<CompositorWindow*>(sender());
+    QWaylandWlShellSurface *pWlShellSurfaceExt = static_cast<QWaylandWlShellSurface*>(window->shellSurface());
 
     // Windows created by QtWebProcess are not meant to be shown to the user
     // They are mainly temporary windows used for offscreen drawing.
     // Therefore, as long as they are hidden, don't create a card for them.
-    if (window->surface()->className() != "QtWebProcess" && window->surface()->className() != "QtWebEngineProcess") {
+    if (pWlShellSurfaceExt->className() != "QtWebProcess" && pWlShellSurfaceExt->className() != "QtWebEngineProcess") {
         if (!WindowModel::isWindowAlreadyAdded(mWindowModels, window)) {
             qDebug() << Q_FUNC_INFO << "Adding window" << window << "to our models";
             emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
@@ -191,49 +207,61 @@ void Compositor::windowIsReady()
     }
 }
 
-QWaylandSurfaceItem* Compositor::createView(QWaylandSurface *surface)
+void Compositor::onSurfaceCreated(QWaylandSurface *surface)
 {
     qDebug() << __PRETTY_FUNCTION__ << "surface" << surface;
 
-    return createWindowForSurface(surface);
+//    CompositorWindow *window = createWindowForSurface(surface);
+
+    connect(surface, &QWaylandSurface::hasContentChanged, this, &Compositor::onSurfaceMappedChanged);
+    //connect(surface, &QWaylandSurface::sizeChanged, this, &Compositor::onSurfaceSizeChanged);
+    //connect(surface, &QWaylandSurface::damaged, this, &Compositor::onSurfaceDamaged);
 }
 
-void Compositor::surfaceMapped()
+void Compositor::onSurfaceMappedChanged()
+{
+    QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(sender());
+    CompositorWindow *window = surfaceWindow(surface);
+    if(window && surface) {
+        if(surface->hasContent()) {
+            qDebug() << __PRETTY_FUNCTION__ << " MAPPED " << window << "appId" << window->appId() << "windowType" << window->windowType();
+
+            // If it was a window created by QtWebProcess, it may be not already in our WindowModel list
+            if (!WindowModel::isWindowAlreadyAdded(mWindowModels, window)) {
+                qDebug() << Q_FUNC_INFO << "Adding window" << window << "to our models";
+                emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+                WindowModel::addWindowForEachModel(mWindowModels, window);
+            }
+            emit windowShown(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+        }
+        else {
+            qDebug() << __PRETTY_FUNCTION__ << " UNMAPPED " << window << "appId" << window->appId() << "windowType" << window->windowType();
+
+            if (surface == mFullscreenSurface)
+                setFullscreenSurface(0);
+
+            emit windowHidden(QVariant::fromValue(static_cast<QQuickItem*>(window)));
+        }
+    }
+}
+
+void Compositor::onSurfaceMapped(QWaylandSurface *surface)
 {
     qDebug() << __PRETTY_FUNCTION__;
-
-    QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(sender());
-
+    /*
     CompositorWindow *window = surfaceWindow(surface);
     if (!window)
         window = createWindowForSurface(surface);
+    */
 
-    qDebug() << __PRETTY_FUNCTION__ << window << "appId" << window->appId() << "windowType" << window->windowType();
-
-    // If it was a window created by QtWebProcess, it may be not already in our WindowModel list
-    if (!WindowModel::isWindowAlreadyAdded(mWindowModels, window)) {
-        qDebug() << Q_FUNC_INFO << "Adding window" << window << "to our models";
-        emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
-        WindowModel::addWindowForEachModel(mWindowModels, window);
-    }
-    emit windowShown(QVariant::fromValue(static_cast<QQuickItem*>(window)));
 }
 
-void Compositor::surfaceUnmapped()
+void Compositor::onSurfaceUnmapped(QWaylandSurface *surface)
 {
     qDebug() << __PRETTY_FUNCTION__;
-
-    QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(sender());
-    if (surface == mFullscreenSurface)
-        setFullscreenSurface(0);
-
-    CompositorWindow *window = surfaceWindow(surface);
-    qWarning() << Q_FUNC_INFO << window;
-
-    emit windowHidden(QVariant::fromValue(static_cast<QQuickItem*>(window)));
 }
 
-void Compositor::surfaceDying()
+void Compositor::onSurfaceAboutToBeDestroyed()
 {
     QWaylandSurface *surface = static_cast<QWaylandSurface *>(sender());
     qDebug() << Q_FUNC_INFO << surface;
@@ -256,41 +284,10 @@ void Compositor::surfaceDying()
     }
 }
 
-void Compositor::frameSwappedSlot()
+void Compositor::onSurfaceRaised()
 {
-#if QT_VERSION > QT_VERSION_CHECK(5,2,1)
-    sendFrameCallbacks(surfaces());
-#else
-    frameFinished(mFullscreenSurface);
-#endif
-}
-
-void Compositor::resizeEvent(QResizeEvent *event)
-{
-    QQuickView::resizeEvent(event);
-    QWaylandCompositor::setOutputGeometry(QRect(0, 0, width(), height()));
-}
-
-void Compositor::surfaceCreated(QWaylandSurface *surface)
-{
-    qDebug() << __PRETTY_FUNCTION__ << "surface" << surface;
-
-    Q_UNUSED(surface);
-    connect(surface, SIGNAL(mapped()), this, SLOT(surfaceMapped()));
-    connect(surface, SIGNAL(unmapped()), this, SLOT(surfaceUnmapped()));
-    connect(surface, SIGNAL(raiseRequested()), this, SLOT(surfaceRaised()));
-    connect(surface, SIGNAL(lowerRequested()), this, SLOT(surfaceLowered()));
-    connect(surface, SIGNAL(sizeChanged()), this, SLOT(surfaceSizeChanged()));
-#if QT_VERSION > QT_VERSION_CHECK(5,2,1)
-    connect(surface, SIGNAL(damaged(const QRegion)), this, SLOT(surfaceDamaged(QRegion)));
-#else
-    connect(surface, SIGNAL(damaged(const QRect)), this, SLOT(surfaceDamaged(const QRect&)));
-#endif
-}
-
-void Compositor::surfaceRaised()
-{
-    QWaylandSurface *surface = qobject_cast<QWaylandSurface*>(sender());
+    QtWayland::ExtendedSurface *extSurface = qobject_cast<QtWayland::ExtendedSurface*>(sender());
+    QWaylandSurface *surface = qobject_cast<QWaylandSurface*>(extSurface->extensionContainer());
     CompositorWindow *window = surfaceWindow(surface);
 
     qWarning() << Q_FUNC_INFO << "the window " << window << "is going to be raised";
@@ -299,9 +296,10 @@ void Compositor::surfaceRaised()
         emit windowRaised(QVariant::fromValue(static_cast<QQuickItem*>(window)));
 }
 
-void Compositor::surfaceLowered()
+void Compositor::onSurfaceLowered()
 {
-    QWaylandSurface *surface = qobject_cast<QWaylandSurface*>(sender());
+    QtWayland::ExtendedSurface *extSurface = qobject_cast<QtWayland::ExtendedSurface*>(sender());
+    QWaylandSurface *surface = qobject_cast<QWaylandSurface*>(extSurface->extensionContainer());
     CompositorWindow *window = surfaceWindow(surface);
 
     qWarning() << Q_FUNC_INFO << "the window " << window << "is going to be lowered";
@@ -310,27 +308,39 @@ void Compositor::surfaceLowered()
         emit windowLowered(QVariant::fromValue(static_cast<QQuickItem*>(window)));
 }
 
-void Compositor::surfaceSizeChanged()
+void Compositor::onSurfaceDamaged(const QRegion &)
 {
-    QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(sender());
+    /*
+    if (!isVisible())
+        sendFrameCallbacks(surfaces());
+    */
+}
+
+void Compositor::onWlShellSurfaceCreated(QWaylandWlShellSurface *shellSurface)
+{
+    createWindowForSurfaceShell(shellSurface);
+}
+
+void Compositor::onExtendedSurfaceReady(QtWayland::ExtendedSurface *extSurface, QWaylandSurface *surface)
+{
+    extSurface->initialize();
 
     CompositorWindow *window = surfaceWindow(surface);
     if (window)
-        window->setSize(surface->size());
-}
+    {
+        QVariantMap properties = extSurface->windowProperties();
+        QMapIterator<QString,QVariant> iter(properties);
+        while (iter.hasNext()) {
+            iter.next();
+            window->onWindowPropertyChanged(iter.key(), iter.value());
+        }
 
-#if QT_VERSION > QT_VERSION_CHECK(5,2,1)
-void Compositor::surfaceDamaged(const QRegion &)
-#else
-void Compositor::surfaceDamaged(const QRect&)
-#endif
-{
-    if (!isVisible())
-#if QT_VERSION > QT_VERSION_CHECK(5,2,1)
-        sendFrameCallbacks(surfaces());
-#else
-        frameFinished(0);
-#endif
+        connect(extSurface, &QtWayland::ExtendedSurface::windowPropertyChanged, window, &CompositorWindow::onWindowPropertyChanged);
+        connect(extSurface, &QtWayland::ExtendedSurface::raiseRequested, this, &Compositor::onSurfaceRaised);
+        connect(extSurface, &QtWayland::ExtendedSurface::lowerRequested, this, &Compositor::onSurfaceLowered);
+
+        window->sendWindowIdToClient();
+    }
 }
 
 void Compositor::setRecording(bool value)

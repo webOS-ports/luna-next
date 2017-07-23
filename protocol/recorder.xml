@@ -92,10 +92,10 @@
                 The format will be one of the values as defined in the
                 wl_shm::format enum.
             </description>
-            <arg name="width" type="int" description="width of the frame, in pixels"/>
-            <arg name="height" type="int" description="height of the frame, in pixels"/>
-            <arg name="stride" type="int" description="stride of the frame"/>
-            <arg name="format" type="int" desciption="format of the frame"/>
+            <arg name="width" type="int" summary="width of the frame, in pixels"/>
+            <arg name="height" type="int" summary="height of the frame, in pixels"/>
+            <arg name="stride" type="int" summary="stride of the frame"/>
+            <arg name="format" type="int" summary="format of the frame"/>
         </event>
 
         <event name="frame">

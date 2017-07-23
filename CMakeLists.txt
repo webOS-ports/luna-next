@@ -29,9 +29,9 @@ if(NOT Qt5Quick_FOUND)
     message(FATAL_ERROR "Qt5Quick module is required!")
 endif()
 
-find_package(Qt5Compositor REQUIRED)
-if(NOT Qt5Compositor_FOUND)
-    message(FATAL_ERROR "Qt5Compositor module is required!")
+find_package(Qt5WaylandCompositor REQUIRED)
+if(NOT Qt5WaylandCompositor_FOUND)
+    message(FATAL_ERROR "Qt5WaylandCompositor module is required!")
 endif()
 
 find_package(Qt5DBus REQUIRED)

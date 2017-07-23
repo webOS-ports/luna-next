@@ -4,7 +4,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
-    ${Qt5Compositor_PRIVATE_INCLUDE_DIRS}
+    ${Qt5WaylandCompositor_PRIVATE_INCLUDE_DIRS}
     ${WAYLAND_SERVER_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/compositor)
 
@@ -26,7 +26,7 @@ ecm_add_qtwayland_server_protocol(SOURCES
     PREFIX luna_)
 
 add_library(lunanext-compositor-qml SHARED ${SOURCES})
-qt5_use_modules(lunanext-compositor-qml Qml Quick Compositor)
+qt5_use_modules(lunanext-compositor-qml Qml Quick WaylandCompositor)
 
 execute_process(COMMAND ${CMAKE_COMMAND}
                 -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/qmldir"

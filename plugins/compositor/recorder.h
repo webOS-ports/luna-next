@@ -19,7 +19,7 @@
 #include <QObject>
 #include <QMultiHash>
 #include <QMutex>
-#include <QWaylandGlobalInterface>
+#include <QWaylandCompositorExtension>
 
 #include "qwayland-server-luna-recorder.h"
 
@@ -34,29 +34,28 @@ namespace luna
 {
 
 class Recorder;
+class Compositor;
 
-class RecorderManager : public QWaylandGlobalInterface, public QtWaylandServer::luna_recorder_manager
+class RecorderManager : public QWaylandCompositorExtensionTemplate<RecorderManager>, public QtWaylandServer::luna_recorder_manager
 {
+    Q_OBJECT
 public:
-    RecorderManager();
-
-    const wl_interface* interface() const Q_DECL_OVERRIDE;
+    RecorderManager(QWaylandCompositor *compositor);
 
     void recordFrame(QWindow *window);
     void requestFrame(QWindow *window, Recorder *recorder);
     void remove(QWindow *window, Recorder *recorder);
 
-protected:
-    void bind(wl_client *client, quint32 version, quint32 id) Q_DECL_OVERRIDE;
+private:
     void recorder_manager_create_recorder(Resource *resource, uint32_t id, ::wl_resource *output) Q_DECL_OVERRIDE;
 
-private:
     QMultiHash<QWindow *, Recorder *> m_requests;
     QMutex m_mutex;
 };
 
-class Recorder : public QObject, public QtWaylandServer::luna_recorder
+class Recorder : public QWaylandCompositorExtensionTemplate<Recorder>, public QtWaylandServer::luna_recorder
 {
+    Q_OBJECT
 public:
     Recorder(RecorderManager *manager, wl_client *client, quint32 id, QQuickWindow *window);
     ~Recorder();

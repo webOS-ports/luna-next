@@ -20,7 +20,8 @@
 
 #include <QWaylandQuickCompositor>
 #include <QWaylandSurface>
-#include <QWaylandSurfaceItem>
+#include <QWaylandWlShellSurface>
+#include <5.8.0/QtWaylandCompositor/private/qwlextendedsurface_p.h>
 
 #include <QQmlContext>
 #include <QQuickItem>
@@ -36,8 +37,7 @@ namespace luna
 class WindowModel;
 class RecorderManager;
 
-class Compositor : public QQuickView, public QWaylandQuickCompositor,
-                   public QQmlParserStatus
+class Compositor : public QWaylandQuickCompositor
 {
     Q_OBJECT
     Q_PROPERTY(QWaylandSurface* fullscreenSurface READ fullscreenSurface WRITE setFullscreenSurface NOTIFY fullscreenSurfaceChanged)
@@ -45,9 +45,9 @@ class Compositor : public QQuickView, public QWaylandQuickCompositor,
 
 public:
     Compositor();
+    virtual ~Compositor();
 
-    virtual void classBegin();
-    virtual void componentComplete();
+    void create() Q_DECL_OVERRIDE;
 
     QWaylandSurface *fullscreenSurface() const { return mFullscreenSurface; }
     void setFullscreenSurface(QWaylandSurface *surface);
@@ -65,9 +65,6 @@ public:
 
     CompositorWindow* windowForId(int id);
 
-    void surfaceCreated(QWaylandSurface *surface) Q_DECL_OVERRIDE;
-    QWaylandSurfaceItem* createView(QWaylandSurface *surface) Q_DECL_OVERRIDE;
-
 signals:
     void windowAdded(QVariant window);
     void windowRemoved(QVariant window);
@@ -80,22 +77,18 @@ signals:
     void recordingChanged();
 
 private slots:
-    void surfaceMapped();
-    void surfaceUnmapped();
-    void frameSwappedSlot();
-#if QT_VERSION > QT_VERSION_CHECK(5,2,1)
-    void surfaceDamaged(const QRegion &);
-#else
-    void surfaceDamaged(const QRect&);
-#endif
-    void surfaceSizeChanged();
-    void surfaceRaised();
-    void surfaceLowered();
-    void surfaceDying();
+    void onSurfaceCreated(QWaylandSurface *surface);
+    void onSurfaceMappedChanged();
+    void onSurfaceMapped(QWaylandSurface *surface);
+    void onSurfaceUnmapped(QWaylandSurface *surface);
+    void onSurfaceDamaged(const QRegion &);
+    void onSurfaceRaised();
+    void onSurfaceLowered();
+    void onSurfaceAboutToBeDestroyed();
     void windowIsReady();
 
-protected:
-    void resizeEvent(QResizeEvent *event);
+    void onWlShellSurfaceCreated(QWaylandWlShellSurface *shellSurface);
+    void onExtendedSurfaceReady(QtWayland::ExtendedSurface *extSurface, QWaylandSurface *surface);
 
 private:
     friend class WindowModel;
@@ -109,8 +102,10 @@ private:
 
     static Compositor *mInstance;
 
+    QtWayland::SurfaceExtensionGlobal *mSurfaceExtension;
+
 private:
-    CompositorWindow* createWindowForSurface(QWaylandSurface *surface);
+    CompositorWindow* createWindowForSurfaceShell(QWaylandWlShellSurface *shellSurface);
     void readContent();
     bool hasProcessMultipleWindows(quint64 processId);
 };

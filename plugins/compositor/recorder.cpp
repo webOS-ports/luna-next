@@ -56,14 +56,10 @@ public:
     int result;
 };
 
-RecorderManager::RecorderManager()
-                       : QWaylandGlobalInterface()
-{
-}
 
-const wl_interface* RecorderManager::interface() const
+RecorderManager::RecorderManager(QWaylandCompositor *compositor)
+    : QWaylandCompositorExtensionTemplate(compositor)
 {
-    return &luna_recorder_manager_interface;
 }
 
 void RecorderManager::recordFrame(QWindow *window)
@@ -107,36 +103,18 @@ void RecorderManager::remove(QWindow *window, Recorder *recorder)
     m_requests.remove(window, recorder);
 }
 
-void RecorderManager::bind(wl_client *client, quint32 version, quint32 id)
-{
-    Q_UNUSED(version)
-
-    Resource *res = add(client, id, version);
-
-#if 0
-    gid_t gid;
-    wl_client_get_credentials(client, Q_NULLPTR, Q_NULLPTR, &gid);
-    group *g = getgrgid(gid);
-    if (strcmp(g->gr_name, "privileged") != 0) {
-        wl_resource_post_error(res->handle, WL_DISPLAY_ERROR_INVALID_OBJECT, "Permission to bind luna_recorder_manager denied");
-        wl_resource_destroy(res->handle);
-    }
-#endif
-}
-
 void RecorderManager::recorder_manager_create_recorder(Resource *resource, uint32_t id, ::wl_resource *output)
 {
-    // TODO: we should find out the window associated with this output, but there isn't
-    // a way to do that in qtcompositor yet. Just ignore it for now and use the one window we have.
-    Q_UNUSED(output)
+    QWaylandOutput *pOutput = QWaylandOutput::fromResource(output);
 
-    new Recorder(this, resource->client(), id, Compositor::instance());
+    new Recorder(this, resource->client(), id, static_cast<QQuickWindow*>(pOutput->window()));
     Compositor::instance()->setRecording(true);
 }
 
 
 Recorder::Recorder(RecorderManager *manager, wl_client *client, quint32 id, QQuickWindow *window)
-                : QtWaylandServer::luna_recorder(client, id, 1)
+                : QWaylandCompositorExtensionTemplate(manager)
+                , QtWaylandServer::luna_recorder(client, id, 1)
                 , m_manager(manager)
                 , m_bufferResource(Q_NULLPTR)
                 , m_client(client)

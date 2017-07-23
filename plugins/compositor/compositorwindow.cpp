@@ -16,10 +16,13 @@
  */
 
 #include <QCoreApplication>
-#include <QWaylandCompositor>
-#include <QWaylandInputDevice>
-#include <QWaylandClient>
 #include <QTimer>
+
+#include <QWaylandCompositor>
+#include <QWaylandSeat>
+#include <QWaylandWlShellSurface>
+
+#include <5.8.0/QtWaylandCompositor/private/qwlextendedsurface_p.h>
 
 #include "compositorwindow.h"
 #include "windowtype.h"
@@ -27,8 +30,8 @@
 namespace luna
 {
 
-CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *surface, QQuickItem *parent)
-    : QWaylandSurfaceItem(surface, parent),
+CompositorWindow::CompositorWindow(unsigned int winId, QQuickItem *parent)
+    : QWaylandQuickShellSurfaceItem(parent),
       mId(winId),
       mParentWinId(0),
       mParentWinIdSet(false),
@@ -39,21 +42,8 @@ CompositorWindow::CompositorWindow(unsigned int winId, QWaylandQuickSurface *sur
       mKeepAlive(false),
       mLoadingAnimationDisabled(false)
 {
-    QVariantMap properties = surface->windowProperties();
-    QMapIterator<QString,QVariant> iter(properties);
-    while (iter.hasNext()) {
-        iter.next();
-        onWindowPropertyChanged(iter.key(), iter.value());
-    }
+    connect(this, &QWaylandQuickItem::surfaceDestroyed, this, &QObject::deleteLater);
 
-    connect(surface, &QWaylandSurface::windowTypeChanged, this, &CompositorWindow::onWindowTypeChanged);
-    connect(surface, SIGNAL(windowPropertyChanged(const QString&,const QVariant&)),
-            this, SLOT(onWindowPropertyChanged(const QString&, const QVariant&)));
-    connect(surface, SIGNAL(mapped()), this, SLOT(onSurfaceMappedChanged()));
-    connect(surface, SIGNAL(unmapped()), this, SLOT(onSurfaceMappedChanged()));
-    connect(this, &QWaylandSurfaceItem::surfaceDestroyed, this, &QObject::deleteLater);
-
-    QTimer::singleShot(0, this, SLOT(sendWindowIdToClient()));
     QTimer::singleShot(2000, this, SLOT(onReadyTimeout()));
 
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
@@ -64,19 +54,32 @@ CompositorWindow::~CompositorWindow()
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
 }
 
+void CompositorWindow::initialize(QWaylandWlShellSurface *shellSurface)
+{
+    setShellSurface(shellSurface);
+
+    QWaylandSurface *surface = shellSurface->surface();
+    setSurface(surface);
+
+    connect(surface, &QWaylandSurface::hasContentChanged, this, &CompositorWindow::onSurfaceMappedChanged);
+}
+
 void CompositorWindow::forceVisible()
 {
-    surface()->sendOnScreenVisibilityChange(true);
+    QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
+    pExtendedSurfaceExt->sendOnScreenVisibilityChange(true);
 }
 
 void CompositorWindow::sendWindowIdToClient()
 {
-    surface()->setWindowProperty("_LUNE_WINDOW_ID", QVariant(mId));
+    QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
+    pExtendedSurfaceExt->setWindowProperty("_LUNE_WINDOW_ID", QVariant(mId));
 }
 
 bool CompositorWindow::isPopup()
 {
-    return (surface()->windowType() == QWaylandSurface::Popup);
+    QWaylandShellSurface *pShellSurfaceExt = shellSurface();
+    return Qt::Popup == pShellSurfaceExt->windowType();
 }
 
 void CompositorWindow::checkStatus()
@@ -101,12 +104,15 @@ void CompositorWindow::onReadyTimeout()
     emit readyChanged();
 }
 
-void CompositorWindow::onWindowTypeChanged(QWaylandSurface::WindowType type)
+void CompositorWindow::onWindowTypeChanged()
 {
+    QWaylandShellSurface *pShellSurfaceExt = shellSurface();
+    Qt::WindowType type = pShellSurfaceExt->windowType();
+
     qDebug() << Q_FUNC_INFO << type;
 
     // if it's not too late, adjust the LuneOS window type to overlay
-    if(isPopup() && !mReady) {
+    if(type == Qt::Popup && !mReady) {
         mWindowType = WindowType::Overlay;
     }
 }
@@ -139,7 +145,7 @@ void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVaria
 void CompositorWindow::onSurfaceMappedChanged()
 {
     if (surface())
-        qDebug() << Q_FUNC_INFO << "id" << mId << "mapped" << surface()->isMapped();
+        qDebug() << Q_FUNC_INFO << "id" << mId << "mapped" << surface()->hasContent();
 
     emit mappedChanged();
 }
@@ -225,7 +231,7 @@ void CompositorWindow::tryRemove()
 
 bool CompositorWindow::event(QEvent *event)
 {
-    bool handled = QWaylandSurfaceItem::event(event);
+    bool handled = QWaylandQuickItem::event(event);
 
     if (event->type() == QEvent::User) {
         mRemovePosted = false;
@@ -239,26 +245,30 @@ void CompositorWindow::postEvent(int event)
 {
     int key = EventType::toKey(static_cast<EventType::Event>(event));
     if (key > 0) {
-        QWaylandInputDevice *inputDevice = surface()->compositor()->defaultInputDevice();
+        QWaylandSeat *defaultSeat = surface()->compositor()->defaultSeat();
 
         QKeyEvent *keyEvent = new QKeyEvent(QEvent::KeyPress, key, Qt::NoModifier);
-        inputDevice->sendFullKeyEvent(surface(), keyEvent);
+        defaultSeat->sendFullKeyEvent(surface(), keyEvent);
 
         keyEvent = new QKeyEvent(QEvent::KeyRelease, key, Qt::NoModifier);
-        inputDevice->sendFullKeyEvent(surface(), keyEvent);
+        defaultSeat->sendFullKeyEvent(surface(), keyEvent);
     }
 }
 
 void CompositorWindow::changeSize(const QSize& size)
 {
-    surface()->requestSize(size);
+    QWaylandWlShellSurface *pWlShellSurfaceExt = static_cast<QWaylandWlShellSurface*>(shellSurface());
+    if(pWlShellSurfaceExt)
+        pWlShellSurfaceExt->sendConfigure(size, QWaylandWlShellSurface::BottomRightEdge);
 }
 
 void CompositorWindow::setParentWinId(unsigned int id)
 {
     mParentWinId = id;
-    if (surface())
-        surface()->setWindowProperty("parentWindowId", id);
+
+    QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
+    pExtendedSurfaceExt->setWindowProperty("parentWindowId", id);
+
     parentWinIdChanged();
 }
 
@@ -267,7 +277,7 @@ bool CompositorWindow::mapped() const
     if (!surface())
         return false;
 
-    return surface()->isMapped();
+    return surface()->hasContent();
 }
 
 QString CompositorWindow::appIcon() const
@@ -282,7 +292,8 @@ bool CompositorWindow::loadingAnimationDisabled() const
 
 QVariantMap CompositorWindow::windowPropertyMap() const
 {
-    return surface()->windowProperties();
+    QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
+    return pExtendedSurfaceExt->windowProperties();
 }
 
 } // namespace luna
