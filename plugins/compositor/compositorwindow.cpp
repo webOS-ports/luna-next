@@ -62,6 +62,7 @@ void CompositorWindow::initialize(QWaylandWlShellSurface *shellSurface)
     setSurface(surface);
 
     connect(surface, &QWaylandSurface::hasContentChanged, this, &CompositorWindow::onSurfaceMappedChanged);
+    connect(shellSurface, &QWaylandWlShellSurface::windowTypeChanged, this, &CompositorWindow::onWindowTypeChanged);
 }
 
 void CompositorWindow::forceVisible()
@@ -128,7 +129,10 @@ void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVaria
     else if (name == "_LUNE_APP_KEEP_ALIVE")
         mKeepAlive = value.toBool();
     else if (name == "_LUNE_WINDOW_TYPE")
+    {
         mWindowType = WindowType::fromString(value.toString());
+        if(mWindowType == WindowType::Overlay) setFocusOnClick(false);
+    }
     else if (name == "_LUNE_WINDOW_PARENT_ID") {
         mParentWinId = value.toInt();
         mParentWinIdSet = true;
