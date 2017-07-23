@@ -172,6 +172,7 @@ CompositorWindow* Compositor::createWindowForSurfaceShell(QWaylandWlShellSurface
     QQuickWindow *defaultOutputWindow = static_cast<QQuickWindow*>(defaultOutput()->window());
     CompositorWindow *window = new CompositorWindow(windowId, defaultOutputWindow->contentItem());
 
+    window->setOutput(defaultOutput()); //useful ?
     window->setFlag(QQuickItem::ItemIsFocusScope, true);
     // window->setUseTextureAlpha(true);
 
@@ -179,12 +180,9 @@ CompositorWindow* Compositor::createWindowForSurfaceShell(QWaylandWlShellSurface
     window->setSize(surface->size());
     window->setTouchEventsEnabled(true);
 
-    window->setOutput(defaultOutput()); //useful ?
-
     mWindows.insert(windowId, window);
 
     connect(surface, &QWaylandSurface::surfaceDestroyed, this, &Compositor::onSurfaceAboutToBeDestroyed);
-    connect(shellSurface, &QWaylandWlShellSurface::windowTypeChanged, window, &CompositorWindow::onWindowTypeChanged);
     connect(window, &CompositorWindow::readyChanged, this, &Compositor::windowIsReady);
 
     return window;
