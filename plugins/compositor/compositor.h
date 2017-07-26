@@ -79,12 +79,10 @@ signals:
 private slots:
     void onSurfaceCreated(QWaylandSurface *surface);
     void onSurfaceMappedChanged();
-    void onSurfaceMapped(QWaylandSurface *surface);
-    void onSurfaceUnmapped(QWaylandSurface *surface);
     void onSurfaceDamaged(const QRegion &);
     void onSurfaceRaised();
     void onSurfaceLowered();
-    void onSurfaceAboutToBeDestroyed();
+    void onSurfaceAboutToBeDestroyed(QWaylandSurface *surface);
     void windowIsReady();
 
     void onWlShellSurfaceCreated(QWaylandWlShellSurface *shellSurface);
@@ -105,7 +103,6 @@ private:
     QtWayland::SurfaceExtensionGlobal *mSurfaceExtension;
 
 private:
-    CompositorWindow* createWindowForSurfaceShell(QWaylandWlShellSurface *shellSurface);
     void readContent();
     bool hasProcessMultipleWindows(quint64 processId);
 };

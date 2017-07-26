@@ -68,9 +68,6 @@ public:
 
     void setParentWinId(unsigned int id);
 
-    void setClosed(bool closed);
-    void tryRemove();
-
     bool checkIsAllowedToStay();
 
     bool isPopup();
@@ -83,6 +80,7 @@ public:
 
 public slots:
     void sendWindowIdToClient();
+    void sendClose();
     void onWindowTypeChanged();
     void onWindowPropertyChanged(const QString&, const QVariant&);
 
@@ -97,16 +95,11 @@ private slots:
     void onSurfaceMappedChanged();
     void onReadyTimeout();
 
-protected:
-    virtual bool event(QEvent *event);
-
 private:
     unsigned int mId;
     unsigned int mParentWinId;
     bool mParentWinIdSet;
     unsigned int mWindowType;
-    bool mClosed;
-    bool mRemovePosted;
     QString mAppId;
     QVariant mUserData;
     bool mReady;

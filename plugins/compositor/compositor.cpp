@@ -149,43 +149,19 @@ void Compositor::closeWindowWithId(int winId)
 
     CompositorWindow *window = mWindows.value(winId, 0);
     if (window && window->surface()) {
+        QWaylandSurface *surface = window->surface();
+
         if (window->checkIsAllowedToStay() ||
             hasProcessMultipleWindows(window->processId()) ||
             window->keepAlive()) {
             qDebug() << Q_FUNC_INFO << "Destroying surface and keeping client alive";
-            window->surface()->destroy();
+            window->sendClose();
         }
         else {
             qDebug() << Q_FUNC_INFO << "Closing client and destroying surface";
-            destroyClientForSurface(window->surface());
+            destroyClientForSurface(surface);
         }
     }
-}
-
-CompositorWindow* Compositor::createWindowForSurfaceShell(QWaylandWlShellSurface *shellSurface)
-{
-    unsigned int windowId = mNextWindowId++;
-    QWaylandSurface *surface = shellSurface->surface();
-
-    qDebug() << Q_FUNC_INFO << "windowId" << windowId << surface;
-
-    QQuickWindow *defaultOutputWindow = static_cast<QQuickWindow*>(defaultOutput()->window());
-    CompositorWindow *window = new CompositorWindow(windowId, defaultOutputWindow->contentItem());
-
-    window->setOutput(defaultOutput()); //useful ?
-    window->setFlag(QQuickItem::ItemIsFocusScope, true);
-    // window->setUseTextureAlpha(true);
-
-    window->initialize(shellSurface);
-    window->setSize(surface->size());
-    window->setTouchEventsEnabled(true);
-
-    mWindows.insert(windowId, window);
-
-    connect(surface, &QWaylandSurface::surfaceDestroyed, this, &Compositor::onSurfaceAboutToBeDestroyed);
-    connect(window, &CompositorWindow::readyChanged, this, &Compositor::windowIsReady);
-
-    return window;
 }
 
 void Compositor::windowIsReady()
@@ -243,25 +219,8 @@ void Compositor::onSurfaceMappedChanged()
     }
 }
 
-void Compositor::onSurfaceMapped(QWaylandSurface *surface)
+void Compositor::onSurfaceAboutToBeDestroyed(QWaylandSurface *surface)
 {
-    qDebug() << __PRETTY_FUNCTION__;
-    /*
-    CompositorWindow *window = surfaceWindow(surface);
-    if (!window)
-        window = createWindowForSurface(surface);
-    */
-
-}
-
-void Compositor::onSurfaceUnmapped(QWaylandSurface *surface)
-{
-    qDebug() << __PRETTY_FUNCTION__;
-}
-
-void Compositor::onSurfaceAboutToBeDestroyed()
-{
-    QWaylandSurface *surface = static_cast<QWaylandSurface *>(sender());
     qDebug() << Q_FUNC_INFO << surface;
 
     CompositorWindow *window = surfaceWindow(surface);
@@ -277,8 +236,7 @@ void Compositor::onSurfaceAboutToBeDestroyed()
 
         mWindows.remove(window->winId());
 
-        window->setClosed(true);
-        window->tryRemove();
+        // window->deleteLater(); // not needed: the deletion of the surface will trigger the deletion of its extensions, among which is our CompositorWindow
     }
 }
 
@@ -316,7 +274,25 @@ void Compositor::onSurfaceDamaged(const QRegion &)
 
 void Compositor::onWlShellSurfaceCreated(QWaylandWlShellSurface *shellSurface)
 {
-    createWindowForSurfaceShell(shellSurface);
+    unsigned int windowId = mNextWindowId++;
+    QWaylandSurface *surface = shellSurface->surface();
+
+    qDebug() << Q_FUNC_INFO << "windowId" << windowId << surface;
+
+    QQuickWindow *defaultOutputWindow = static_cast<QQuickWindow*>(defaultOutput()->window());
+    CompositorWindow *window = new CompositorWindow(windowId, defaultOutputWindow->contentItem());
+
+    window->setOutput(defaultOutput()); //useful ?
+    window->setFlag(QQuickItem::ItemIsFocusScope, true);
+    // window->setUseTextureAlpha(true);
+
+    window->initialize(shellSurface);
+    window->setSize(surface->size());
+    window->setTouchEventsEnabled(true);
+
+    mWindows.insert(windowId, window);
+
+    connect(window, &CompositorWindow::readyChanged, this, &Compositor::windowIsReady);
 }
 
 void Compositor::onExtendedSurfaceReady(QtWayland::ExtendedSurface *extSurface, QWaylandSurface *surface)

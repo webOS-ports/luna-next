@@ -36,14 +36,10 @@ CompositorWindow::CompositorWindow(unsigned int winId, QQuickItem *parent)
       mParentWinId(0),
       mParentWinIdSet(false),
       mWindowType(WindowType::Card),
-      mClosed(false),
-      mRemovePosted(false),
       mReady(false),
       mKeepAlive(false),
       mLoadingAnimationDisabled(false)
 {
-    connect(this, &QWaylandQuickItem::surfaceDestroyed, this, &QObject::deleteLater);
-
     QTimer::singleShot(2000, this, SLOT(onReadyTimeout()));
 
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
@@ -61,6 +57,7 @@ void CompositorWindow::initialize(QWaylandWlShellSurface *shellSurface)
     QWaylandSurface *surface = shellSurface->surface();
     setSurface(surface);
 
+    connect(this, &QWaylandQuickItem::surfaceDestroyed, this, &QObject::deleteLater);
     connect(surface, &QWaylandSurface::hasContentChanged, this, &CompositorWindow::onSurfaceMappedChanged);
     connect(shellSurface, &QWaylandWlShellSurface::windowTypeChanged, this, &CompositorWindow::onWindowTypeChanged);
 }
@@ -75,6 +72,12 @@ void CompositorWindow::sendWindowIdToClient()
 {
     QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
     pExtendedSurfaceExt->setWindowProperty("_LUNE_WINDOW_ID", QVariant(mId));
+}
+
+void CompositorWindow::sendClose()
+{
+    QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
+    pExtendedSurfaceExt->send_close();
 }
 
 bool CompositorWindow::isPopup()
@@ -218,31 +221,6 @@ bool CompositorWindow::checkIsAllowedToStay()
     // source code for changing the list of allowed processes
     return (procExeEntry.symLinkTarget() == "/usr/sbin/LunaWebAppManager" ||
             procExeEntry.symLinkTarget() == "/usr/bin/maliit-server");
-}
-
-void CompositorWindow::setClosed(bool closed)
-{
-    mClosed = closed;
-}
-
-void CompositorWindow::tryRemove()
-{
-    if (mClosed && !mRemovePosted) {
-        mRemovePosted = true;
-        QCoreApplication::postEvent(this, new QEvent(QEvent::User));
-    }
-}
-
-bool CompositorWindow::event(QEvent *event)
-{
-    bool handled = QWaylandQuickItem::event(event);
-
-    if (event->type() == QEvent::User) {
-        mRemovePosted = false;
-        delete this;
-    }
-
-    return handled;
 }
 
 void CompositorWindow::postEvent(int event)
