@@ -41,7 +41,7 @@ class RecorderManager;
 class Compositor : public QWaylandQuickCompositor
 {
     Q_OBJECT
-    Q_PROPERTY(QWaylandSurface* fullscreenSurface READ fullscreenSurface WRITE setFullscreenSurface NOTIFY fullscreenSurfaceChanged)
+    Q_PROPERTY(CompositorWindow* fullscreenWindow READ fullscreenWindow WRITE setFullscreenWindow NOTIFY fullscreenWindowChanged)
     Q_PROPERTY(bool recording READ recording NOTIFY recordingChanged)
 
 public:
@@ -50,8 +50,8 @@ public:
 
     void create() Q_DECL_OVERRIDE;
 
-    QWaylandSurface *fullscreenSurface() const { return mFullscreenSurface; }
-    void setFullscreenSurface(QWaylandSurface *surface);
+    CompositorWindow *fullscreenWindow() const { return mFullscreenWindow; }
+    void setFullscreenWindow(CompositorWindow *window);
 
     bool recording() const { return mRecorderCounter > 0; }
     void setRecording(bool recording);
@@ -73,7 +73,7 @@ signals:
     void windowHidden(QVariant window);
     void windowRaised(QVariant window);
     void windowLowered(QVariant window);
-    void fullscreenSurfaceChanged();
+    void fullscreenWindowChanged();
     void windowsChanged();
     void recordingChanged();
 
@@ -83,6 +83,7 @@ private slots:
     void onSurfaceDamaged(const QRegion &);
     void onSurfaceRaised();
     void onSurfaceLowered();
+    void onSurfaceDestroyed();
     void onSurfaceAboutToBeDestroyed(QWaylandSurface *surface);
     void windowIsReady();
 
@@ -92,7 +93,7 @@ private slots:
 private:
     friend class WindowModel;
 
-    QWaylandSurface *mFullscreenSurface;
+    CompositorWindow *mFullscreenWindow;
     unsigned int mNextWindowId;
     QHash<unsigned int, CompositorWindow*> mWindows;
     QList<WindowModel*> mWindowModels;
