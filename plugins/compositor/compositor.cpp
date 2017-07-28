@@ -38,7 +38,7 @@ static CompositorWindow *surfaceWindow(QWaylandSurface *surface)
 Compositor* Compositor::mInstance = 0;
 
 Compositor::Compositor()
-    : mFullscreenSurface(0),
+    : mFullscreenWindow(0),
       mNextWindowId(1),
       mRecorderCounter(0)
 {
@@ -71,7 +71,6 @@ void Compositor::create()
     connect(wlShell, &QWaylandWlShell::wlShellSurfaceCreated, this, &Compositor::onWlShellSurfaceCreated);
 
     connect(this, &QWaylandCompositor::surfaceCreated, this, &Compositor::onSurfaceCreated);
-    connect(this, &QWaylandCompositor::surfaceAboutToBeDestroyed, this, &Compositor::onSurfaceAboutToBeDestroyed);
 
     QQuickWindow *defaultOutputWindow = static_cast<QQuickWindow*>(defaultOutput()->window());
     connect(defaultOutputWindow, &QQuickWindow::afterRendering, this, &Compositor::readContent, Qt::DirectConnection);
@@ -105,23 +104,21 @@ CompositorWindow* Compositor::windowForId(int id)
     return mWindows[id];
 }
 
-void Compositor::setFullscreenSurface(QWaylandSurface *surface)
+void Compositor::setFullscreenWindow(CompositorWindow *window)
 {
-    if (surface == mFullscreenSurface)
+    if (window == mFullscreenWindow)
         return;
 
-    qDebug() << Q_FUNC_INFO << surface;
+    qDebug() << Q_FUNC_INFO << window;
 
     // Prevent flicker when returning to composited mode
-    if (!surface && mFullscreenSurface) {
-        CompositorWindow *fullscreenWindow = surfaceWindow(mFullscreenSurface);
-        if(fullscreenWindow)
-            fullscreenWindow->update();
+    if (!window && mFullscreenWindow) {
+        mFullscreenWindow->update();
     }
 
-    mFullscreenSurface = surface;
+    mFullscreenWindow = window;
 
-    emit fullscreenSurfaceChanged();
+    emit fullscreenWindowChanged();
 }
 
 void Compositor::clearKeyboardFocus()
@@ -210,22 +207,22 @@ void Compositor::onSurfaceMappedChanged()
         else {
             qDebug() << __PRETTY_FUNCTION__ << " UNMAPPED " << window << "appId" << window->appId() << "windowType" << window->windowType();
 
-            if (surface == mFullscreenSurface)
-                setFullscreenSurface(0);
+            if (window == mFullscreenWindow)
+                setFullscreenWindow(0);
 
             emit windowHidden(QVariant::fromValue(static_cast<QQuickItem*>(window)));
         }
     }
 }
 
-void Compositor::onSurfaceAboutToBeDestroyed(QWaylandSurface *surface)
+void Compositor::onSurfaceDestroyed()
 {
-    qDebug() << Q_FUNC_INFO << surface;
+    CompositorWindow *window = static_cast<CompositorWindow*>(sender());
 
-    CompositorWindow *window = surfaceWindow(surface);
+    qDebug() << Q_FUNC_INFO << window;
 
-    if (surface == mFullscreenSurface)
-        setFullscreenSurface(0);
+    if (window == mFullscreenWindow)
+        setFullscreenWindow(0);
 
     if (window) {
         if (WindowModel::isWindowAlreadyAdded(mWindowModels, window)) {
@@ -292,6 +289,7 @@ void Compositor::onWlShellSurfaceCreated(QWaylandWlShellSurface *shellSurface)
     mWindows.insert(windowId, window);
 
     connect(window, &CompositorWindow::readyChanged, this, &Compositor::windowIsReady);
+    connect(window, &QWaylandQuickItem::surfaceDestroyed, this, &Compositor::onSurfaceDestroyed);
 }
 
 void Compositor::onExtendedSurfaceReady(QtWayland::ExtendedSurface *extSurface, QWaylandSurface *surface)
