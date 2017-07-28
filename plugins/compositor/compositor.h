@@ -21,6 +21,7 @@
 #include <QWaylandQuickCompositor>
 #include <QWaylandSurface>
 #include <QWaylandWlShellSurface>
+#include <QWaylandClient>
 #include <5.8.0/QtWaylandCompositor/private/qwlextendedsurface_p.h>
 
 #include <QQmlContext>
@@ -104,7 +105,7 @@ private:
 
 private:
     void readContent();
-    bool hasProcessMultipleWindows(quint64 processId);
+    bool hasProcessMultipleWindows(QWaylandClient* client);
 };
 
 } // namespace luna

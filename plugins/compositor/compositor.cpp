@@ -129,14 +129,13 @@ void Compositor::clearKeyboardFocus()
     defaultSeat()->setKeyboardFocus(0);
 }
 
-bool Compositor::hasProcessMultipleWindows(quint64 processId)
+bool Compositor::hasProcessMultipleWindows(QWaylandClient* client)
 {
     unsigned int count = 0;
 
-    QList<CompositorWindow*> windows = mWindows.values();
-    for (int n = 0; n < windows.size(); n++) {
-        CompositorWindow *window = windows[n];
-        if (window->processId() == processId)
+    QList<QWaylandSurface *> surfaces = surfacesForClient(client);
+    for (QWaylandSurface *surface : surfaces) {
+        if (surfaceWindow(surface))
             count++;
     }
 
@@ -152,7 +151,7 @@ void Compositor::closeWindowWithId(int winId)
         QWaylandSurface *surface = window->surface();
 
         if (window->checkIsAllowedToStay() ||
-            hasProcessMultipleWindows(window->processId()) ||
+            hasProcessMultipleWindows(surface->client()) ||
             window->keepAlive()) {
             qDebug() << Q_FUNC_INFO << "Destroying surface and keeping client alive";
             window->sendClose();
