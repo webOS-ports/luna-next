@@ -36,6 +36,7 @@ CompositorWindow::CompositorWindow(unsigned int winId, QQuickItem *parent)
       mParentWinId(0),
       mParentWinIdSet(false),
       mWindowType(WindowType::Card),
+      mWindowTypeSet(false),
       mReady(false),
       mKeepAlive(false),
       mLoadingAnimationDisabled(false)
@@ -91,7 +92,7 @@ void CompositorWindow::checkStatus()
     if (mReady)
         return;
 
-    if (mAppId.length() > 0 && mParentWinIdSet) {
+    if (mAppId.length() > 0 && mParentWinIdSet && mWindowTypeSet) {
         mReady = true;
         emit readyChanged();
     }
@@ -104,6 +105,7 @@ void CompositorWindow::onReadyTimeout()
 
     mReady = true;
     mParentWinIdSet = true;
+    mWindowTypeSet = true;
 
     emit readyChanged();
 }
@@ -118,6 +120,7 @@ void CompositorWindow::onWindowTypeChanged()
     // if it's not too late, adjust the LuneOS window type to overlay
     if(type == Qt::Popup && !mReady) {
         mWindowType = WindowType::Overlay;
+        mWindowTypeSet = true;
     }
 }
 
@@ -135,6 +138,7 @@ void CompositorWindow::onWindowPropertyChanged(const QString &name, const QVaria
     {
         mWindowType = WindowType::fromString(value.toString());
         if(mWindowType == WindowType::Overlay) setFocusOnClick(false);
+        mWindowTypeSet = true;
     }
     else if (name == "_LUNE_WINDOW_PARENT_ID") {
         mParentWinId = value.toInt();

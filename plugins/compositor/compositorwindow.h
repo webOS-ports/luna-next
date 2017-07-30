@@ -100,6 +100,7 @@ private:
     unsigned int mParentWinId;
     bool mParentWinIdSet;
     unsigned int mWindowType;
+    bool mWindowTypeSet;
     QString mAppId;
     QVariant mUserData;
     bool mReady;
