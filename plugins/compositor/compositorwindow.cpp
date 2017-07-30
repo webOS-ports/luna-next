@@ -230,10 +230,10 @@ void CompositorWindow::postEvent(int event)
         QWaylandSeat *defaultSeat = surface()->compositor()->defaultSeat();
 
         QKeyEvent *keyEvent = new QKeyEvent(QEvent::KeyPress, key, Qt::NoModifier);
-        defaultSeat->sendFullKeyEvent(surface(), keyEvent);
+        defaultSeat->sendFullKeyEvent(keyEvent);
 
         keyEvent = new QKeyEvent(QEvent::KeyRelease, key, Qt::NoModifier);
-        defaultSeat->sendFullKeyEvent(surface(), keyEvent);
+        defaultSeat->sendFullKeyEvent(keyEvent);
     }
 }
 
