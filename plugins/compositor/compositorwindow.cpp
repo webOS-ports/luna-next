@@ -22,7 +22,7 @@
 #include <QWaylandSeat>
 #include <QWaylandWlShellSurface>
 
-#include <5.8.0/QtWaylandCompositor/private/qwlextendedsurface_p.h>
+#include <QtWaylandCompositor/private/qwlextendedsurface_p.h>
 
 #include "compositorwindow.h"
 #include "windowtype.h"

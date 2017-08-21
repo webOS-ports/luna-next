@@ -22,7 +22,7 @@
 #include <QWaylandSurface>
 #include <QWaylandWlShellSurface>
 #include <QWaylandClient>
-#include <5.8.0/QtWaylandCompositor/private/qwlextendedsurface_p.h>
+#include <QtWaylandCompositor/private/qwlextendedsurface_p.h>
 
 #include <QQmlContext>
 #include <QQuickItem>
