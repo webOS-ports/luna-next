@@ -67,6 +67,12 @@ void Compositor::create()
 
     QWaylandCompositor::create();
 
+    // Add a valid mode for the output
+    QWaylandOutput *output = defaultOutput();
+    QWaylandOutputMode defaultMode(QSize(output->window()->size()), 25000);
+    output->addMode(defaultMode, true);
+    output->setCurrentMode(defaultMode);
+
     QWaylandWlShell *wlShell = new QWaylandWlShell(this);
     connect(wlShell, &QWaylandWlShell::wlShellSurfaceCreated, this, &Compositor::onWlShellSurfaceCreated);
 
