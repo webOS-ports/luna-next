@@ -27,6 +27,8 @@
 #include <QWaylandWlShell>
 #include <QWaylandWlShellSurface>
 
+#include "QtWaylandCompositor/private/qwlqtkey_p.h"
+
 namespace luna
 {
 
@@ -83,6 +85,8 @@ void Compositor::create()
 
     mSurfaceExtension = new QtWayland::SurfaceExtensionGlobal(this);
     connect(mSurfaceExtension, &QtWayland::SurfaceExtensionGlobal::extendedSurfaceReady, this, &Compositor::onExtendedSurfaceReady);
+
+    QtWayland::QtKeyExtensionGlobal *pKeyExtension = new QtWayland::QtKeyExtensionGlobal(this);
 
     mRecorder = new RecorderManager(this);
 }
