@@ -17,8 +17,9 @@ set(QML_SOURCES
     PerformanceOverlay.qml)
 
 add_library(lunanext-performance-qml SHARED ${SOURCES})
-qt5_use_modules(lunanext-performance-qml Qml Quick)
-target_link_libraries(lunanext-performance-qml ${LUNA_SYSMGR_COMMON_LIBRARIES} ${EGL_LIBRARIES})
+target_link_libraries(lunanext-performance-qml ${LUNA_SYSMGR_COMMON_LIBRARIES} ${EGL_LIBRARIES}
+    Qt5::Qml Qt5::Quick
+)
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/qmldir"
                                                               "${CMAKE_CURRENT_BINARY_DIR}/qmldir")

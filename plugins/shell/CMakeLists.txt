@@ -17,8 +17,9 @@ set(SOURCES
     inversemouseareatype.cpp)
 
 add_library(lunanext-shell-qml SHARED ${SOURCES})
-qt5_use_modules(lunanext-shell-qml Qml Quick)
-target_link_libraries(lunanext-shell-qml ${LUNA_SYSMGR_COMMON_LIBRARIES})
+target_link_libraries(lunanext-shell-qml ${LUNA_SYSMGR_COMMON_LIBRARIES}
+    Qt5::Qml Qt5::Quick
+)
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/qmldir"
                                                               "${CMAKE_CURRENT_BINARY_DIR}/qmldir")
