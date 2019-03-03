@@ -76,6 +76,7 @@ void Compositor::create()
     output->setCurrentMode(defaultMode);
 
     QWaylandWlShell *wlShell = new QWaylandWlShell(this);
+    wlShell->setFocusPolicy(QWaylandShell::ManualFocus);
     connect(wlShell, &QWaylandWlShell::wlShellSurfaceCreated, this, &Compositor::onWlShellSurfaceCreated);
 
     connect(this, &QWaylandCompositor::surfaceCreated, this, &Compositor::onSurfaceCreated);
