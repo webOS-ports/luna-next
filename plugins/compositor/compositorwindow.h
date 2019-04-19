@@ -26,6 +26,8 @@
 #include "eventtype.h"
 #include "windowtype.h"
 
+class QWaylandXdgSurface;
+
 namespace luna
 {
 
@@ -49,7 +51,7 @@ public:
     CompositorWindow(unsigned int winId, QQuickItem *parent = 0);
     virtual ~CompositorWindow();
 
-    void initialize(QWaylandWlShellSurface *shellSurface);
+    void initialize(QWaylandXdgSurface *shellSurface);
 
     unsigned int winId() const;
     unsigned int parentWinId() const;
