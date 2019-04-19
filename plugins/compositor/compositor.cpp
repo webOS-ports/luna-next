@@ -29,6 +29,7 @@
 #include <QWaylandXdgToplevel>
 
 #include "QtWaylandCompositor/private/qwlqtkey_p.h"
+#include <QtWaylandCompositor/QWaylandXdgDecorationManagerV1>
 
 namespace luna
 {
@@ -90,6 +91,11 @@ void Compositor::create()
     connect(mSurfaceExtension, &QtWayland::SurfaceExtensionGlobal::extendedSurfaceReady, this, &Compositor::onExtendedSurfaceReady);
 
     QtWayland::QtKeyExtensionGlobal *pKeyExtension = new QtWayland::QtKeyExtensionGlobal(this);
+
+    QWaylandXdgDecorationManagerV1 *mXdgDecorationManagerV1 = new QWaylandXdgDecorationManagerV1();
+    mXdgDecorationManagerV1->setExtensionContainer(this);
+    mXdgDecorationManagerV1->initialize();
+    mXdgDecorationManagerV1->setPreferredMode(QWaylandXdgToplevel::ServerSideDecoration);
 
     mRecorder = new RecorderManager(this);
 }
