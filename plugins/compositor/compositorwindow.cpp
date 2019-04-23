@@ -22,8 +22,7 @@
 #include <QWaylandSeat>
 #include <QWaylandWlShellSurface>
 
-#include <QtWaylandCompositor/private/qwlextendedsurface_p.h>
-
+#include "luneosextendedsurface.h"
 #include "compositorwindow.h"
 #include "windowtype.h"
 
@@ -65,19 +64,19 @@ void CompositorWindow::initialize(QWaylandWlShellSurface *shellSurface)
 
 void CompositorWindow::forceVisible()
 {
-    QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
+    ExtendedSurface *pExtendedSurfaceExt = static_cast<ExtendedSurface*>(surface()->extension(ExtendedSurface::interfaceName()));
     pExtendedSurfaceExt->sendOnScreenVisibilityChange(true);
 }
 
 void CompositorWindow::sendWindowIdToClient()
 {
-    QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
+    ExtendedSurface *pExtendedSurfaceExt = static_cast<ExtendedSurface*>(surface()->extension(ExtendedSurface::interfaceName()));
     pExtendedSurfaceExt->setWindowProperty("_LUNE_WINDOW_ID", QVariant(mId));
 }
 
 void CompositorWindow::sendClose()
 {
-    QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
+    ExtendedSurface *pExtendedSurfaceExt = static_cast<ExtendedSurface*>(surface()->extension(ExtendedSurface::interfaceName()));
     pExtendedSurfaceExt->send_close();
 }
 
@@ -252,7 +251,7 @@ void CompositorWindow::setParentWinId(unsigned int id)
 {
     mParentWinId = id;
 
-    QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
+    ExtendedSurface *pExtendedSurfaceExt = static_cast<ExtendedSurface*>(surface()->extension(ExtendedSurface::interfaceName()));
     pExtendedSurfaceExt->setWindowProperty("parentWindowId", id);
 
     parentWinIdChanged();
@@ -278,7 +277,7 @@ bool CompositorWindow::loadingAnimationDisabled() const
 
 QVariantMap CompositorWindow::windowPropertyMap() const
 {
-    QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
+    ExtendedSurface *pExtendedSurfaceExt = static_cast<ExtendedSurface*>(surface()->extension(ExtendedSurface::interfaceName()));
     return pExtendedSurfaceExt->windowProperties();
 }
 

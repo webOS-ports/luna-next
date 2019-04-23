@@ -19,6 +19,7 @@
 #include "windowmodel.h"
 #include "windowtype.h"
 #include "recorder.h"
+#include "luneosextendedsurface.h"
 
 #include <QtCore/QtGlobal>
 
@@ -83,8 +84,8 @@ void Compositor::create()
     QQuickWindow *defaultOutputWindow = static_cast<QQuickWindow*>(defaultOutput()->window());
     connect(defaultOutputWindow, &QQuickWindow::afterRendering, this, &Compositor::readContent, Qt::DirectConnection);
 
-    mSurfaceExtension = new QtWayland::SurfaceExtensionGlobal(this);
-    connect(mSurfaceExtension, &QtWayland::SurfaceExtensionGlobal::extendedSurfaceReady, this, &Compositor::onExtendedSurfaceReady);
+    mSurfaceExtension = new SurfaceExtensionGlobal(this);
+    connect(mSurfaceExtension, &SurfaceExtensionGlobal::extendedSurfaceReady, this, &Compositor::onExtendedSurfaceReady);
 
     QtWayland::QtKeyExtensionGlobal *pKeyExtension = new QtWayland::QtKeyExtensionGlobal(this);
 
@@ -248,7 +249,7 @@ void Compositor::onSurfaceDestroyed()
 
 void Compositor::onSurfaceRaised()
 {
-    QtWayland::ExtendedSurface *extSurface = qobject_cast<QtWayland::ExtendedSurface*>(sender());
+    ExtendedSurface *extSurface = qobject_cast<QtWayland::ExtendedSurface*>(sender());
     QWaylandSurface *surface = qobject_cast<QWaylandSurface*>(extSurface->extensionContainer());
     CompositorWindow *window = surfaceWindow(surface);
 
@@ -260,7 +261,7 @@ void Compositor::onSurfaceRaised()
 
 void Compositor::onSurfaceLowered()
 {
-    QtWayland::ExtendedSurface *extSurface = qobject_cast<QtWayland::ExtendedSurface*>(sender());
+    ExtendedSurface *extSurface = qobject_cast<QtWayland::ExtendedSurface*>(sender());
     QWaylandSurface *surface = qobject_cast<QWaylandSurface*>(extSurface->extensionContainer());
     CompositorWindow *window = surfaceWindow(surface);
 
@@ -302,7 +303,7 @@ void Compositor::onWlShellSurfaceCreated(QWaylandWlShellSurface *shellSurface)
     connect(window, &QWaylandQuickItem::surfaceDestroyed, this, &Compositor::onSurfaceDestroyed);
 }
 
-void Compositor::onExtendedSurfaceReady(QtWayland::ExtendedSurface *extSurface, QWaylandSurface *surface)
+void Compositor::onExtendedSurfaceReady(ExtendedSurface *extSurface, QWaylandSurface *surface)
 {
     extSurface->initialize();
 
@@ -316,9 +317,9 @@ void Compositor::onExtendedSurfaceReady(QtWayland::ExtendedSurface *extSurface, 
             window->onWindowPropertyChanged(iter.key(), iter.value());
         }
 
-        connect(extSurface, &QtWayland::ExtendedSurface::windowPropertyChanged, window, &CompositorWindow::onWindowPropertyChanged);
-        connect(extSurface, &QtWayland::ExtendedSurface::raiseRequested, this, &Compositor::onSurfaceRaised);
-        connect(extSurface, &QtWayland::ExtendedSurface::lowerRequested, this, &Compositor::onSurfaceLowered);
+        connect(extSurface, &ExtendedSurface::windowPropertyChanged, window, &CompositorWindow::onWindowPropertyChanged);
+        connect(extSurface, &ExtendedSurface::raiseRequested, this, &Compositor::onSurfaceRaised);
+        connect(extSurface, &ExtendedSurface::lowerRequested, this, &Compositor::onSurfaceLowered);
 
         window->sendWindowIdToClient();
     }
