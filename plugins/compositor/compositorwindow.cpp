@@ -57,7 +57,22 @@ void CompositorWindow::initialize(QWaylandXdgSurface *shellSurface)
     setShellSurface(shellSurface);
 
     QWaylandSurface *surface = shellSurface->surface();
-    if(surface) setSurface(surface);
+    if(surface) {
+        setSurface(surface);
+
+        QtWayland::ExtendedSurface *extSurface = static_cast<QtWayland::ExtendedSurface*>(surface->extension(QtWayland::ExtendedSurface::interfaceName()));
+        if (extSurface)
+        {
+            QVariantMap properties = extSurface->windowProperties();
+            QMapIterator<QString,QVariant> iter(properties);
+            while (iter.hasNext()) {
+                iter.next();
+                onWindowPropertyChanged(iter.key(), iter.value());
+            }
+
+            connect(extSurface, &QtWayland::ExtendedSurface::windowPropertyChanged, this, &CompositorWindow::onWindowPropertyChanged);
+        }
+    }
 
     connect(this, &QWaylandQuickItem::surfaceDestroyed, this, &QObject::deleteLater);
     connect(surface, &QWaylandSurface::hasContentChanged, this, &CompositorWindow::onSurfaceMappedChanged);

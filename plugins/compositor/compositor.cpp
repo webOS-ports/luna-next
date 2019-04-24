@@ -313,28 +313,13 @@ void Compositor::onXdgToplevelCreated(QWaylandXdgToplevel *toplevel, QWaylandXdg
 
     connect(window, &CompositorWindow::readyChanged, this, &Compositor::windowIsReady);
     connect(window, &QWaylandQuickItem::surfaceDestroyed, this, &Compositor::onSurfaceDestroyed);
+
+    window->sendWindowIdToClient();
 }
 
 void Compositor::onExtendedSurfaceReady(QtWayland::ExtendedSurface *extSurface, QWaylandSurface *surface)
 {
     extSurface->initialize();
-
-    CompositorWindow *window = surfaceWindow(surface);
-    if (window)
-    {
-        QVariantMap properties = extSurface->windowProperties();
-        QMapIterator<QString,QVariant> iter(properties);
-        while (iter.hasNext()) {
-            iter.next();
-            window->onWindowPropertyChanged(iter.key(), iter.value());
-        }
-
-        connect(extSurface, &QtWayland::ExtendedSurface::windowPropertyChanged, window, &CompositorWindow::onWindowPropertyChanged);
-        connect(extSurface, &QtWayland::ExtendedSurface::raiseRequested, this, &Compositor::onSurfaceRaised);
-        connect(extSurface, &QtWayland::ExtendedSurface::lowerRequested, this, &Compositor::onSurfaceLowered);
-
-        window->sendWindowIdToClient();
-    }
 }
 
 void Compositor::setRecording(bool value)
