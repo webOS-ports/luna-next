@@ -266,6 +266,7 @@ void CompositorWindow::changeSize(const QSize& size)
     if(pXdgTopLevel)
     {
         QVector<QWaylandXdgToplevel::State> states;
+        if(hasFocus()) states += QWaylandXdgToplevel::ActivatedState;
         pXdgTopLevel->sendConfigure(size, states);
     }
 }
