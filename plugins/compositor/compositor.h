@@ -20,7 +20,7 @@
 
 #include <QWaylandQuickCompositor>
 #include <QWaylandSurface>
-#include <QWaylandWlShellSurface>
+#include <QWaylandXdgSurface>
 #include <QWaylandClient>
 #include <QtWaylandCompositor/private/qwlextendedsurface_p.h>
 
@@ -87,7 +87,8 @@ private slots:
     void onSurfaceAboutToBeDestroyed(QWaylandSurface *surface);
     void windowIsReady();
 
-    void onWlShellSurfaceCreated(QWaylandWlShellSurface *shellSurface);
+    //void onXdgSurfaceCreated(QWaylandXdgSurface *shellSurface);
+    void onXdgToplevelCreated(QWaylandXdgToplevel *toplevel, QWaylandXdgSurface *shellSurface);
     void onExtendedSurfaceReady(QtWayland::ExtendedSurface *extSurface, QWaylandSurface *surface);
 
 private:

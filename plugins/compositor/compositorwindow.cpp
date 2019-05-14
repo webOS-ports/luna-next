@@ -20,7 +20,8 @@
 
 #include <QWaylandCompositor>
 #include <QWaylandSeat>
-#include <QWaylandWlShellSurface>
+#include <QWaylandXdgSurface>
+#include <QWaylandXdgToplevel>
 
 #include <QtWaylandCompositor/private/qwlextendedsurface_p.h>
 
@@ -51,16 +52,31 @@ CompositorWindow::~CompositorWindow()
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
 }
 
-void CompositorWindow::initialize(QWaylandWlShellSurface *shellSurface)
+void CompositorWindow::initialize(QWaylandXdgSurface *shellSurface)
 {
     setShellSurface(shellSurface);
 
     QWaylandSurface *surface = shellSurface->surface();
-    setSurface(surface);
+    if(surface) {
+        setSurface(surface);
+
+        QtWayland::ExtendedSurface *extSurface = static_cast<QtWayland::ExtendedSurface*>(surface->extension(QtWayland::ExtendedSurface::interfaceName()));
+        if (extSurface)
+        {
+            QVariantMap properties = extSurface->windowProperties();
+            QMapIterator<QString,QVariant> iter(properties);
+            while (iter.hasNext()) {
+                iter.next();
+                onWindowPropertyChanged(iter.key(), iter.value());
+            }
+
+            connect(extSurface, &QtWayland::ExtendedSurface::windowPropertyChanged, this, &CompositorWindow::onWindowPropertyChanged);
+        }
+    }
 
     connect(this, &QWaylandQuickItem::surfaceDestroyed, this, &QObject::deleteLater);
     connect(surface, &QWaylandSurface::hasContentChanged, this, &CompositorWindow::onSurfaceMappedChanged);
-    connect(shellSurface, &QWaylandWlShellSurface::windowTypeChanged, this, &CompositorWindow::onWindowTypeChanged);
+    connect(shellSurface, &QWaylandShellSurface::windowTypeChanged, this, &CompositorWindow::onWindowTypeChanged);
 }
 
 void CompositorWindow::forceVisible()
@@ -243,9 +259,16 @@ void CompositorWindow::postEvent(int event)
 
 void CompositorWindow::changeSize(const QSize& size)
 {
-    QWaylandWlShellSurface *pWlShellSurfaceExt = static_cast<QWaylandWlShellSurface*>(shellSurface());
-    if(pWlShellSurfaceExt)
-        pWlShellSurfaceExt->sendConfigure(size, QWaylandWlShellSurface::BottomRightEdge);
+    QWaylandXdgSurface *pXdgShellSurfaceExt = static_cast<QWaylandXdgSurface*>(shellSurface());
+    QWaylandXdgToplevel *pXdgTopLevel = NULL;
+    if(pXdgShellSurfaceExt) pXdgTopLevel = pXdgShellSurfaceExt->toplevel();
+    
+    if(pXdgTopLevel)
+    {
+        QVector<QWaylandXdgToplevel::State> states;
+        if(hasFocus()) states += QWaylandXdgToplevel::ActivatedState;
+        pXdgTopLevel->sendConfigure(size, states);
+    }
 }
 
 void CompositorWindow::setParentWinId(unsigned int id)
