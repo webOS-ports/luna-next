@@ -28,6 +28,9 @@
 #include <QWaylandXdgSurface>
 #include <QWaylandXdgToplevel>
 
+#include <QWaylandWlShell>
+#include <QWaylandWlShellSurface>
+
 #include "QtWaylandCompositor/private/qwlqtkey_p.h"
 #include <QtWaylandCompositor/QWaylandXdgDecorationManagerV1>
 
@@ -76,11 +79,15 @@ void Compositor::create()
     QWaylandOutputMode defaultMode(QSize(output->window()->size()), 25000);
     output->addMode(defaultMode, true);
     output->setCurrentMode(defaultMode);
-
+    
     QWaylandXdgShell *xdgShell = new QWaylandXdgShell(this);
     xdgShell->setFocusPolicy(QWaylandShell::ManualFocus);
 //    connect(xdgShell, &QWaylandXdgShell::xdgSurfaceCreated, this, &Compositor::onXdgSurfaceCreated);
     connect(xdgShell, &QWaylandXdgShell::toplevelCreated, this, &Compositor::onXdgToplevelCreated);
+
+    QWaylandWlShell *wlShell = new QWaylandWlShell(this);
+    wlShell->setFocusPolicy(QWaylandShell::ManualFocus);
+    connect(wlShell, &QWaylandWlShell::wlShellSurfaceCreated, this, &Compositor::onWlShellSurfaceCreated);
 
     connect(this, &QWaylandCompositor::surfaceCreated, this, &Compositor::onSurfaceCreated);
 
@@ -182,15 +189,13 @@ void Compositor::closeWindowWithId(int winId)
 void Compositor::windowIsReady()
 {
     CompositorWindow *window = static_cast<CompositorWindow*>(sender());
-    QWaylandXdgSurface *pShellSurfaceExt = static_cast<QWaylandXdgSurface*>(window->shellSurface());
 
-    QWaylandXdgToplevel *pXdgTopLevel = NULL;
-    if(pShellSurfaceExt) pXdgTopLevel = pShellSurfaceExt->toplevel();
+    QString processName = window->processName();
 
     // Windows created by QtWebProcess are not meant to be shown to the user
     // They are mainly temporary windows used for offscreen drawing.
     // Therefore, as long as they are hidden, don't create a card for them.
-    if (pXdgTopLevel->appId() != "QtWebProcess" && pXdgTopLevel->appId() != "QtWebEngineProcess") {
+    if (processName != "QtWebProcess" && processName != "QtWebEngineProcess") {
         if (!WindowModel::isWindowAlreadyAdded(mWindowModels, window)) {
             qDebug() << Q_FUNC_INFO << "Adding window" << window << "to our models";
             emit windowAdded(QVariant::fromValue(static_cast<QQuickItem*>(window)));
@@ -290,8 +295,33 @@ void Compositor::onSurfaceDamaged(const QRegion &)
     */
 }
 
+void Compositor::onWlShellSurfaceCreated(QWaylandWlShellSurface *shellSurface)
+{
+    unsigned int windowId = mNextWindowId++;
+    QWaylandSurface *surface = shellSurface->surface();
+
+    qDebug() << Q_FUNC_INFO << "windowId" << windowId << surface;
+
+    QQuickWindow *defaultOutputWindow = static_cast<QQuickWindow*>(defaultOutput()->window());
+    CompositorWindow *window = new CompositorWindow(windowId, defaultOutputWindow->contentItem());
+
+    window->setOutput(defaultOutput()); //useful ?
+    window->setFlag(QQuickItem::ItemIsFocusScope, true);
+    // window->setUseTextureAlpha(true);
+
+    window->initialize(shellSurface);
+    window->setSize(surface->size());
+    window->setTouchEventsEnabled(true);
+
+    mWindows.insert(windowId, window);
+
+    connect(window, &CompositorWindow::readyChanged, this, &Compositor::windowIsReady);
+    connect(window, &QWaylandQuickItem::surfaceDestroyed, this, &Compositor::onSurfaceDestroyed);
+
+    window->sendWindowIdToClient();
+}
+
 void Compositor::onXdgToplevelCreated(QWaylandXdgToplevel *toplevel, QWaylandXdgSurface *shellSurface)
-//void Compositor::onXdgSurfaceCreated(QWaylandXdgSurface *shellSurface)
 {
     unsigned int windowId = mNextWindowId++;
     QWaylandSurface *surface = shellSurface->surface();
