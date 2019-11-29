@@ -27,6 +27,7 @@
 #include <QtWaylandCompositor/private/qwlextendedsurface_p.h>
 
 #include "compositorwindow.h"
+#include "webos_shell.h"
 #include "windowtype.h"
 
 namespace luna
@@ -51,6 +52,32 @@ CompositorWindow::CompositorWindow(unsigned int winId, QQuickItem *parent)
 CompositorWindow::~CompositorWindow()
 {
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
+}
+
+void CompositorWindow::initialize(WlWebosShellSurface *shellSurface)
+{
+    //setShellSurface(shellSurface);
+
+    QWaylandSurface *surface = shellSurface->surface();
+    if(surface) {
+        setSurface(surface);
+
+        QtWayland::ExtendedSurface *extSurface = static_cast<QtWayland::ExtendedSurface*>(surface->extension(QtWayland::ExtendedSurface::interfaceName()));
+        if (extSurface)
+        {
+            QVariantMap properties = extSurface->windowProperties();
+            QMapIterator<QString,QVariant> iter(properties);
+            while (iter.hasNext()) {
+                iter.next();
+                onWindowPropertyChanged(iter.key(), iter.value());
+            }
+
+            connect(extSurface, &QtWayland::ExtendedSurface::windowPropertyChanged, this, &CompositorWindow::onWindowPropertyChanged);
+        }
+    }
+
+    connect(this, &QWaylandQuickItem::surfaceDestroyed, this, &QObject::deleteLater);
+    connect(surface, &QWaylandSurface::hasContentChanged, this, &CompositorWindow::onSurfaceMappedChanged);
 }
 
 void CompositorWindow::initialize(QWaylandShellSurface *shellSurface)

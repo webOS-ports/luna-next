@@ -19,6 +19,7 @@
 #include "windowmodel.h"
 #include "windowtype.h"
 #include "recorder.h"
+#include "webos_shell.h"
 
 #include <QtCore/QtGlobal>
 
@@ -85,9 +86,8 @@ void Compositor::create()
 //    connect(xdgShell, &QWaylandXdgShell::xdgSurfaceCreated, this, &Compositor::onXdgSurfaceCreated);
     connect(xdgShell, &QWaylandXdgShell::toplevelCreated, this, &Compositor::onXdgToplevelCreated);
 
-    QWaylandWlShell *wlShell = new QWaylandWlShell(this);
-    wlShell->setFocusPolicy(QWaylandShell::ManualFocus);
-    connect(wlShell, &QWaylandWlShell::wlShellSurfaceCreated, this, &Compositor::onWlShellSurfaceCreated);
+    WlWebosShell *wlShell = new WlWebosShell(this);
+    connect(wlShell, &WlWebosShell::wlShellSurfaceCreated, this, &Compositor::onWlShellSurfaceCreated);
 
     connect(this, &QWaylandCompositor::surfaceCreated, this, &Compositor::onSurfaceCreated);
 
@@ -295,7 +295,7 @@ void Compositor::onSurfaceDamaged(const QRegion &)
     */
 }
 
-void Compositor::onWlShellSurfaceCreated(QWaylandWlShellSurface *shellSurface)
+void Compositor::onWlShellSurfaceCreated(WlWebosShellSurface *shellSurface)
 {
     unsigned int windowId = mNextWindowId++;
     QWaylandSurface *surface = shellSurface->surface();

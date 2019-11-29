@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="webos_shell">
+
+    <copyright>
+      Copyright (c) 2013-2019 LG Electronics, Inc.
+
+      Licensed under the Apache License, Version 2.0 (the "License");
+      you may not use this file except in compliance with the License.
+      You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      See the License for the specific language governing permissions and
+      limitations under the License.
+    </copyright>
+
+    <interface name="wl_webos_shell" version="1">
+        <description summary="TODO">
+            TODO
+        </description>
+
+        <request name="get_system_pip">
+            <description summary="Deprecated request.">
+                This request is deprecated. If you want to create a new request,
+                you can reuse this one. FYI, in that case, you also need to modify
+                get_system_pip method in luna-surfacemanager as well.
+            </description>
+        </request>
+
+        <request name="get_shell_surface">
+            <description summary="create a shell surface from a surface">
+                Creates an webos shell surface for an existing surface.
+            </description>
+            <arg name="id" type="new_id" interface="wl_webos_shell_surface"/>
+            <arg name="surface" type="object" interface="wl_surface"/>
+        </request>
+    </interface>
+
+    <interface name="wl_webos_shell_surface" version="1">
+        <description summary="create a webos shell surface from a surface">
+            This allows the client to associate an normal surface with a
+            shell surface. The shell surface provides webos specific functionality
+            to surfaces
+        </description>
+
+        <request name="set_location_hint">
+            <description summary="sets the preferred location hint">
+                The location hint is a guideline to the compositor where
+                to place the surface. The compositor will do its best to
+                place it there, however this is not guaranteed. Currently
+                The location hint is only applied to _WEBOS_WINDOW_TYPE_POPUP
+                and _WEBOS_WINDOW_TYPE_SYSTEM_UI surfaces.
+            </description>
+            <arg name="hint" type="uint"/>
+        </request>
+
+        <enum name="location_hint">
+            <description summary="location mask for the surface">
+                Using this mask the surface can be positioned onto
+                different locations on screen. By not using absolute
+                coordinates we can create greater flexibility in the
+                compositor and the clients.
+            </description>
+            <entry name="north" value="1"/>
+            <entry name="west" value="2"/>
+            <entry name="south" value="4"/>
+            <entry name="east" value="8"/>
+            <entry name="center" value="16"/>
+        </enum>
+
+        <enum name="state">
+            <description summary="The state of the surface">
+                The state provides info to the client on how the compositor has placed
+                the surface.
+
+                The default state will indicate to the client that it is windowed. The
+                "position_changed" event will tell the position in screen coordinates
+                when the surface is in this state.
+            </description>
+
+            <entry name="default" value="0"/>
+            <entry name="minimized" value="1"/>
+            <entry name="maximized" value="2"/>
+            <entry name="fullscreen" value="3"/>
+        </enum>
+
+        <request name="set_state">
+            <description summary="sets the surface state">
+                The client requests its surface state to the compositor.
+            </description>
+            <arg name="state" type="uint"/>
+        </request>
+
+        <request name="set_property">
+            <description summary="sets the surface property">
+                The client sets the surface property to the compositor. The property
+                is given by a string pair (name, value).
+            </description>
+            <arg name="name" type="string"/>
+            <arg name="value" type="string"/>
+        </request>
+
+        <enum name="webos_key">
+            <description summary="The key that the surface handels">
+                The client uses wl_webos_shell_surface.set_key_mask to notify server
+                that it will handle specific keys only.
+            </description>
+
+            <entry name="home" value="1"/>
+            <entry name="back" value="2"/>
+            <entry name="exit" value="4"/>
+            <entry name="navigation_left" value="8"/>
+            <entry name="navigation_right" value="16"/>
+            <entry name="navigation_up" value="32"/>
+            <entry name="navigation_down" value="64"/>
+            <entry name="navigation_ok" value="128"/>
+            <entry name="numeric_keys" value="256"/>
+            <entry name="remote_color_red" value="512"/>
+            <entry name="remote_color_green" value="1024"/>
+            <entry name="remote_color_yellow" value="2048"/>
+            <entry name="remote_color_blue" value="4096"/>
+            <entry name="remote_programme_group" value="8192"/>
+            <entry name="remote_playback_group" value="16384"/>
+            <entry name="remote_teletext_group" value="32768"/>
+            <entry name="local_left" value="65536"/>
+            <entry name="local_right" value="131072"/>
+            <entry name="local_up" value="262144"/>
+            <entry name="local_down" value="524288"/>
+            <entry name="local_ok" value="1048576"/>
+            <entry name="remote_magnifier_group" value="2097152"/>
+            <entry name="minimal_playback_group" value="4194304"/>
+            <entry name="guide" value="8388608"/>
+            <entry name="default" value="0xFFFFFFF8"/>
+        </enum>
+
+        <request name="set_key_mask">
+            <description summary="sets the key mask for this surface">
+                A value of '1' in the mask indicates that the respective key event (both press and release)
+                will be delivered to the client. Bitwise XOR operation against the default mask value and
+                a supported individual values will result in that key not being delivered to the client.
+                Notice that the default value omits certain keys.
+
+                The compositor is free to ignore certain keys even if set to '1' depending on the overall
+                system UI behaviour, most commonly this will mean the HOME key.
+
+                NOTE: This protocol will eventually replace the string property based key filtering
+            </description>
+            <arg name="webos_key" type="uint"/>
+        </request>
+
+        <event name="state_changed">
+            <description summary="The surface state was changed">
+                The compositor or the user has taken action that has resulted in
+                this surface to change state.
+            </description>
+            <arg name="state" type="uint"/>
+        </event>
+
+        <event name="position_changed">
+            <description summary="The surface position on screen changed">
+                This event will only be sent the surfaces that are in their default
+                state. It will be not sent for fullscreen surfaces nor for surfaces
+                that are minimized.
+            </description>
+            <arg name="x" type="int"/>
+            <arg name="y" type="int"/>
+        </event>
+
+        <event name="close">
+            <description summary="request closing of window">
+                The close event is sent when the compositor requests closing
+                of a window, e.g. through some gesture or other interaction,
+                without explicitly quitting or killing the client.
+            </description>
+        </event>
+
+        <event name="exposed">
+            <description summary="Indicates what areas are exposed">
+                The array contains non-overlapping rectangles that define
+                areas that are visible in this surface. The array elements
+                are a series of ints arranged as follows x,y,w,h,x,y,w,h,-1.
+                The values will not contain negative numbers and the -1 is
+                treated as a terminating marker.
+            </description>
+            <arg name="rectangles" type="array" summary="The array"/>
+        </event>
+
+        <event name="state_about_to_change">
+            <description summary="The surface state is about to change">
+                Be sure that the actual state should not be changed with this.
+                Client can only prepare that state will be changed.
+            </description>
+            <arg name="state" type="uint"/>
+        </event>
+    </interface>
+
+</protocol>
