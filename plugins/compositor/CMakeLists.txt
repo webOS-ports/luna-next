@@ -13,7 +13,6 @@ set(SOURCES
     compositor.cpp
     compositorwindow.cpp
     recorder.cpp
-    webos_shell.cpp
     windowmodel.cpp
     windowstate.cpp
     windowtype.cpp
@@ -25,11 +24,6 @@ ecm_add_qtwayland_server_protocol(SOURCES
     PROTOCOL ${CMAKE_SOURCE_DIR}/protocol/recorder.xml
     BASENAME luna-recorder
     PREFIX luna_)
-
-ecm_add_qtwayland_server_protocol(SOURCES
-    PROTOCOL ${CMAKE_SOURCE_DIR}/protocol/webos-shell.xml
-    BASENAME webos-shell
-    PREFIX wl_webos_)
 
 add_library(lunanext-compositor-qml SHARED ${SOURCES})
 qt5_use_modules(lunanext-compositor-qml Qml Quick WaylandCompositor)

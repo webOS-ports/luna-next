@@ -29,8 +29,6 @@
 namespace luna
 {
 
-class WlWebosShellSurface;
-
 class CompositorWindow : public QWaylandQuickShellSurfaceItem
 {
     Q_OBJECT
@@ -51,7 +49,6 @@ public:
     CompositorWindow(unsigned int winId, QQuickItem *parent = 0);
     virtual ~CompositorWindow();
 
-    void initialize(WlWebosShellSurface *shellSurface);
     void initialize(QWaylandShellSurface *shellSurface);
 
     unsigned int winId() const;

@@ -36,7 +36,6 @@
 namespace luna
 {
 
-class WlWebosShellSurface;
 class WindowModel;
 class RecorderManager;
 
@@ -89,7 +88,7 @@ private slots:
     void onSurfaceAboutToBeDestroyed(QWaylandSurface *surface);
     void windowIsReady();
 
-    void onWlShellSurfaceCreated(WlWebosShellSurface *shellSurface);
+    void onWlShellSurfaceCreated(QWaylandWlShellSurface *shellSurface);
     void onXdgToplevelCreated(QWaylandXdgToplevel *toplevel, QWaylandXdgSurface *shellSurface);
     void onExtendedSurfaceReady(QtWayland::ExtendedSurface *extSurface, QWaylandSurface *surface);
 
