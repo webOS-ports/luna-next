@@ -1,9 +1,7 @@
 {
-    "role": {
-        "exeName":"@WEBOS_INSTALL_SBINDIR@/luna-next",
-        "type": "privileged",
-        "allowedNames": ["org.webosports.luna","org.webosports.notifications"]
-    },
+    "exeName":"@WEBOS_INSTALL_SBINDIR@/luna-next",
+    "type": "privileged",
+    "allowedNames": ["org.webosports.luna","org.webosports.notifications"],
     "permissions": [
         {
             "service":"org.webosports.luna",
