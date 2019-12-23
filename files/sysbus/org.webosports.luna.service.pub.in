@@ -1,4 +1,0 @@
-[D-BUS Service]
-Name=org.webosports.luna;org.webosports.notifications
-Exec=@WEBOS_INSTALL_SBINDIR@/luna-next
-Type=static

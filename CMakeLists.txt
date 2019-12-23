@@ -64,3 +64,5 @@ include(FindQtWaylandScanner)
 add_subdirectory(src)
 add_subdirectory(plugins)
 add_subdirectory(tools)
+
+webos_build_system_bus_files()
