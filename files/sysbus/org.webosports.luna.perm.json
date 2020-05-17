@@ -4,7 +4,9 @@
         "devices",
         "services",
         "settings",
-        "system"
+        "system",
+        "media",
+        "all"        
     ],
     "org.webosports.notifications": [
         "applications",
