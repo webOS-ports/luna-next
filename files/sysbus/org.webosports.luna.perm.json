@@ -1,18 +1,8 @@
 {
     "org.webosports.luna": [
-        "applications",
-        "devices",
-        "services",
-        "settings",
-        "system",
-        "media",
         "all"        
     ],
     "org.webosports.notifications": [
-        "applications",
-        "devices",
-        "services",
-        "settings",
-        "system"
+        "all"
     ]
 }
