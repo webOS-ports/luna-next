@@ -22,6 +22,7 @@
 #include <QWaylandSeat>
 #include <QWaylandXdgSurface>
 #include <QWaylandXdgToplevel>
+#include <QWaylandWlShellSurface>
 
 #include <QtWaylandCompositor/private/qwlextendedsurface_p.h>
 
@@ -52,11 +53,18 @@ CompositorWindow::~CompositorWindow()
     qDebug() << Q_FUNC_INFO << "id" << mId << "type" << mWindowType << "appId" << mAppId;
 }
 
-void CompositorWindow::initialize(QWaylandXdgSurface *shellSurface)
+void CompositorWindow::initialize(QWaylandShellSurface *shellSurface)
 {
     setShellSurface(shellSurface);
 
-    QWaylandSurface *surface = shellSurface->surface();
+    QWaylandSurface *surface = nullptr;
+    
+    QWaylandWlShellSurface *pWlShellSurfaceExt = qobject_cast<QWaylandWlShellSurface*>(shellSurface);
+    QWaylandXdgSurface *pShellSurfaceExt = qobject_cast<QWaylandXdgSurface*>(shellSurface);
+
+    if(pWlShellSurfaceExt) surface = pWlShellSurfaceExt->surface();
+    else if(pShellSurfaceExt) surface = pShellSurfaceExt->surface();
+
     if(surface) {
         setSurface(surface);
 
@@ -82,25 +90,28 @@ void CompositorWindow::initialize(QWaylandXdgSurface *shellSurface)
 void CompositorWindow::forceVisible()
 {
     QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
-    pExtendedSurfaceExt->sendOnScreenVisibilityChange(true);
+    if(pExtendedSurfaceExt) pExtendedSurfaceExt->sendOnScreenVisibilityChange(true);
 }
 
 void CompositorWindow::sendWindowIdToClient()
 {
     QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
-    pExtendedSurfaceExt->setWindowProperty("_LUNE_WINDOW_ID", QVariant(mId));
+    if(pExtendedSurfaceExt) pExtendedSurfaceExt->setWindowProperty("_LUNE_WINDOW_ID", QVariant(mId));
 }
 
 void CompositorWindow::sendClose()
 {
     QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
-    pExtendedSurfaceExt->send_close();
+    if(pExtendedSurfaceExt) pExtendedSurfaceExt->send_close();
 }
 
 bool CompositorWindow::isPopup()
 {
     QWaylandShellSurface *pShellSurfaceExt = shellSurface();
-    return Qt::Popup == pShellSurfaceExt->windowType();
+    if(pShellSurfaceExt)
+        return Qt::Popup == pShellSurfaceExt->windowType();
+
+    return false;
 }
 
 void CompositorWindow::checkStatus()
@@ -197,6 +208,22 @@ QString CompositorWindow::appId() const
     return mAppId;
 }
 
+QString CompositorWindow::processName() const
+{
+    QWaylandWlShellSurface *pWlShellSurfaceExt = qobject_cast<QWaylandWlShellSurface*>(shellSurface());
+    QWaylandXdgSurface *pShellSurfaceExt = qobject_cast<QWaylandXdgSurface*>(shellSurface());
+
+    if(pWlShellSurfaceExt) {
+        return pWlShellSurfaceExt->className();
+    }
+    else if(pShellSurfaceExt) {
+        QWaylandXdgToplevel *pXdgTopLevel = pShellSurfaceExt->toplevel();
+        return pXdgTopLevel->appId();
+    }
+    
+    return "";
+}
+
 quint64 CompositorWindow::processId() const
 {
     if (surface())
@@ -259,15 +286,19 @@ void CompositorWindow::postEvent(int event)
 
 void CompositorWindow::changeSize(const QSize& size)
 {
-    QWaylandXdgSurface *pXdgShellSurfaceExt = static_cast<QWaylandXdgSurface*>(shellSurface());
-    QWaylandXdgToplevel *pXdgTopLevel = NULL;
-    if(pXdgShellSurfaceExt) pXdgTopLevel = pXdgShellSurfaceExt->toplevel();
+    QWaylandXdgSurface *pXdgShellSurfaceExt = qobject_cast<QWaylandXdgSurface*>(shellSurface());
+    QWaylandWlShellSurface *pWlShellSurfaceExt = qobject_cast<QWaylandWlShellSurface*>(shellSurface());
     
-    if(pXdgTopLevel)
-    {
-        QVector<QWaylandXdgToplevel::State> states;
-        if(hasFocus()) states += QWaylandXdgToplevel::ActivatedState;
-        pXdgTopLevel->sendConfigure(size, states);
+    if(pWlShellSurfaceExt) {
+        pWlShellSurfaceExt->sendConfigure(size, QWaylandWlShellSurface::BottomRightEdge);
+    }
+    else if(pXdgShellSurfaceExt) {
+        QWaylandXdgToplevel *pXdgTopLevel = pXdgShellSurfaceExt->toplevel();
+        if(pXdgTopLevel)
+        {
+            QVector<QWaylandXdgToplevel::State> states;
+            pXdgTopLevel->sendConfigure(size, states);
+        }
     }
 }
 
@@ -276,7 +307,7 @@ void CompositorWindow::setParentWinId(unsigned int id)
     mParentWinId = id;
 
     QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
-    pExtendedSurfaceExt->setWindowProperty("parentWindowId", id);
+    if(pExtendedSurfaceExt) pExtendedSurfaceExt->setWindowProperty("parentWindowId", id);
 
     parentWinIdChanged();
 }
@@ -302,7 +333,10 @@ bool CompositorWindow::loadingAnimationDisabled() const
 QVariantMap CompositorWindow::windowPropertyMap() const
 {
     QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
-    return pExtendedSurfaceExt->windowProperties();
+    if(pExtendedSurfaceExt)
+        return pExtendedSurfaceExt->windowProperties();
+
+    return QVariantMap();
 }
 
 } // namespace luna
