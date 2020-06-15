@@ -26,7 +26,9 @@ ecm_add_qtwayland_server_protocol(SOURCES
     PREFIX luna_)
 
 add_library(lunanext-compositor-qml SHARED ${SOURCES})
-qt5_use_modules(lunanext-compositor-qml Qml Quick WaylandCompositor)
+target_link_libraries(lunanext-compositor-qml
+    Qt5::Qml Qt5::Quick Qt5::WaylandCompositor
+)
 
 execute_process(COMMAND ${CMAKE_COMMAND}
                 -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/qmldir"

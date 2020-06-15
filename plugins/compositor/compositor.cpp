@@ -81,7 +81,7 @@ void Compositor::create()
     output->setCurrentMode(defaultMode);
     
     QWaylandXdgShell *xdgShell = new QWaylandXdgShell(this);
-    xdgShell->setFocusPolicy(QWaylandShell::ManualFocus);
+    //xdgShell->setFocusPolicy(QWaylandShell::ManualFocus);
 //    connect(xdgShell, &QWaylandXdgShell::xdgSurfaceCreated, this, &Compositor::onXdgSurfaceCreated);
     connect(xdgShell, &QWaylandXdgShell::toplevelCreated, this, &Compositor::onXdgToplevelCreated);
 

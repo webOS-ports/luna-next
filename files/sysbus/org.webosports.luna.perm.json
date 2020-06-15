@@ -1,0 +1,8 @@
+{
+    "org.webosports.luna": [
+        "all"        
+    ],
+    "org.webosports.notifications": [
+        "all"
+    ]
+}

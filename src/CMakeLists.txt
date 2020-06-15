@@ -8,11 +8,13 @@ set(SOURCES
     shellapplication.cpp)
 
 add_executable(luna-next ${SOURCES} ${RESOURCES})
-qt5_use_modules(luna-next Quick Gui)
 target_link_libraries(luna-next
     ${SYSTEMD_LIBRARIES}
     ${LUNA_SYSMGR_COMMON_LIBRARIES}
-    ${GLIB2_LIBRARIES})
+    ${GLIB2_LIBRARIES}
+    Qt5::Quick
+    Qt5::Gui
+)
 
 webos_build_daemon()
 webos_build_system_bus_files()

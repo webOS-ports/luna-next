@@ -11,7 +11,8 @@ ecm_add_wayland_client_protocol(SOURCES
     BASENAME luna-recorder)
 
 add_executable(luna-recorder ${SOURCES})
-qt5_use_modules(luna-recorder Gui)
 target_link_libraries(luna-recorder
-    ${WAYLAND_CLIENT_LIBRARIES})
+    ${WAYLAND_CLIENT_LIBRARIES}
+    Qt5::Gui
+)
 install(TARGETS luna-recorder DESTINATION bin)
