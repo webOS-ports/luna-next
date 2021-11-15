@@ -123,6 +123,9 @@ int main(int argc, char *argv[])
 
     mkdir(XDG_RUNTIME_DIR_DEFAULT, 0700);
     setenv("XDG_RUNTIME_DIR", XDG_RUNTIME_DIR_DEFAULT, 0);
+    
+    // We want to make sure we can still use XHR for loading local files at our end in our QML apps.
+    qputenv("QML_XHR_ALLOW_FILE_READ", QByteArray("1"));
 
     QString shellName = qgetenv("LUNA_NEXT_SHELL");
     if (shellName.isEmpty())
