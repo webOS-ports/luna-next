@@ -82,19 +82,25 @@ void CompositorWindow::initialize(QWaylandXdgSurface *shellSurface)
 void CompositorWindow::forceVisible()
 {
     QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
-    pExtendedSurfaceExt->sendOnScreenVisibilityChange(true);
+    if(pExtendedSurfaceExt) {
+        pExtendedSurfaceExt->sendOnScreenVisibilityChange(true);
+    }
 }
 
 void CompositorWindow::sendWindowIdToClient()
 {
     QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
-    pExtendedSurfaceExt->setWindowProperty("_LUNE_WINDOW_ID", QVariant(mId));
+    if(pExtendedSurfaceExt) {
+        pExtendedSurfaceExt->setWindowProperty("_LUNE_WINDOW_ID", QVariant(mId));
+    }
 }
 
 void CompositorWindow::sendClose()
 {
     QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
-    pExtendedSurfaceExt->send_close();
+    if(pExtendedSurfaceExt) {
+        pExtendedSurfaceExt->send_close();
+    }
 }
 
 bool CompositorWindow::isPopup()
@@ -276,7 +282,9 @@ void CompositorWindow::setParentWinId(unsigned int id)
     mParentWinId = id;
 
     QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
-    pExtendedSurfaceExt->setWindowProperty("parentWindowId", id);
+    if(pExtendedSurfaceExt) {
+        pExtendedSurfaceExt->setWindowProperty("parentWindowId", id);
+    }
 
     parentWinIdChanged();
 }
@@ -302,7 +310,10 @@ bool CompositorWindow::loadingAnimationDisabled() const
 QVariantMap CompositorWindow::windowPropertyMap() const
 {
     QtWayland::ExtendedSurface *pExtendedSurfaceExt = static_cast<QtWayland::ExtendedSurface*>(surface()->extension(QtWayland::ExtendedSurface::interfaceName()));
-    return pExtendedSurfaceExt->windowProperties();
+    if(pExtendedSurfaceExt)
+        return pExtendedSurfaceExt->windowProperties();
+    else
+        return QVariantMap();
 }
 
 } // namespace luna
