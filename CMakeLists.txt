@@ -12,36 +12,11 @@ webos_component(0 2 0)
 find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden -Wall -std=c++0x")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden -Wall -std=c++1z")
 
-find_package(Qt5Gui REQUIRED)
-if(NOT Qt5Gui_FOUND)
-    message(FATAL_ERROR "Qt5Gui module is required!")
-endif()
-
-find_package(Qt5Qml REQUIRED)
-if(NOT Qt5Qml_FOUND)
-    message(FATAL_ERROR "Qt5Qml module is required!")
-endif()
-
-find_package(Qt5Quick REQUIRED)
-if(NOT Qt5Quick_FOUND)
-    message(FATAL_ERROR "Qt5Quick module is required!")
-endif()
-
-find_package(Qt5WaylandCompositor REQUIRED)
-if(NOT Qt5WaylandCompositor_FOUND)
-    message(FATAL_ERROR "Qt5WaylandCompositor module is required!")
-endif()
-
-find_package(Qt5DBus REQUIRED)
-if(NOT Qt5DBus_FOUND)
-    message(FATAL_ERROR "Qt5DBus module is required!")
-endif()
-
-find_package(Qt5Sql REQUIRED)
-if(NOT Qt5Sql_FOUND)
-    message(FATAL_ERROR "Qt5Sql module is required!")
+find_package(Qt6 COMPONENTS Gui Qml Quick WaylandCompositor DBus Sql)
+if (NOT Qt6_FOUND)
+    find_package(Qt5 5.15 REQUIRED COMPONENTS Gui Qml Quick WaylandCompositor DBus Sql)
 endif()
 
 find_package(PkgConfig "0.22" REQUIRED)
