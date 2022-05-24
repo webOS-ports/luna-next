@@ -1,6 +1,7 @@
 include_directories(
     ${WAYLAND_CLIENT_INCLUDE_DIRS}
-    ${Qt5Gui_PRIVATE_INCLUDE_DIRS})
+    ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
+    ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 
 set(SOURCES
     main.cpp
@@ -13,6 +14,6 @@ ecm_add_wayland_client_protocol(SOURCES
 add_executable(luna-recorder ${SOURCES})
 target_link_libraries(luna-recorder
     ${WAYLAND_CLIENT_LIBRARIES}
-    Qt5::Gui
+    Qt::Gui
 )
 install(TARGETS luna-recorder DESTINATION bin)

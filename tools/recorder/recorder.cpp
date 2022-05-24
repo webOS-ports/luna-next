@@ -122,7 +122,7 @@ public:
             if (rec->m_starving)
                 rec->recordFrame();
 
-            output->write((const char*) img.bits(), img.byteCount());
+            output->write((const char*) img.bits(), img.sizeInBytes());
 
             if (countingFrames && --remainingFrames == 0)
                 QCoreApplication::exit(0);

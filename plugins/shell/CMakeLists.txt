@@ -1,6 +1,8 @@
 include_directories(
     ${Qt5Quick_INCLUDE_DIRS}
     ${Qt5Quick_PRIVATE_INCLUDE_DIRS}
+    ${Qt6Quick_INCLUDE_DIRS}
+    ${Qt6Quick_PRIVATE_INCLUDE_DIRS}
     ${GLIB2_INCLUDE_DIRS}
     ${LUNA_SYSMGR_COMMON_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -18,7 +20,7 @@ set(SOURCES
 
 add_library(lunanext-shell-qml SHARED ${SOURCES})
 target_link_libraries(lunanext-shell-qml ${LUNA_SYSMGR_COMMON_LIBRARIES}
-    Qt5::Qml Qt5::Quick
+    Qt::Qml Qt::Quick
 )
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/qmldir"
